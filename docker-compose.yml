@@ -1,0 +1,47 @@
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: mas_feliz_app
+    ports:
+      - "8080:80"
+    volumes:
+      - .:/var/www/html
+    depends_on:
+      - db
+    networks:
+      - mas_feliz_network
+
+  db:
+    image: mariadb:10.11
+    container_name: mas_feliz_db
+    restart: always
+    environment:
+      MYSQL_DATABASE: inspira_mas_feliz
+      MYSQL_USER: mas_feliz_user
+      MYSQL_PASSWORD: mas_feliz_password
+      MYSQL_ROOT_PASSWORD: mas_feliz_root_password
+    volumes:
+      - mas_feliz_db_data:/var/lib/mysql
+    networks:
+      - mas_feliz_network
+
+  node:
+    image: node:20-alpine
+    container_name: mas_feliz_node
+    working_dir: /var/www/html
+    volumes:
+      - .:/var/www/html
+    tty: true
+    stdin_open: true
+    networks:
+      - mas_feliz_network
+
+volumes:
+  mas_feliz_db_data:
+    driver: local
+
+networks:
+  mas_feliz_network:
+    driver: bridge

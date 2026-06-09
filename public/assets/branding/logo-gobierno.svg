@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 60" width="200" height="60">
+  <rect x="10" y="10" width="40" height="40" rx="6" fill="#1e293b" />
+  <path d="M22 20h16v4H22zM22 28h16v4H22zM22 36h10v4H22z" fill="#ffffff"/>
+  <text x="65" y="38" font-family="system-ui, sans-serif" font-size="20" font-weight="700" fill="#1e293b">GOBIERNO</text>
+  <text x="65" y="48" font-family="system-ui, sans-serif" font-size="10" font-weight="500" fill="#64748b" letter-spacing="1">ESTADO DE MÉXICO</text>
+</svg>
