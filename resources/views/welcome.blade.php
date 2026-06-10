@@ -2,6 +2,7 @@
 <html lang="es" class="scroll-smooth">
 <head>
     <meta charset="utf-8">
+    <link rel="icon" type="image/png" href="{{ asset('images/favicon.png') }}">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>+Feliz | Distintivo de Salud Mental</title>
     
