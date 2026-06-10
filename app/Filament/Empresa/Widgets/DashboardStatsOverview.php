@@ -17,17 +17,20 @@ class DashboardStatsOverview extends StatsOverviewWidget
 
         return [
             Stat::make('Liga de Diagnóstico', $liga)
-                ->description('Copia y comparte esta liga con tus colaboradores')
+                ->description('Haz clic aquí, copia y comparte esta liga con tus colaboradores')
                 ->descriptionIcon('heroicon-m-link')
-                ->color('info'),
+                ->color('info')
+                ->view('filament.widgets.custom-stat'),
             Stat::make('Progreso de Participación', "{$porcentaje}%")
                 ->description('Meta indispensable: 90%')
                 ->descriptionIcon($porcentaje >= 90 ? 'heroicon-m-check-circle' : 'heroicon-m-exclamation-triangle')
-                ->color($porcentaje >= 90 ? 'success' : 'warning'),
+                ->color($porcentaje >= 90 ? 'success' : 'warning')
+                ->view('filament.widgets.custom-stat'),
             Stat::make('Total Evaluados', $evaluados)
                 ->description('Colaboradores que han respondido')
                 ->descriptionIcon('heroicon-m-users')
-                ->color('success'),
+                ->color('success')
+                ->view('filament.widgets.custom-stat'),
         ];
     }
 }

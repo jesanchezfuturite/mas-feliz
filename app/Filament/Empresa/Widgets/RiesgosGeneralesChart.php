@@ -8,6 +8,10 @@ class RiesgosGeneralesChart extends ChartWidget
 {
     protected ?string $heading = 'Distribución de Niveles de Riesgo';
 
+    protected int | string | array $columnSpan = 'full';
+
+    protected ?string $maxHeight = '280px';
+
     protected function getData(): array
     {
         $empresa = auth()->user();

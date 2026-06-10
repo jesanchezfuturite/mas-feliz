@@ -27,7 +27,7 @@ class EmpresaResource extends Resource
 
     protected static ?string $navigationLabel = 'Empresas';
 
-    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedRectangleStack;
+    protected static string|BackedEnum|null $navigationIcon = 'heroicon-m-building-office';
 
     public static function form(Schema $schema): Schema
     {
@@ -38,12 +38,14 @@ class EmpresaResource extends Resource
     {
         return $schema
             ->components([
-                \Filament\Schemas\Components\Grid::make([
-                    'default' => 1,
-                    'lg' => 2,
-                ])
-                    ->schema([
-                        \Filament\Schemas\Components\Section::make('Datos Generales')
+                \Filament\Schemas\Components\Section::make('Datos Generales')
+                            ->headerActions([
+                                \Filament\Actions\Action::make('icon')
+                                    ->icon('heroicon-m-document-text')
+                                    ->link()
+                                    ->extraAttributes(['style' => 'pointer-events: none; margin-left: auto; color: #556ee6;'])
+                                    ->label('')
+                            ])
                             ->schema([
                                 TextEntry::make('folio')
                                     ->label('Folio'),
@@ -57,6 +59,13 @@ class EmpresaResource extends Resource
                             ->columns(2),
 
                         \Filament\Schemas\Components\Section::make('Dictamen de Gobierno')
+                            ->headerActions([
+                                \Filament\Actions\Action::make('icon')
+                                    ->icon('heroicon-m-shield-check')
+                                    ->link()
+                                    ->extraAttributes(['style' => 'pointer-events: none; margin-left: auto; color: #556ee6;'])
+                                    ->label('')
+                            ])
                             ->schema([
                                 TextEntry::make('estatus_distintivo')
                                     ->label('Estatus del Distintivo')
@@ -89,6 +98,14 @@ class EmpresaResource extends Resource
                             ->columns(2),
 
                         \Filament\Schemas\Components\Section::make('Progreso de Tamizaje')
+                            ->extraAttributes(['class' => 'equal-height-section'])
+                            ->headerActions([
+                                \Filament\Actions\Action::make('icon')
+                                    ->icon('heroicon-m-chart-bar')
+                                    ->link()
+                                    ->extraAttributes(['style' => 'pointer-events: none; margin-left: auto; color: #556ee6;'])
+                                    ->label('')
+                            ])
                             ->schema([
                                 TextEntry::make('total_tamizajes')
                                     ->label('Total de Tamizajes Realizados')
@@ -127,6 +144,14 @@ class EmpresaResource extends Resource
                             ->columns(2),
 
                         \Filament\Schemas\Components\Section::make('Casos Clínicos')
+                            ->extraAttributes(['class' => 'equal-height-section'])
+                            ->headerActions([
+                                \Filament\Actions\Action::make('icon')
+                                    ->icon('heroicon-m-clipboard-document-list')
+                                    ->link()
+                                    ->extraAttributes(['style' => 'pointer-events: none; margin-left: auto; color: #556ee6;'])
+                                    ->label('')
+                            ])
                             ->schema([
                                 TextEntry::make('total_casos')
                                     ->label('Total de Casos Clínicos en Bitácora')
@@ -136,7 +161,6 @@ class EmpresaResource extends Resource
                                     ->state(fn ($record) => $record->casosSeguimiento()->where('estatus_atencion', 'Canalizado')->count()),
                             ])
                             ->columns(2),
-                    ])
             ]);
     }
 

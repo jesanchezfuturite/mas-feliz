@@ -42,6 +42,7 @@ class TamizajesRelationManager extends RelationManager
     public function table(Table $table): Table
     {
         return $table
+            ->heading('Historial de Tamizajes (Evaluaciones Anónimas)')
             ->recordTitleAttribute('nivel_riesgo_general')
             ->columns([
                 TextColumn::make('created_at')
@@ -79,7 +80,11 @@ class TamizajesRelationManager extends RelationManager
                 //
             ])
             ->headerActions([
-                // Read-only
+                \Filament\Actions\Action::make('icon')
+                    ->icon('heroicon-m-clock')
+                    ->link()
+                    ->extraAttributes(['style' => 'pointer-events: none; margin-left: auto; color: #556ee6;'])
+                    ->label('')
             ])
             ->recordActions([
                 ViewAction::make(),

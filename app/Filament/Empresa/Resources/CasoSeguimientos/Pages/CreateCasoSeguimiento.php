@@ -15,4 +15,10 @@ class CreateCasoSeguimiento extends CreateRecord
 
         return $data;
     }
+
+    protected function getCreateAnotherFormAction(): \Filament\Actions\Action
+    {
+        return parent::getCreateAnotherFormAction()
+            ->label('Guardar y crear otro');
+    }
 }

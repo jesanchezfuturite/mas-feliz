@@ -51,6 +51,7 @@ class CasosSeguimientoRelationManager extends RelationManager
     public function table(Table $table): Table
     {
         return $table
+            ->heading('Bitácora de Casos Clínicos y Seguimiento')
             ->recordTitleAttribute('identificador_empleado')
             ->columns([
                 TextColumn::make('identificador_empleado')
@@ -95,7 +96,11 @@ class CasosSeguimientoRelationManager extends RelationManager
                 //
             ])
             ->headerActions([
-                // Read-only
+                \Filament\Actions\Action::make('icon')
+                    ->icon('heroicon-m-clipboard-document-list')
+                    ->link()
+                    ->extraAttributes(['style' => 'pointer-events: none; margin-left: auto; color: #556ee6;'])
+                    ->label('')
             ])
             ->recordActions([
                 ViewAction::make(),

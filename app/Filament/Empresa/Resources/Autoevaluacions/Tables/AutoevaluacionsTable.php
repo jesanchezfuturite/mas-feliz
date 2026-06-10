@@ -44,11 +44,12 @@ class AutoevaluacionsTable
                 //
             ])
             ->recordActions([
-                EditAction::make(),
+                \Filament\Actions\EditAction::make()->iconButton(),
                 Action::make('descargar_acuse')
                     ->label('Descargar Acuse')
                     ->icon('heroicon-o-arrow-down-tray')
                     ->color('primary')
+                    ->iconButton()
                     ->action(function ($record) {
                         return response()->streamDownload(function () use ($record) {
                             echo \Barryvdh\DomPDF\Facade\Pdf::loadView('pdf.acuse-autoevaluacion', [

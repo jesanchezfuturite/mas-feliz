@@ -14,11 +14,13 @@ class EmpresaStats extends StatsOverviewWidget
             Stat::make('Total de Empresas Registradas', Empresa::count())
                 ->description('Empresas incorporadas en el sistema')
                 ->descriptionIcon('heroicon-m-building-office')
-                ->color('success'),
+                ->color('success')
+                ->view('filament.widgets.custom-stat'),
             Stat::make('Total de Trabajadores Impactados', Empresa::sum('numero_trabajadores'))
                 ->description('Colaboradores beneficiados directamente')
                 ->descriptionIcon('heroicon-m-users')
-                ->color('info'),
+                ->color('info')
+                ->view('filament.widgets.custom-stat'),
         ];
     }
 }

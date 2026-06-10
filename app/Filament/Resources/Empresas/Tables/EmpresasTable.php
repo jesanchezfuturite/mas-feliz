@@ -16,6 +16,7 @@ class EmpresasTable
     public static function configure(Table $table): Table
     {
         return $table
+            ->heading('Listado')
             ->columns([
                 TextColumn::make('folio')
                     ->label('Folio')
@@ -23,20 +24,25 @@ class EmpresasTable
                     ->sortable(),
                 TextColumn::make('nombre_empresa')
                     ->label('Nombre de la Empresa')
+                    ->color('primary')
                     ->searchable()
-                    ->sortable(),
+                    ->sortable()
+                    ->extraAttributes(['class' => 'col-nombre-empresa']),
                 TextColumn::make('municipio')
                     ->label('Municipio')
                     ->searchable()
-                    ->sortable(),
+                    ->sortable()
+                    ->alignCenter(),
                 TextColumn::make('rubro')
                     ->label('Rubro')
                     ->searchable()
-                    ->sortable(),
+                    ->sortable()
+                    ->alignCenter(),
                 TextColumn::make('numero_trabajadores')
                     ->label('Número de Trabajadores')
                     ->numeric()
-                    ->sortable(),
+                    ->sortable()
+                    ->alignCenter(),
             ])
             ->filters([
                 SelectFilter::make('municipio')
@@ -47,8 +53,14 @@ class EmpresasTable
                     ->options(fn () => Empresa::query()->distinct()->pluck('rubro', 'rubro')->filter()->toArray()),
             ])
             ->recordActions([
-                ViewAction::make(),
-                EditAction::make(),
+                ViewAction::make()
+                    ->iconButton()
+                    ->color('gray')
+                    ->tooltip('Ver detalle'),
+                EditAction::make()
+                    ->iconButton()
+                    ->color('gray')
+                    ->tooltip('Editar empresa'),
             ])
             ->toolbarActions([
                 BulkActionGroup::make([

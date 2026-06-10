@@ -19,7 +19,6 @@ class ViewEmpresa extends ViewRecord
             Action::make('emitir_dictamen')
                 ->label('Emitir Dictamen')
                 ->color('primary')
-                ->icon('heroicon-m-check-badge')
                 ->form([
                     Select::make('estatus_distintivo')
                         ->label('Estatus del Distintivo')
