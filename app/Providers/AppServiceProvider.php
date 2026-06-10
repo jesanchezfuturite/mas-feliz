@@ -4,6 +4,8 @@ namespace App\Providers;
 
 use Illuminate\Support\ServiceProvider;
 
+use Filament\Actions\ViewAction;
+
 class AppServiceProvider extends ServiceProvider
 {
     /**
@@ -19,6 +21,8 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        //
+        ViewAction::configureUsing(function (ViewAction $action): void {
+            $action->modalCancelAction(false);
+        });
     }
 }

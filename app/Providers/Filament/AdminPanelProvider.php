@@ -70,6 +70,7 @@ class AdminPanelProvider extends PanelProvider
                     .fi-sidebar .fi-active > .fi-sidebar-item-btn, .fi-sidebar .fi-active > .fi-sidebar-item-btn * { color: #ffffff !important; font-weight: 600; }
                     .fi-sidebar .fi-sidebar-item-btn { color: #888ea8 !important; font-weight: 500 !important; padding: 0.75rem 1.25rem !important; margin: 0.25rem 0 !important; }
                     .fi-btn.fi-color-custom, .fi-btn.fi-color-primary { background-color: #556ee6 !important; padding: 0.75rem 2rem !important; height: auto !important; border-radius: 0.5rem !important; border: none !important; color: #ffffff !important; }
+                    .fi-btn.fi-color-gray { padding: 0.75rem 2rem !important; height: auto !important; border-radius: 0.5rem !important; }
                     .fi-btn.fi-color-custom:hover, .fi-btn.fi-color-primary:hover { background-color: #4458b8 !important; color: #ffffff !important; }
                     .fi-btn.fi-color-custom .fi-btn-label, .fi-btn.fi-color-custom span, .fi-btn.fi-color-primary .fi-btn-label, .fi-btn.fi-color-primary span { color: #ffffff !important; }
                     body, .fi-main { background-color: #f6f6f9 !important; color: #343a40 !important; }
@@ -81,7 +82,16 @@ class AdminPanelProvider extends PanelProvider
                     .col-nombre-empresa * { transition: color 0.2s ease-in-out; }
                     .col-nombre-empresa:hover * { color: rgba(var(--primary-900), 1) !important; }
                     .fi-resource-create-record-page form, .fi-resource-edit-record-page form { background-color: #ffffff !important; padding: 2rem !important; border-radius: 0.75rem !important; box-shadow: 0 0px 10px 0px var(--tw-shadow-color, #eee), 0 0px 10px 1px var(--tw-shadow-color, #eee) !important; }
-                    
+                    /* Modal Header Divider with Gray Background */
+                    .fi-modal-header {
+                        background-color: #f3f4f6 !important;
+                        border-bottom: 1px solid #e2e8f0 !important;
+                        padding: 1.25rem 1.5rem !important;
+                        margin: 0 0 1.5rem 0 !important;
+                        border-top-left-radius: 0.5rem !important;
+                        border-top-right-radius: 0.5rem !important;
+                    }
+
                     /* Custom Input Field Styles (matches Home Contact Form) */
                     .fi-input-wrapper, .fi-fo-field-wrp {
                         box-shadow: none !important;

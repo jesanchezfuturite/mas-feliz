@@ -19,6 +19,9 @@ class ViewEmpresa extends ViewRecord
             Action::make('emitir_dictamen')
                 ->label('Emitir Dictamen')
                 ->color('primary')
+                ->modalFooterActionsAlignment(\Filament\Support\Enums\Alignment::Right)
+                ->modalSubmitActionLabel('Enviar')
+                ->modalCancelActionLabel('Cerrar')
                 ->form([
                     Select::make('estatus_distintivo')
                         ->label('Estatus del Distintivo')

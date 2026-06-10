@@ -24,7 +24,7 @@ class AutoevaluacionResource extends Resource
 
     protected static ?string $navigationLabel = 'Autoevaluaciones';
 
-    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedRectangleStack;
+    protected static string|BackedEnum|null $navigationIcon = 'heroicon-o-clipboard-document-check';
 
     public static function form(Schema $schema): Schema
     {

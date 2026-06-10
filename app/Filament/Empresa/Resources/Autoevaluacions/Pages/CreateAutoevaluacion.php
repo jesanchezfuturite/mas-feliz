@@ -21,4 +21,10 @@ class CreateAutoevaluacion extends CreateRecord
     {
         return $this->getResource()::getUrl('index');
     }
+
+    protected function getCreateAnotherFormAction(): \Filament\Actions\Action
+    {
+        return parent::getCreateAnotherFormAction()
+            ->label('Guardar y crear otro');
+    }
 }

@@ -59,6 +59,7 @@ class AutoevaluacionForm
                 Select::make("criterio_{$num}")
                     ->options($options)
                     ->required()
+                    ->default('10')
                     ->selectablePlaceholder(false)
                     ->hiddenLabel()
                     ->columnSpan(2),

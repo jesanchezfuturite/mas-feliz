@@ -103,7 +103,10 @@ class CasosSeguimientoRelationManager extends RelationManager
                     ->label('')
             ])
             ->recordActions([
-                ViewAction::make(),
+                ViewAction::make()
+                    ->iconButton()
+                    ->tooltip('Ver detalle')
+                    ->modalCancelAction(false),
             ])
             ->toolbarActions([
                 // Read-only

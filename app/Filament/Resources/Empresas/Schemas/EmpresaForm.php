@@ -14,6 +14,7 @@ class EmpresaForm
                 TextInput::make('folio')
                     ->label('Folio')
                     ->readOnly()
+                    ->hiddenOn('create')
                     ->placeholder('Generado automáticamente al crear'),
                 TextInput::make('nombre_empresa')
                     ->label('Nombre de la Empresa')

@@ -14,4 +14,16 @@ class CreateEmpresa extends CreateRecord
         return parent::getCreateAnotherFormAction()
             ->label('Guardar y crear otro');
     }
+
+    protected function mutateFormDataBeforeCreate(array $data): array
+    {
+        $data['password'] = bcrypt('password123');
+
+        return $data;
+    }
+
+    protected function getRedirectUrl(): string
+    {
+        return $this->getResource()::getUrl('index');
+    }
 }

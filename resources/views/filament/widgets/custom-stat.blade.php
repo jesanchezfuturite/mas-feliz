@@ -23,9 +23,9 @@
     {{
         $getExtraAttributeBag()
             ->class([
-                'fi-wi-stats-overview-stat relative rounded-xl bg-white dark:bg-gray-900 ring-1 ring-gray-950/5 dark:ring-white/10',
+                'fi-wi-stats-overview-stat relative rounded-xl bg-white dark:bg-gray-900',
             ])
-            ->style(['padding: 0 !important;', 'display: flex;', 'flex-direction: row;', 'overflow: hidden;'])
+            ->style(['padding: 0 !important;', 'display: flex;', 'flex-direction: row;', 'overflow: hidden;', 'box-shadow: none !important;', 'border: none !important;'])
     }}
 >
     <!-- Left Column: 60% -->

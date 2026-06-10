@@ -47,7 +47,9 @@ class CasoSeguimientosTable
                 //
             ])
             ->recordActions([
-                \Filament\Actions\EditAction::make()->iconButton(),
+                \Filament\Actions\EditAction::make()
+                    ->iconButton()
+                    ->tooltip('Editar'),
             ])
             ->toolbarActions([
                 BulkActionGroup::make([

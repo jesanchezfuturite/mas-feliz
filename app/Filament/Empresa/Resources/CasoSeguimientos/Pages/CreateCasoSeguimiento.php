@@ -21,4 +21,9 @@ class CreateCasoSeguimiento extends CreateRecord
         return parent::getCreateAnotherFormAction()
             ->label('Guardar y crear otro');
     }
+
+    protected function getRedirectUrl(): string
+    {
+        return $this->getResource()::getUrl('index');
+    }
 }
