@@ -3,6 +3,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" type="image/png" href="{{ asset('images/favicon.png') }}">
     <title>{{ $title ?? '+Feliz | Diagnóstico' }}</title>
     
     <!-- Fonts -->
@@ -27,10 +28,16 @@
     <!-- Header -->
     <header class="bg-white/80 dark:bg-slate-900/80 backdrop-blur-md border-b border-slate-100 dark:border-slate-800/80 sticky top-0 z-40">
         <div class="max-w-4xl mx-auto px-4 h-16 flex items-center justify-between">
-            <div class="flex items-center space-x-2">
-                <span class="text-xl font-black bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent tracking-tight">+Feliz</span>
-                <span class="h-4 w-px bg-slate-200 dark:bg-slate-800"></span>
-                <span class="text-[10px] font-semibold text-slate-400 uppercase tracking-widest">Diagnóstico</span>
+            <div class="flex items-center space-x-3">
+                @php
+                    $partnerLogo = \App\Models\Setting::where('key', 'landing_partner_logo')->first()?->value;
+                @endphp
+                @if($partnerLogo)
+                    <img src="{{ Storage::disk('public')->url($partnerLogo) }}" alt="Partner" class="h-7 w-auto border-r border-slate-200 dark:border-slate-700 pr-3" />
+                @endif
+                <img src="{{ asset('images/masFeliz_logo_ch.svg') }}" alt="+Feliz" class="h-7 w-auto" />
+                <span class="h-5 w-px bg-slate-200 dark:bg-slate-700"></span>
+                <span class="text-[11px] font-semibold text-slate-400 uppercase tracking-widest mt-0.5">Diagnóstico</span>
             </div>
             <div class="text-[11px] text-emerald-600 dark:text-emerald-400 font-semibold bg-emerald-50 dark:bg-emerald-950/30 px-2.5 py-1 rounded-full flex items-center gap-1.5">
                 <span class="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse"></span>

@@ -29,6 +29,12 @@
     <header class="sticky top-0 z-40 bg-white/80 dark:bg-slate-900/80 backdrop-blur-md border-b border-slate-100 dark:border-slate-800/80 transition-all duration-300">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
             <div class="flex items-center space-x-3">
+                @php
+                    $partnerLogo = \App\Models\Setting::where('key', 'landing_partner_logo')->first()?->value;
+                @endphp
+                @if($partnerLogo)
+                    <img src="{{ Storage::disk('public')->url($partnerLogo) }}" alt="Partner" class="h-8 w-auto border-r border-slate-200 dark:border-slate-800 pr-3" />
+                @endif
                 @include('filament.logo')
                 <span class="h-6 w-px bg-slate-200 dark:bg-slate-800"></span>
                 <span class="text-xs font-semibold text-slate-500 uppercase tracking-wider hidden sm:inline-block">Programa Estatal</span>
