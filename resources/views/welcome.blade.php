@@ -176,7 +176,7 @@
                 <div class="flex flex-wrap justify-center gap-8">
                     
                     <!-- Public Area -->
-                    <div class="w-full md:w-[calc(50%-1rem)] lg:w-[calc(33.333%-1.35rem)] group p-8 rounded-2xl bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800/80 hover:border-[#8CC63F] dark:hover:border-[#8CC63F] hover:shadow-xl transition-all duration-300">
+                    <div class="w-full md:w-[calc(50%-1rem)] lg:w-[calc(33.333%-1.35rem)] group p-8 rounded-2xl bg-white dark:bg-slate-900 shadow-xl shadow-slate-200/40 dark:shadow-none border border-slate-100 dark:border-slate-800/80 hover:border-[#8CC63F] dark:hover:border-[#8CC63F] hover:shadow-xl transition-all duration-300">
                         <div class="h-12 w-12 bg-[#8CC63F]/10 dark:bg-[#8CC63F]/20 text-[#8CC63F] rounded-xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
                             <!-- Icon -->
                             <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -190,7 +190,7 @@
                     </div>
 
                     <!-- Educational Area -->
-                    <div class="w-full md:w-[calc(50%-1rem)] lg:w-[calc(33.333%-1.35rem)] group p-8 rounded-2xl bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800/80 hover:border-[#2AB288] dark:hover:border-[#2AB288] hover:shadow-xl transition-all duration-300">
+                    <div class="w-full md:w-[calc(50%-1rem)] lg:w-[calc(33.333%-1.35rem)] group p-8 rounded-2xl bg-white dark:bg-slate-900 shadow-xl shadow-slate-200/40 dark:shadow-none border border-slate-100 dark:border-slate-800/80 hover:border-[#2AB288] dark:hover:border-[#2AB288] hover:shadow-xl transition-all duration-300">
                         <div class="h-12 w-12 bg-[#2AB288]/10 dark:bg-[#2AB288]/20 text-[#2AB288] rounded-xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
                             <!-- Icon -->
                             <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -204,7 +204,7 @@
                     </div>
 
                     <!-- Industrial/Productive Area -->
-                    <div class="w-full md:w-[calc(50%-1rem)] lg:w-[calc(33.333%-1.35rem)] group p-8 rounded-2xl bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800/80 hover:border-[#29BFE0] dark:hover:border-[#29BFE0] hover:shadow-xl transition-all duration-300">
+                    <div class="w-full md:w-[calc(50%-1rem)] lg:w-[calc(33.333%-1.35rem)] group p-8 rounded-2xl bg-white dark:bg-slate-900 shadow-xl shadow-slate-200/40 dark:shadow-none border border-slate-100 dark:border-slate-800/80 hover:border-[#29BFE0] dark:hover:border-[#29BFE0] hover:shadow-xl transition-all duration-300">
                         <div class="h-12 w-12 bg-[#29BFE0]/10 dark:bg-[#29BFE0]/20 text-[#29BFE0] rounded-xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
                             <!-- Icon -->
                             <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -218,7 +218,7 @@
                     </div>
 
                     <!-- Social/Community Area -->
-                    <div class="w-full md:w-[calc(50%-1rem)] lg:w-[calc(33.333%-1.35rem)] group p-8 rounded-2xl bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800/80 hover:border-[#F49F00] dark:hover:border-[#F49F00] hover:shadow-xl transition-all duration-300">
+                    <div class="w-full md:w-[calc(50%-1rem)] lg:w-[calc(33.333%-1.35rem)] group p-8 rounded-2xl bg-white dark:bg-slate-900 shadow-xl shadow-slate-200/40 dark:shadow-none border border-slate-100 dark:border-slate-800/80 hover:border-[#F49F00] dark:hover:border-[#F49F00] hover:shadow-xl transition-all duration-300">
                         <div class="h-12 w-12 bg-[#F49F00]/10 dark:bg-[#F49F00]/20 text-[#F49F00] rounded-xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
                             <!-- Icon -->
                             <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -232,7 +232,7 @@
                     </div>
 
                     <!-- Others Area -->
-                    <div class="w-full md:w-[calc(50%-1rem)] lg:w-[calc(33.333%-1.35rem)] group p-8 rounded-2xl bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800/80 hover:border-[#E6007E] dark:hover:border-[#E6007E] hover:shadow-xl transition-all duration-300">
+                    <div class="w-full md:w-[calc(50%-1rem)] lg:w-[calc(33.333%-1.35rem)] group p-8 rounded-2xl bg-white dark:bg-slate-900 shadow-xl shadow-slate-200/40 dark:shadow-none border border-slate-100 dark:border-slate-800/80 hover:border-[#E6007E] dark:hover:border-[#E6007E] hover:shadow-xl transition-all duration-300">
                         <div class="h-12 w-12 bg-[#E6007E]/10 dark:bg-[#E6007E]/20 text-[#E6007E] rounded-xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
                             <!-- Icon -->
                             <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
