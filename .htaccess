@@ -1,0 +1,17 @@
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+
+    # 1. Redirigir todas las peticiones a la carpeta public/ sin mostrarla en la URL
+    RewriteCond %{REQUEST_URI} !^/public/
+    RewriteRule ^(.*)$ public/$1 [L]
+</IfModule>
+
+# 2. Seguridad: Denegar acceso directo a archivos sensibles de configuración
+<FilesMatch "^\.env|composer\.json|composer\.lock|package\.json|package-lock\.json|artisan|phpunit\.xml|Dockerfile|docker-compose\.yml">
+    Order allow,deny
+    Deny from all
+</FilesMatch>
+
+# 3. Seguridad: Denegar acceso a carpetas del sistema
+RedirectMatch 404 ^/\.(git|github|cursor|vscode|zed)/
+RedirectMatch 404 ^/(app|bootstrap|config|database|resources|routes|storage|tests|vendor)/
