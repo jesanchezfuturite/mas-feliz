@@ -16,8 +16,8 @@ class ConfiguradorLanding extends Page implements HasForms
     use InteractsWithForms;
 
     protected static string|\BackedEnum|null $navigationIcon = 'heroicon-o-cog';
-    protected static ?string $navigationLabel = 'Configurador landing';
-    protected static ?string $title = 'Configurador Landing';
+    protected static ?string $navigationLabel = 'Configurador de Logo';
+    protected static ?string $title = 'Configurador de Logo';
 
     protected string $view = 'filament.pages.configurador-landing';
 
