@@ -27,7 +27,7 @@
 
     <!-- Navigation Bar -->
     <header class="sticky top-0 z-40 bg-white/80 dark:bg-slate-900/80 backdrop-blur-md border-b border-slate-100 dark:border-slate-800/80 transition-all duration-300">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-24 flex items-center justify-between">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 min-h-24 py-2 flex items-center justify-between">
             <div class="flex items-center space-x-4">
                 @php
                     $partnerLogo = \App\Models\Setting::where('key', 'landing_partner_logo')->first()?->value;
@@ -37,7 +37,7 @@
                 @endif
                 <img src="{{ asset('images/coahuila.png') }}" alt="Gobierno de Coahuila" class="w-auto object-contain" style="height: 84px;" />
                 <span class="h-12 w-px bg-slate-200 dark:bg-slate-800"></span>
-                <img src="{{ asset('images/inspira.png') }}" alt="Inspira Coahuila" class="w-auto object-contain" style="height: 72px;" />
+                <img src="{{ asset('images/inspira.png') }}" alt="Inspira Coahuila" class="w-auto object-contain" style="height: 108px;" />
             </div>
             <nav class="flex items-center space-x-6">
                 <a href="#ambitos" class="text-sm font-medium text-slate-600 dark:text-slate-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors">Ámbitos</a>
