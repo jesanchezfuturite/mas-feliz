@@ -5,7 +5,10 @@ namespace App\Providers;
 use Illuminate\Support\ServiceProvider;
 
 use Illuminate\Support\Facades\Schema;
+use Illuminate\Support\Facades\Mail;
 use Filament\Actions\ViewAction;
+use Symfony\Component\Mailer\Bridge\Brevo\Transport\BrevoTransportFactory;
+use Symfony\Component\Mailer\Transport\Dsn;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -23,6 +26,12 @@ class AppServiceProvider extends ServiceProvider
     public function boot(): void
     {
         Schema::defaultStringLength(191);
+
+        Mail::extend('brevo', function () {
+            return (new BrevoTransportFactory())->create(
+                Dsn::fromString(config('services.brevo.dsn'))
+            );
+        });
 
         ViewAction::configureUsing(function (ViewAction $action): void {
             $action->modalCancelAction(false);
