@@ -38,8 +38,6 @@
                 <img src="{{ asset('images/coahuila.png') }}" alt="Gobierno de Coahuila" class="w-auto object-contain" style="height: 84px;" />
                 <span class="h-12 w-px bg-slate-200 dark:bg-slate-800"></span>
                 <img src="{{ asset('images/inspira.png') }}" alt="Inspira Coahuila" class="w-auto object-contain" style="height: 72px;" />
-                <span class="h-12 w-px bg-slate-200 dark:bg-slate-800"></span>
-                <span class="text-xs font-semibold text-slate-500 uppercase tracking-wider hidden sm:inline-block">Programa Estatal</span>
             </div>
             <nav class="flex items-center space-x-6">
                 <a href="#ambitos" class="text-sm font-medium text-slate-600 dark:text-slate-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors">Ámbitos</a>
