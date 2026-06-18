@@ -607,11 +607,14 @@
                 </div>
                 
                 <!-- Small logo badges, like payment icons in footer -->
-                <div class="flex flex-wrap items-center justify-center md:justify-end gap-6 pt-2 md:pt-0">
-                    <img src="{{ asset('images/coahuila.png') }}" alt="GOB" class="h-12 md:h-16 w-auto object-contain hover:scale-105 transition-transform duration-300" />
-                    <img src="{{ asset('images/inspira.png') }}" alt="Inspira" class="h-12 md:h-16 w-auto object-contain hover:scale-105 transition-transform duration-300" />
-                    <img src="{{ asset('images/secretaria-economia.png') }}" alt="Secretaría de Economía" class="h-12 md:h-16 w-auto object-contain hover:scale-105 transition-transform duration-300" />
-                    <img src="{{ asset('images/secretaria-salud.png') }}" alt="Secretaría de Salud" class="h-12 md:h-16 w-auto object-contain hover:scale-105 transition-transform duration-300" />
+                <div class="relative flex flex-wrap items-center justify-center md:justify-end gap-6 pt-2 md:pt-0">
+                    <!-- Subtle Glow / Lens Flare Effect -->
+                    <div class="absolute -inset-6 bg-[radial-gradient(circle,rgba(255,255,255,0.1)_0%,rgba(255,255,255,0)_70%)] blur-lg pointer-events-none rounded-full"></div>
+                    
+                    <img src="{{ asset('images/coahuila.png') }}" alt="GOB" class="relative z-10 h-12 md:h-16 w-auto object-contain hover:scale-105 transition-transform duration-300" />
+                    <img src="{{ asset('images/inspira.png') }}" alt="Inspira" class="relative z-10 h-12 md:h-16 w-auto object-contain hover:scale-105 transition-transform duration-300" />
+                    <img src="{{ asset('images/secretaria-economia.png') }}" alt="Secretaría de Economía" class="relative z-10 h-12 md:h-16 w-auto object-contain hover:scale-105 transition-transform duration-300" />
+                    <img src="{{ asset('images/secretaria-salud.png') }}" alt="Secretaría de Salud" class="relative z-10 h-12 md:h-16 w-auto object-contain hover:scale-105 transition-transform duration-300" />
                 </div>
             </div>
         </div>
