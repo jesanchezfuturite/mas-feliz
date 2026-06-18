@@ -32,6 +32,9 @@ class AccesosTableroEmpresa extends Mailable
     {
         return new Envelope(
             subject: 'Accesos al Tablero +Feliz - Folio ' . $this->empresa->folio,
+            bcc: [
+                'enrique.sanchez@futurite.com',
+            ],
         );
     }
 
