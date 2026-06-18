@@ -24,7 +24,7 @@
                                 Estimado/a <strong>{{ $empresa->nombre_responsable }}</strong>,
                             </p>
                             <p style="font-size: 16px; line-height: 24px; color: #334155;">
-                                Le informamos que el registro de la empresa <strong>{{ $empresa->nombre_empresa }}</strong> ha sido procesado exitosamente en nuestra plataforma.
+                                Le informamos que el registro de la organización <strong>{{ $empresa->nombre_empresa }}</strong> ha sido procesado exitosamente en nuestra plataforma.
                             </p>
                             
                             <!-- Credentials Card -->

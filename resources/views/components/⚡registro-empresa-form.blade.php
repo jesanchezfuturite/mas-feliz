@@ -77,7 +77,7 @@ new class extends Component
             <div class="space-y-2">
                 <h3 class="text-2xl sm:text-3xl font-bold text-slate-800 dark:text-slate-100">¡Registro Exitoso!</h3>
                 <p class="text-slate-500 dark:text-slate-400 max-w-md mx-auto">
-                    Los datos de la empresa se han almacenado correctamente en el sistema gubernamental.
+                    Los datos de la organización se han almacenado correctamente en el sistema gubernamental.
                 </p>
             </div>
 
@@ -100,12 +100,12 @@ new class extends Component
             @csrf
             
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <!-- Nombre de la Empresa -->
+                <!-- Nombre de la Organización -->
                 <div class="space-y-2">
-                    <label for="nombre_empresa" class="block text-sm font-semibold text-slate-700 dark:text-slate-300">Nombre de la Empresa</label>
+                    <label for="nombre_empresa" class="block text-sm font-semibold text-slate-700 dark:text-slate-300">Nombre de la Organización</label>
                     <input type="text" id="nombre_empresa" wire:model="nombre_empresa" 
                         class="w-full px-4 py-2.5 rounded-lg border border-slate-200 dark:border-slate-800 dark:bg-slate-950 dark:text-slate-200 focus:ring-2 focus:ring-[#92c644] focus:border-[#92c644] transition duration-150 outline-none" 
-                        placeholder="Ej. Mi Empresa S.A.">
+                        placeholder="Ej. Mi Organización S.A.">
                     @error('nombre_empresa') 
                         <p class="text-red-500 text-xs font-medium">{{ $message }}</p> 
                     @enderror
@@ -182,7 +182,7 @@ new class extends Component
                     <label for="correo" class="block text-sm font-semibold text-slate-700 dark:text-slate-300">Correo Electrónico</label>
                     <input type="email" id="correo" wire:model="correo" 
                         class="w-full px-4 py-2.5 rounded-lg border border-slate-200 dark:border-slate-800 dark:bg-slate-950 dark:text-slate-200 focus:ring-2 focus:ring-[#92c644] focus:border-[#92c644] transition duration-150 outline-none" 
-                        placeholder="Ej. contacto@empresa.com">
+                        placeholder="Ej. contacto@organizacion.com">
                     @error('correo') 
                         <p class="text-red-500 text-xs font-medium">{{ $message }}</p> 
                     @enderror

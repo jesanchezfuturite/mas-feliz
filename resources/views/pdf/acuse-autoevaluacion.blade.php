@@ -316,7 +316,7 @@
             <td class="info-value">{{ \Carbon\Carbon::parse($autoevaluacion->fecha_evaluacion)->format('d/m/Y H:i') }}</td>
         </tr>
         <tr>
-            <td class="info-label">Razón Social / Empresa</td>
+            <td class="info-label">Razón Social / Organización</td>
             <td class="info-value" colspan="3" style="font-weight: bold;">{{ $autoevaluacion->empresa->nombre_empresa }}</td>
         </tr>
         <tr>
@@ -373,7 +373,7 @@
                     @php $val = $autoevaluacion->{"criterio_{$i}"}; @endphp
                     <tr>
                         <td>Criterio {{ $i }}</td>
-                        <td>Acciones de contención y fomento a la salud mental dentro de la empresa.</td>
+                        <td>Acciones de contención y fomento a la salud mental dentro de la organización.</td>
                         <td style="text-align: center;">
                             <span class="badge {{ $optionsBadgeClass[$val] ?? 'badge-na' }}">
                                 {{ $optionsText[$val] ?? $val }}

@@ -74,7 +74,7 @@
 
                 <div class="flex flex-col sm:flex-row items-center justify-center gap-4 pt-4">
                     <a href="#registro" class="w-full sm:w-auto px-8 py-4 bg-gradient-to-r from-[#92c644] to-[#84b33d] hover:from-[#84b33d] hover:to-[#749d36] text-white font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all duration-150 transform hover:-translate-y-0.5 text-center">
-                        Registrar mi Institución
+                        Registrar mi Organización
                     </a>
                     <a href="#ambitos" class="w-full sm:w-auto px-8 py-4 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800/50 font-semibold rounded-xl transition-all duration-150 text-center">
                         Conoce los Ámbitos
@@ -219,7 +219,7 @@
                         </div>
                         <h3 class="text-xl font-bold mb-3 text-slate-800 dark:text-slate-200">Ámbito Productivo o Industrial</h3>
                         <p class="text-slate-500 dark:text-slate-400 text-sm leading-relaxed">
-                            Empresas comerciales, fábricas y corporativos que cuenten con programas preventivos contra el estrés y fatiga laboral.
+                            Organizaciones comerciales, fábricas y corporativos que cuenten con programas preventivos contra el estrés y fatiga laboral.
                         </p>
                     </div>
 
@@ -320,7 +320,7 @@
                                 <div class="flex-shrink-0 w-6 h-6 rounded-full bg-[#92c644]/10 dark:bg-[#92c644]/20 text-[#92c644] flex items-center justify-center mt-1 group-hover:bg-[#92c644] group-hover:text-white transition-all duration-300">
                                     <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
                                 </div>
-                                <span class="ml-4 text-lg text-slate-600 dark:text-slate-300 leading-relaxed">Reconocimiento público como empresa comprometida con la salud mental</span>
+                                <span class="ml-4 text-lg text-slate-600 dark:text-slate-300 leading-relaxed">Reconocimiento público como organización comprometida con la salud mental</span>
                             </li>
                             <li class="flex items-start group">
                                 <div class="flex-shrink-0 w-6 h-6 rounded-full bg-[#92c644]/10 dark:bg-[#92c644]/20 text-[#92c644] flex items-center justify-center mt-1 group-hover:bg-[#92c644] group-hover:text-white transition-all duration-300">
@@ -527,7 +527,7 @@
                 
                 <div class="text-center max-w-2xl mx-auto space-y-4 mb-12">
                     <h2 class="text-3xl sm:text-4xl font-bold tracking-tight text-slate-900 dark:text-white">
-                        Registra tu Institución o Empresa
+                        Registra tu Organización
                     </h2>
                     <p class="text-slate-500 dark:text-slate-400 text-sm">
                         Completa el formulario oficial para inscribir tu centro de trabajo y postularte al distintivo estatal.
