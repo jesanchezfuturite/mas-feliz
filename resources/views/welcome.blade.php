@@ -59,10 +59,7 @@
             <div class="absolute top-60 -left-20 w-80 h-80 bg-indigo-400/20 dark:bg-indigo-600/10 rounded-full blur-3xl"></div>
             
             <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 text-center space-y-8 relative z-10">
-                <div class="inline-flex items-center space-x-2 bg-[#92c644]/10 dark:bg-[#92c644]/20 text-[#92c644] px-4 py-1.5 rounded-full text-xs font-semibold uppercase tracking-wider">
-                    <span>Distintivo Gubernamental Oficial</span>
-                </div>
-                
+
                 <h1 class="text-5xl sm:text-6xl md:text-7xl font-extrabold tracking-tight text-slate-900 dark:text-white leading-tight flex flex-col sm:flex-row items-center justify-center gap-2 sm:gap-6">
                     <span>Iniciativa</span>
                     <img src="{{ asset('images/+FELIZ-LOGO.png') }}" alt="+Feliz" class="h-20 sm:h-24 md:h-28 w-auto object-contain mt-2 sm:mt-0">
