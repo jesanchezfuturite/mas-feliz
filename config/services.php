@@ -35,4 +35,8 @@ return [
         ],
     ],
 
+    'brevo' => [
+        'dsn' => 'brevo+api://' . env('BREVO_API_KEY') . '@default',
+    ],
+
 ];
