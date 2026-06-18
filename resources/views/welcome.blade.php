@@ -597,13 +597,22 @@
                 
                 <!-- Right: Logos Grid -->
                 <div class="md:col-span-6 flex flex-col justify-center space-y-6">
-                    <h4 class="text-xs font-bold uppercase tracking-wider text-slate-500 text-center md:text-left">Organizaciones Convocantes</h4>
-                    <div class="grid grid-cols-2 sm:grid-cols-5 gap-6 items-center justify-items-center bg-slate-900/40 p-6 rounded-2xl border border-slate-900/60">
-                        <img src="{{ asset('images/coahuila.png') }}" alt="GOB" class="h-10 w-auto object-contain opacity-80 hover:opacity-100 transition-opacity" />
-                        <img src="{{ asset('images/inspira.png') }}" alt="Inspira" class="h-10 w-auto object-contain opacity-80 hover:opacity-100 transition-opacity" />
-                        <img src="{{ asset('images/secretaria-economia.png') }}" alt="Secretaría de Economía" class="h-10 w-auto object-contain opacity-80 hover:opacity-100 transition-opacity" />
-                        <img src="{{ asset('images/secretaria-salud.png') }}" alt="Secretaría de Salud" class="h-10 w-auto object-contain opacity-80 hover:opacity-100 transition-opacity" />
-                        <img src="{{ asset('images/salud-mental.png') }}" alt="Salud Mental" class="h-10 w-auto object-contain opacity-80 hover:opacity-100 transition-opacity col-span-2 sm:col-span-1" />
+                    <div class="grid grid-cols-2 sm:grid-cols-5 gap-4 items-center justify-items-center bg-slate-900/40 p-6 rounded-2xl border border-slate-900/60">
+                        <div class="bg-white rounded-lg p-3 flex items-center justify-center w-full h-20 shadow-sm">
+                            <img src="{{ asset('images/coahuila.png') }}" alt="GOB" class="max-h-full w-auto object-contain" />
+                        </div>
+                        <div class="bg-white rounded-lg p-3 flex items-center justify-center w-full h-20 shadow-sm">
+                            <img src="{{ asset('images/inspira.png') }}" alt="Inspira" class="max-h-full w-auto object-contain" />
+                        </div>
+                        <div class="bg-white rounded-lg p-3 flex items-center justify-center w-full h-20 shadow-sm">
+                            <img src="{{ asset('images/secretaria-economia.png') }}" alt="Secretaría de Economía" class="max-h-full w-auto object-contain" />
+                        </div>
+                        <div class="bg-white rounded-lg p-3 flex items-center justify-center w-full h-20 shadow-sm">
+                            <img src="{{ asset('images/secretaria-salud.png') }}" alt="Secretaría de Salud" class="max-h-full w-auto object-contain" />
+                        </div>
+                        <div class="bg-white rounded-lg p-3 flex items-center justify-center w-full h-20 shadow-sm col-span-2 sm:col-span-1">
+                            <img src="{{ asset('images/salud-mental.png') }}" alt="Salud Mental" class="max-h-full w-auto object-contain" />
+                        </div>
                     </div>
                 </div>
             </div>
