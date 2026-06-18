@@ -551,7 +551,9 @@
             <div class="flex flex-wrap items-center justify-center gap-8 md:gap-12 pb-6 border-b border-slate-100 dark:border-slate-800/80">
                 <img src="{{ asset('images/pasos.png') }}" alt="Coahuila: A pasos de gigante" class="h-10 w-auto object-contain opacity-75 hover:opacity-100 transition-opacity duration-200" />
                 <span class="hidden md:inline h-6 w-px bg-slate-200 dark:bg-slate-800"></span>
-                <img src="{{ asset('images/salud-mental.png') }}" alt="Secretaría de Salud" class="h-10 w-auto object-contain opacity-75 hover:opacity-100 transition-opacity duration-200" />
+                <img src="{{ asset('images/secretaria-salud.png') }}" alt="Secretaría de Salud" class="h-10 w-auto object-contain opacity-75 hover:opacity-100 transition-opacity duration-200" />
+                <span class="hidden md:inline h-6 w-px bg-slate-200 dark:bg-slate-800"></span>
+                <img src="{{ asset('images/secretaria-economia.png') }}" alt="Secretaría de Economía" class="h-10 w-auto object-contain opacity-75 hover:opacity-100 transition-opacity duration-200" />
             </div>
             
             <div class="flex flex-col md:flex-row items-center justify-between text-xs space-y-4 md:space-y-0 text-slate-500">
