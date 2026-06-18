@@ -14,6 +14,18 @@ class CasoSeguimientosTable
     public static function configure(Table $table): Table
     {
         return $table
+            ->description(new \Illuminate\Support\HtmlString('
+                <div style="display: flex; align-items: center; gap: 1rem; border-radius: 1rem; border: 1px solid #3b82f6; background-color: #eff6ff; padding: 0.75rem 1.25rem; color: #1d4ed8; margin-top: 1rem; margin-bottom: 0.5rem; text-align: left;">
+                    <div style="display: flex; height: 2.5rem; width: 2.5rem; flex-shrink: 0; align-items: center; justify-content: center; border-radius: 9999px; background-color: #dbeafe;">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" style="height: 1.25rem; width: 1.25rem;">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M11.25 11.25l.041-.02a.75.75 0 011.063.852l-.708 2.836a.75.75 0 001.063.853l.041-.021M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9-3.75h.008v.008H12V8.25z" />
+                        </svg>
+                    </div>
+                    <div style="font-size: 0.95rem; font-weight: 500; line-height: 1.4; text-wrap: balance;">
+                        Esta herramienta te permite documentar y llevar una bitácora detallada para dar seguimiento a los empleados que requieren atención o canalización.
+                    </div>
+                </div>
+            '))
             ->columns([
                 TextColumn::make('identificador_empleado')
                     ->label('Nombre Completo')
@@ -94,7 +106,7 @@ class CasoSeguimientosTable
                     ->icon('heroicon-m-eye')
                     ->iconButton()
                     ->tooltip('Ver detalle')
-                    ->slideOver()
+                    ->modalHeading('Detalle de Evaluación')
                     ->modalSubmitAction(false)
                     ->modalCancelAction(false)
                     ->modalFooterActionsAlignment('right')

@@ -143,7 +143,7 @@ class CasosSeguimientoRelationManager extends RelationManager
                     ->icon('heroicon-m-eye')
                     ->iconButton()
                     ->tooltip('Ver detalle')
-                    ->slideOver()
+                    ->modalHeading('Detalle de Evaluación')
                     ->modalSubmitAction(false)
                     ->modalCancelAction(false)
                     ->modalFooterActionsAlignment('right')

@@ -15,7 +15,7 @@ class TamizajesRelationManager extends RelationManager
 {
     protected static string $relationship = 'tamizajes';
 
-    protected static ?string $title = 'Historial de Tamizajes (Evaluaciones Anónimas)';
+    protected static ?string $title = 'Historial de Tamizajes (Evaluaciones en línea)';
 
     public function form(Schema $schema): Schema
     {
@@ -89,7 +89,7 @@ class TamizajesRelationManager extends RelationManager
     public function table(Table $table): Table
     {
         return $table
-            ->heading('Historial de Tamizajes (Evaluaciones Anónimas)')
+            ->heading('Historial de Tamizajes (Evaluaciones en línea)')
             ->recordTitleAttribute('nombre_completo')
             ->columns([
                 TextColumn::make('nombre_completo')->label('Nombre Completo')->searchable()->sortable(),
@@ -130,7 +130,9 @@ class TamizajesRelationManager extends RelationManager
                     ->tooltip('Ver detalle')
                     ->modalHeading('Detalle de Evaluación')
                     ->modalCancelActionLabel('Cerrar')
-                    ->modalFooterActionsAlignment('right'),
+                    ->modalFooterActionsAlignment('right')
+                    ->modalSubmitAction(false)
+                    ->form(fn (\Filament\Schemas\Schema $schema) => $this->form($schema)),
             ])
             ->toolbarActions([
                 // Read-only

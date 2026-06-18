@@ -10,11 +10,44 @@ class EditAutoevaluacion extends EditRecord
 {
     protected static string $resource = AutoevaluacionResource::class;
 
+    public function getTitle(): string | \Illuminate\Contracts\Support\Htmlable
+    {
+        $respuestas = $this->data['respuestas'] ?? ($this->record->respuestas ?? []);
+        $total = 0;
+        
+        if (is_array($respuestas)) {
+            foreach ($respuestas as $criterio) {
+                if (is_array($criterio)) {
+                    foreach ($criterio as $elemento) {
+                        if (is_array($elemento) && isset($elemento['score']) && is_numeric($elemento['score'])) {
+                            $total += (float) $elemento['score'];
+                        }
+                    }
+                }
+            }
+        }
+
+        return "Editar Autoevaluación (Puntaje Total: {$total})";
+    }
+
     protected function getHeaderActions(): array
     {
+        if ($this->record->estatus === 'Autorizada') {
+            return [];
+        }
+
         return [
             DeleteAction::make(),
         ];
+    }
+
+    protected function getFormActions(): array
+    {
+        if ($this->record->estatus === 'Autorizada') {
+            return [];
+        }
+
+        return parent::getFormActions();
     }
 
     protected function getRedirectUrl(): string

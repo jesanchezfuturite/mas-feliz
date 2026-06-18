@@ -21,4 +21,30 @@ class EditEmpresa extends EditRecord
     {
         return $this->getResource()::getUrl('index');
     }
+
+    protected function getFormActions(): array
+    {
+        return array_merge(parent::getFormActions(), [
+            \Filament\Actions\Action::make('reenviar_contrasena')
+                ->label('Reenviar contraseña')
+                ->color('primary')
+                ->icon('heroicon-o-paper-airplane')
+                ->extraAttributes(['class' => 'text-white', 'style' => 'color: white;'])
+                ->requiresConfirmation()
+                ->modalHeading('Reenviar contraseña a la Empresa')
+                ->modalDescription('Se generará una nueva contraseña y se enviará por correo a la empresa. ¿Estás seguro de continuar?')
+                ->action(function () {
+                    $record = $this->getRecord();
+                    if (! $record) return;
+                    $password = \Illuminate\Support\Str::random(10);
+                    $record->update(['password' => \Illuminate\Support\Facades\Hash::make($password)]);
+                    \Illuminate\Support\Facades\Mail::to($record->correo)->send(new \App\Mail\AccesosTableroEmpresa($record, $password));
+                    
+                    \Filament\Notifications\Notification::make()
+                        ->title('Contraseña enviada por correo')
+                        ->success()
+                        ->send();
+                })
+        ]);
+    }
 }
