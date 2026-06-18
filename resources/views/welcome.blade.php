@@ -563,49 +563,45 @@
     <footer class="bg-slate-950 text-slate-400 border-t border-slate-900 py-16 transition-colors duration-300">
         <div class="max-w-7xl mx-auto px-6 lg:px-8 space-y-12">
             
-            <div class="grid grid-cols-1 md:grid-cols-12 gap-8 md:gap-12 pb-12 border-b border-slate-900">
+            <div class="grid grid-cols-1 md:grid-cols-12 gap-8 md:gap-12 pb-12 border-b border-slate-900 items-center">
                 <!-- Left: Contact & Info -->
-                <div class="md:col-span-12 space-y-6 text-center md:text-left">
-                    <div class="flex flex-col md:flex-row md:items-center justify-between gap-6">
-                        <div class="space-y-3">
-                            <div class="flex items-center justify-center md:justify-start space-x-3">
-                                <img src="{{ asset('images/+FELIZ-LOGO.png') }}" alt="+Feliz" class="h-10 w-auto object-contain" />
-                                <span class="text-xl font-extrabold text-white tracking-tight">+Feliz Coahuila</span>
-                            </div>
-                            <p class="text-sm text-slate-400 max-w-2xl">
-                                Iniciativa estatal para promover entornos organizacionales saludables, seguros y favorables para el desarrollo integral de la salud mental de los trabajadores.
-                            </p>
-                        </div>
-                        
-                        <!-- Contacto Section -->
-                        <div class="space-y-3 md:text-right w-full md:w-auto">
-                            <h4 class="text-xs font-bold uppercase tracking-wider text-slate-500">Contacto</h4>
-                            <div class="flex flex-col sm:flex-row items-center justify-center md:justify-end gap-4 text-sm whitespace-nowrap">
-                                <a href="mailto:masfeliz@coahuila.gob.mx" class="flex items-center space-x-2 text-slate-300 hover:text-white transition-colors">
-                                    <svg class="w-4 h-4 text-[#92c644]" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                                        <path stroke-linecap="round" stroke-linejoin="round" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
-                                    </svg>
-                                    <span>masfeliz@coahuila.gob.mx</span>
-                                </a>
-                                <span class="hidden sm:inline text-slate-700">|</span>
-                                <a href="https://wa.me/528446636977" target="_blank" class="flex items-center space-x-2 text-slate-300 hover:text-white transition-colors">
-                                    <svg class="w-4 h-4 text-[#92c644]" fill="currentColor" viewBox="0 0 24 24">
-                                        <path d="M12.012 2c-5.506 0-9.989 4.478-9.99 9.984a9.96 9.96 0 0 0 1.333 4.993L2 22l5.184-1.359a9.95 9.95 0 0 0 4.824 1.243h.004c5.507 0 9.99-4.478 9.99-9.985A9.998 9.998 0 0 0 12.012 2zm6.035 14.224c-.25.705-1.458 1.34-2.012 1.418-.549.078-1.229.144-3.666-.86-2.955-1.217-4.836-4.243-4.985-4.441-.148-.198-1.208-1.603-1.208-3.058 0-1.455.76-2.171 1.032-2.469.273-.297.594-.372.793-.372.198 0 .396.002.57.01.18.007.42-.069.658.502.247.594.842 2.057.917 2.206.074.148.124.32.025.518-.099.198-.148.32-.297.495-.148.175-.313.39-.446.522-.148.148-.303.309-.13.607.173.298.769 1.266 1.65 2.049 1.135 1.009 2.09 1.321 2.387 1.47.298.148.471.124.645-.076.173-.198.743-.865.94-1.162.198-.297.396-.248.669-.148.272.099 1.732.817 2.029.965.297.148.495.223.57.346.074.124.074.717-.176 1.423z"/>
-                                    </svg>
-                                    <span>WhatsApp: 844 663 6977</span>
-                                </a>
-                            </div>
+                <div class="md:col-span-6 space-y-6 text-center md:text-left">
+                    <div class="flex items-center justify-center md:justify-start space-x-3">
+                        <img src="{{ asset('images/+FELIZ-LOGO.png') }}" alt="+Feliz" class="h-10 w-auto object-contain" />
+                        <span class="text-xl font-extrabold text-white tracking-tight">+Feliz Coahuila</span>
+                    </div>
+                    <p class="text-sm text-slate-400 max-w-md">
+                        Iniciativa estatal para promover entornos organizacionales saludables, seguros y favorables para el desarrollo integral de la salud mental de los trabajadores.
+                    </p>
+                    
+                    <!-- Contacto Section -->
+                    <div class="space-y-3 pt-2">
+                        <h4 class="text-xs font-bold uppercase tracking-wider text-slate-500">Contacto</h4>
+                        <div class="flex flex-col sm:flex-row items-center justify-center md:justify-start gap-4 text-sm">
+                            <a href="mailto:masfeliz@coahuila.gob.mx" class="flex items-center space-x-2 text-slate-300 hover:text-white transition-colors">
+                                <svg class="w-4 h-4 text-[#92c644]" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
+                                </svg>
+                                <span>masfeliz@coahuila.gob.mx</span>
+                            </a>
+                            <span class="hidden sm:inline text-slate-700">|</span>
+                            <a href="https://wa.me/528446636977" target="_blank" class="flex items-center space-x-2 text-slate-300 hover:text-white transition-colors">
+                                <svg class="w-4 h-4 text-[#92c644]" fill="currentColor" viewBox="0 0 24 24">
+                                    <path d="M12.012 2c-5.506 0-9.989 4.478-9.99 9.984a9.96 9.96 0 0 0 1.333 4.993L2 22l5.184-1.359a9.95 9.95 0 0 0 4.824 1.243h.004c5.507 0 9.99-4.478 9.99-9.985A9.998 9.998 0 0 0 12.012 2zm6.035 14.224c-.25.705-1.458 1.34-2.012 1.418-.549.078-1.229.144-3.666-.86-2.955-1.217-4.836-4.243-4.985-4.441-.148-.198-1.208-1.603-1.208-3.058 0-1.455.76-2.171 1.032-2.469.273-.297.594-.372.793-.372.198 0 .396.002.57.01.18.007.42-.069.658.502.247.594.842 2.057.917 2.206.074.148.124.32.025.518-.099.198-.148.32-.297.495-.148.175-.313.39-.446.522-.148.148-.303.309-.13.607.173.298.769 1.266 1.65 2.049 1.135 1.009 2.09 1.321 2.387 1.47.298.148.471.124.645-.076.173-.198.743-.865.94-1.162.198-.297.396-.248.669-.148.272.099 1.732.817 2.029.965.297.148.495.223.57.346.074.124.074.717-.176 1.423z"/>
+                                </svg>
+                                <span>WhatsApp: 844 663 6977</span>
+                            </a>
                         </div>
                     </div>
                 </div>
                 
-                <!-- Logos Banner -->
-                <div class="md:col-span-12">
-                    <div class="bg-white rounded-2xl py-8 px-6 w-full max-w-5xl mx-auto shadow-sm flex flex-wrap justify-center items-center gap-10 md:gap-14">
-                        <img src="{{ asset('images/coahuila.png') }}" alt="GOB" class="h-16 md:h-20 w-auto object-contain hover:scale-105 transition-transform duration-300" />
-                        <img src="{{ asset('images/inspira.png') }}" alt="Inspira" class="h-16 md:h-20 w-auto object-contain hover:scale-105 transition-transform duration-300" />
-                        <img src="{{ asset('images/secretaria-economia.png') }}" alt="Secretaría de Economía" class="h-16 md:h-20 w-auto object-contain hover:scale-105 transition-transform duration-300" />
-                        <img src="{{ asset('images/secretaria-salud.png') }}" alt="Secretaría de Salud" class="h-16 md:h-20 w-auto object-contain hover:scale-105 transition-transform duration-300" />
+                <!-- Right: Logos Card -->
+                <div class="md:col-span-6 flex flex-col justify-center">
+                    <div class="bg-white rounded-2xl py-5 px-6 shadow-sm flex flex-wrap items-center justify-center gap-5 md:gap-7 max-w-md mx-auto md:ml-auto">
+                        <img src="{{ asset('images/coahuila.png') }}" alt="GOB" class="h-7 md:h-9 w-auto object-contain hover:scale-105 transition-transform duration-300" />
+                        <img src="{{ asset('images/inspira.png') }}" alt="Inspira" class="h-7 md:h-9 w-auto object-contain hover:scale-105 transition-transform duration-300" />
+                        <img src="{{ asset('images/secretaria-economia.png') }}" alt="Secretaría de Economía" class="h-10 md:h-12 w-auto object-contain hover:scale-105 transition-transform duration-300" />
+                        <img src="{{ asset('images/secretaria-salud.png') }}" alt="Secretaría de Salud" class="h-10 md:h-12 w-auto object-contain hover:scale-105 transition-transform duration-300" />
                     </div>
                 </div>
             </div>
