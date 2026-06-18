@@ -35,7 +35,7 @@
                 @if($partnerLogo)
                     <img src="{{ Storage::disk('public')->url($partnerLogo) }}" alt="Partner" class="h-7 w-auto border-r border-slate-200 dark:border-slate-700 pr-3" />
                 @endif
-                <img src="{{ asset('images/masFeliz_logo_ch.svg') }}" alt="+Feliz" class="h-7 w-auto" />
+                <img src="{{ asset('images/+FELIZ-LOGO.png') }}" alt="+Feliz" class="h-7 w-auto" />
                 <span class="h-5 w-px bg-slate-200 dark:bg-slate-700"></span>
                 <span class="text-[11px] font-semibold text-slate-400 uppercase tracking-widest mt-0.5">Diagnóstico</span>
             </div>

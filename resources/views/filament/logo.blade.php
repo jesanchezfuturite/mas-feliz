@@ -1,1 +1,1 @@
-<img src="{{ asset('images/logo-mas-feliz.png') }}" alt="Más Feliz" style="height: 3rem; object-fit: contain;">
+<img src="{{ asset('images/+FELIZ-LOGO.png') }}" alt="Más Feliz" style="height: 3rem; object-fit: contain;">
