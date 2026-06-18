@@ -27,16 +27,18 @@
 
     <!-- Navigation Bar -->
     <header class="sticky top-0 z-40 bg-white/80 dark:bg-slate-900/80 backdrop-blur-md border-b border-slate-100 dark:border-slate-800/80 transition-all duration-300">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
-            <div class="flex items-center space-x-3">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
+            <div class="flex items-center space-x-4">
                 @php
                     $partnerLogo = \App\Models\Setting::where('key', 'landing_partner_logo')->first()?->value;
                 @endphp
                 @if($partnerLogo)
-                    <img src="{{ Storage::disk('public')->url($partnerLogo) }}" alt="Partner" class="h-8 w-auto border-r border-slate-200 dark:border-slate-800 pr-3" />
+                    <img src="{{ Storage::disk('public')->url($partnerLogo) }}" alt="Partner" class="h-10 w-auto border-r border-slate-200 dark:border-slate-800 pr-4" />
                 @endif
-                @include('filament.logo')
-                <span class="h-6 w-px bg-slate-200 dark:bg-slate-800"></span>
+                <img src="{{ asset('images/coahuila.png') }}" alt="Gobierno de Coahuila" class="h-14 w-auto object-contain" />
+                <span class="h-8 w-px bg-slate-200 dark:bg-slate-800"></span>
+                <img src="{{ asset('images/inspira.png') }}" alt="Inspira Coahuila" class="h-12 w-auto object-contain" />
+                <span class="h-8 w-px bg-slate-200 dark:bg-slate-800"></span>
                 <span class="text-xs font-semibold text-slate-500 uppercase tracking-wider hidden sm:inline-block">Programa Estatal</span>
             </div>
             <nav class="flex items-center space-x-6">
@@ -65,7 +67,7 @@
                 
                 <h1 class="text-5xl sm:text-6xl md:text-7xl font-extrabold tracking-tight text-slate-900 dark:text-white leading-tight flex flex-col sm:flex-row items-center justify-center gap-2 sm:gap-6">
                     <span>Iniciativa</span>
-                    <img src="{{ asset('images/masFeliz_logo_ch.svg') }}" alt="+Feliz" class="h-16 sm:h-20 md:h-24 w-auto object-contain mt-2 sm:mt-0">
+                    <img src="{{ asset('images/mas-feliz.png') }}" alt="+Feliz" class="h-20 sm:h-24 md:h-28 w-auto object-contain mt-2 sm:mt-0">
                 </h1>
                 
                 <p class="text-lg sm:text-xl md:text-2xl text-slate-600 dark:text-slate-400 max-w-3xl mx-auto font-light leading-relaxed">
@@ -546,14 +548,23 @@
 
     <!-- Footer -->
     <footer class="bg-white dark:bg-slate-900 border-t border-slate-100 dark:border-slate-800/80 py-12 text-center text-slate-500 dark:text-slate-400 text-sm transition-colors duration-300">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-4">
-            <div class="flex items-center justify-center space-x-2">
-                <span class="font-bold text-slate-700 dark:text-slate-300">+Feliz</span>
-                <span>&copy; 2026</span>
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6">
+            <!-- Logo Row (Footer Support) -->
+            <div class="flex flex-wrap items-center justify-center gap-8 md:gap-12 pb-6 border-b border-slate-100 dark:border-slate-800/80">
+                <img src="{{ asset('images/pasos.png') }}" alt="Coahuila: A pasos de gigante" class="h-10 w-auto object-contain opacity-75 hover:opacity-100 transition-opacity duration-200" />
+                <span class="hidden md:inline h-6 w-px bg-slate-200 dark:bg-slate-800"></span>
+                <img src="{{ asset('images/salud-mental.png') }}" alt="Secretaría de Salud" class="h-10 w-auto object-contain opacity-75 hover:opacity-100 transition-opacity duration-200" />
             </div>
-            <p class="text-xs text-slate-400 dark:text-slate-500 max-w-md mx-auto">
-                Esta es una iniciativa de alta prioridad gubernamental para reconocer las mejores prácticas organizacionales e institucionales en el cuidado de la salud mental de los trabajadores.
-            </p>
+            
+            <div class="flex flex-col md:flex-row items-center justify-between text-xs space-y-4 md:space-y-0 text-slate-500">
+                <div class="flex items-center justify-center space-x-2">
+                    <span class="font-bold text-slate-700 dark:text-slate-300">+Feliz Coahuila</span>
+                    <span>&copy; 2026. Todos los derechos reservados.</span>
+                </div>
+                <p class="max-w-md text-center md:text-right leading-relaxed text-slate-400 dark:text-slate-500 mx-auto md:mx-0">
+                    Iniciativa impulsada por la Oficina Inspira Coahuila y la Secretaría de Salud del Estado para promover entornos psicosociales protectores y saludables en los centros de trabajo.
+                </p>
+            </div>
         </div>
     </footer>
 
