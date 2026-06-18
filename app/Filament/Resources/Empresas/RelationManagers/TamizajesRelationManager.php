@@ -123,7 +123,7 @@ class TamizajesRelationManager extends RelationManager
                     ->label('')
             ])
             ->recordActions([
-                \Filament\Actions\ViewAction::make('Ver')
+                \Filament\Actions\Action::make('Ver')
                     ->label('Ver detalle')
                     ->icon('heroicon-m-eye')
                     ->iconButton()

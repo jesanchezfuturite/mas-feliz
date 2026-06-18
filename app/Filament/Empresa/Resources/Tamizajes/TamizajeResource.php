@@ -159,14 +159,15 @@ class TamizajeResource extends Resource
                         }
                     }),
 
-                \Filament\Actions\ViewAction::make('VerDetalle')
+                \Filament\Actions\Action::make('VerDetalle')
                     ->label('Ver detalle')
                     ->icon('heroicon-m-eye')
                     ->iconButton()
                     ->tooltip('Ver detalle')
                     ->visible(fn ($record) => !empty($record->comentarios))
-                    ->modalHeading('Detalle de Evaluación')
-                    ->modalCancelActionLabel('Cerrar')
+                    ->slideOver()
+                    ->modalSubmitAction(false)
+                    ->modalCancelAction(false)
                     ->modalFooterActionsAlignment('right'),
             ])
             ->toolbarActions([

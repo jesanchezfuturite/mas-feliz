@@ -89,13 +89,14 @@ class CasoSeguimientosTable
                 //
             ])
             ->recordActions([
-                \Filament\Actions\ViewAction::make('VerDetalle')
+                \Filament\Actions\Action::make('VerDetalle')
                     ->label('Ver detalle')
                     ->icon('heroicon-m-eye')
                     ->iconButton()
                     ->tooltip('Ver detalle')
-                    ->modalHeading('Detalle de Evaluación')
-                    ->modalCancelActionLabel('Cerrar')
+                    ->slideOver()
+                    ->modalSubmitAction(false)
+                    ->modalCancelAction(false)
                     ->modalFooterActionsAlignment('right')
                     ->form([
                         \Filament\Schemas\Components\Grid::make(3)
@@ -201,13 +202,19 @@ class CasoSeguimientosTable
 
                         \Filament\Forms\Components\Placeholder::make('seguimiento_title')
                             ->hiddenLabel()
-                            ->visible(fn ($record) => !empty($record->notas_clinicas))
                             ->content(new \Illuminate\Support\HtmlString('<div style="display: flex; justify-content: space-between; align-items: center; padding-bottom: 0.75rem; border-bottom: 1px solid #e5e7eb; margin-top: 1.5rem;"><h3 style="font-size: 1.125rem; font-weight: 600; color: #111827;">Seguimiento</h3><span style="color: #556ee6;"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" style="width: 1.5rem; height: 1.5rem;"><path d="M21.731 2.269a2.625 2.625 0 0 0-3.712 0l-1.157 1.158 3.712 3.712 1.157-1.157a2.625 2.625 0 0 0 0-3.712ZM19.513 8.199l-3.712-3.712-8.4 8.4a5.25 5.25 0 0 0-1.32 2.214l-.8 2.685a.75.75 0 0 0 .933.933l2.685-.8a5.25 5.25 0 0 0 2.214-1.32l8.4-8.4Z" /><path d="M5.25 5.25a3 3 0 0 0-3 3v10.5a3 3 0 0 0 3 3h10.5a3 3 0 0 0 3-3V13.5a.75.75 0 0 0-1.5 0v5.25a1.5 1.5 0 0 1-1.5 1.5H5.25a1.5 1.5 0 0 1-1.5-1.5V8.25a1.5 1.5 0 0 1 1.5-1.5h5.25a.75.75 0 0 0 0-1.5H5.25Z" /></svg></span></div>')),
 
-                        \Filament\Schemas\Components\Grid::make(1)
+                        \Filament\Schemas\Components\Grid::make(2)
                             ->schema([
+                                \Filament\Forms\Components\Placeholder::make('estatus_atencion')
+                                    ->label('Estatus de la Atención')
+                                    ->content(fn ($record) => new \Illuminate\Support\HtmlString("<div style=\"color: #6b7280; font-size: 0.95rem;\">" . ($record->estatus_atencion ?? 'N/A') . "</div>")),
+                                \Filament\Forms\Components\Placeholder::make('institucion_canalizacion')
+                                    ->label('Institución de Canalización')
+                                    ->content(fn ($record) => new \Illuminate\Support\HtmlString("<div style=\"color: #6b7280; font-size: 0.95rem;\">" . ($record->institucion_canalizacion ?? 'N/A') . "</div>")),
                                 \Filament\Forms\Components\Placeholder::make('comentarios')
                                     ->label('Comentarios')
+                                    ->columnSpanFull()
                                     ->visible(fn ($record) => !empty($record->notas_clinicas))
                                     ->content(fn ($record) => new \Illuminate\Support\HtmlString("<div style=\"color: #6b7280; font-size: 0.95rem; white-space: pre-wrap;\">{$record->notas_clinicas}</div>")),
                             ]),
