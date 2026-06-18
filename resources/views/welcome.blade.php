@@ -561,9 +561,8 @@
             <div class="grid grid-cols-1 md:grid-cols-12 gap-8 pb-12 border-b border-slate-900">
                 <!-- Left: Info -->
                 <div class="md:col-span-8 space-y-4 text-center md:text-left">
-                    <div class="flex flex-col md:flex-row items-center justify-center md:justify-start gap-4">
+                    <div class="flex items-center justify-center md:justify-start">
                         <img src="{{ asset('images/+FELIZ-LOGO.png') }}" alt="+Feliz" class="w-auto object-contain" style="height: 120px;" />
-                        <span class="text-2xl md:text-3xl font-extrabold text-white tracking-tight">+Feliz Coahuila</span>
                     </div>
                     <p class="text-sm text-slate-400 max-w-2xl">
                         Iniciativa estatal para promover entornos organizacionales saludables, seguros y favorables para el desarrollo integral de la salud mental de los trabajadores.
