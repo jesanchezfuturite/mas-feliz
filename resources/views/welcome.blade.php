@@ -606,7 +606,6 @@
                         <img src="{{ asset('images/inspira.png') }}" alt="Inspira" class="h-16 md:h-20 w-auto object-contain hover:scale-105 transition-transform duration-300" />
                         <img src="{{ asset('images/secretaria-economia.png') }}" alt="Secretaría de Economía" class="h-16 md:h-20 w-auto object-contain hover:scale-105 transition-transform duration-300" />
                         <img src="{{ asset('images/secretaria-salud.png') }}" alt="Secretaría de Salud" class="h-16 md:h-20 w-auto object-contain hover:scale-105 transition-transform duration-300" />
-                        <img src="{{ asset('images/salud-mental.png') }}" alt="Salud Mental" class="h-16 md:h-20 w-auto object-contain hover:scale-105 transition-transform duration-300" />
                     </div>
                 </div>
             </div>
