@@ -53,6 +53,13 @@ class EmpresasTable
                     ->options(fn () => Empresa::query()->distinct()->pluck('rubro', 'rubro')->filter()->toArray()),
             ])
             ->recordActions([
+                \Filament\Actions\Action::make('autoevaluacion')
+                    ->icon('heroicon-o-clipboard-document-check')
+                    ->iconButton()
+                    ->color(fn ($record) => optional($record->autoevaluaciones()->latest()->first())->estatus === 'Autorizada' ? 'success' : 'warning')
+                    ->tooltip('Ver Autoevaluación')
+                    ->url(fn ($record) => optional($record->autoevaluaciones()->latest()->first())->id ? \App\Filament\Resources\AutoevaluacionResource::getUrl('view', ['record' => $record->autoevaluaciones()->latest()->first()->id]) : null)
+                    ->hidden(fn ($record) => !in_array(optional($record->autoevaluaciones()->latest()->first())->estatus, ['En revisión', 'Autorizada'])),
                 ViewAction::make()
                     ->iconButton()
                     ->color('gray')

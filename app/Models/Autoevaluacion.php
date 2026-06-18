@@ -10,6 +10,10 @@ class Autoevaluacion extends Model
 
     protected $guarded = [];
 
+    protected $casts = [
+        'respuestas' => 'array',
+    ];
+
     /**
      * Get the company that owns the self-evaluation.
      */

@@ -10,7 +10,15 @@ class DashboardStatsOverview extends StatsOverviewWidget
     protected function getStats(): array
     {
         $empresa = auth()->user();
-        $evaluados = $empresa->tamizajes()->count();
+        $tamizajes = $empresa->tamizajes()->count();
+        $casosManuales = $empresa->casosSeguimiento()
+            ->whereNotIn('identificador_empleado', function ($query) use ($empresa) {
+                $query->select('nombre_completo')
+                    ->from('tamizajes')
+                    ->where('empresa_id', $empresa->id);
+            })->count();
+
+        $evaluados = $tamizajes + $casosManuales;
         $trabajadores = $empresa->numero_trabajadores ?: 1;
         $porcentaje = round(($evaluados / $trabajadores) * 100, 1);
         $liga = route('tamizaje.publico', ['token' => $empresa->token_tamizaje]);

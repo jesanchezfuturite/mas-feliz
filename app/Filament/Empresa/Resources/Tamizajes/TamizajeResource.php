@@ -81,7 +81,13 @@ class TamizajeResource extends Resource
                         $makeText('genero', 'Género'),
                         $makeText('edad', 'Grupo de Edad'),
                         $makeText('tiempo_trabajando', 'Tiempo trabajando'),
-                        $makeText('actividad_trabajo', 'Departamento / Actividad')->columnSpanFull(),
+                        $makeText('actividad_trabajo', 'Departamento / Actividad'),
+                        Placeholder::make('created_at')
+                            ->label('Fecha de Evaluación')
+                            ->content(function ($record) {
+                                $value = $record && $record->created_at ? $record->created_at->format('d/m/Y') : 'N/A';
+                                return new HtmlString("<div style=\"color: #6b7280; font-size: 0.95rem;\">{$value}</div>");
+                            }),
                     ]),
 
                 Placeholder::make('seguimiento_title')
@@ -90,7 +96,16 @@ class TamizajeResource extends Resource
 
                 \Filament\Schemas\Components\Grid::make(1)
                     ->schema([
-                        Textarea::make('comentarios')->label('Comentarios')->rows(4)->required(),
+                        Placeholder::make('comentarios_display')
+                            ->label('Comentarios')
+                            ->visible(fn ($record) => !empty($record?->comentarios))
+                            ->content(fn ($record) => new HtmlString("<div style=\"color: #6b7280; font-size: 0.95rem; white-space: pre-wrap;\">{$record->comentarios}</div>")),
+
+                        Textarea::make('comentarios')
+                            ->label('Comentarios')
+                            ->rows(4)
+                            ->required()
+                            ->visible(fn ($record) => empty($record?->comentarios)),
                     ]),
             ]);
     }
@@ -98,6 +113,18 @@ class TamizajeResource extends Resource
     public static function table(Table $table): Table
     {
         return $table
+            ->description(new \Illuminate\Support\HtmlString('
+                <div style="display: flex; align-items: center; gap: 1rem; border-radius: 1rem; border: 1px solid #3b82f6; background-color: #eff6ff; padding: 0.75rem 1.25rem; color: #1d4ed8; margin-top: 1rem; margin-bottom: 0.5rem; text-align: left;">
+                    <div style="display: flex; height: 2.5rem; width: 2.5rem; flex-shrink: 0; align-items: center; justify-content: center; border-radius: 9999px; background-color: #dbeafe;">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" style="height: 1.25rem; width: 1.25rem;">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M11.25 11.25l.041-.02a.75.75 0 011.063.852l-.708 2.836a.75.75 0 001.063.853l.041-.021M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9-3.75h.008v.008H12V8.25z" />
+                        </svg>
+                    </div>
+                    <div style="font-size: 0.95rem; font-weight: 500; line-height: 1.4; text-wrap: balance;">
+                        Esta herramienta te permite consultar los resultados detallados de las evaluaciones aplicadas a tus colaboradores y enviarlos a seguimiento si requieren atención médica o psicológica.
+                    </div>
+                </div>
+            '))
             ->columns([
                 TextColumn::make('nombre_completo')->label('Nombre Completo')->searchable()->sortable(),
                 TextColumn::make('edad')->label('Grupo de Edad')->alignCenter(),
@@ -124,11 +151,38 @@ class TamizajeResource extends Resource
             ])
             ->recordActions([
                 \Filament\Actions\EditAction::make('Ver')
-                    ->label('Ver')
-                    ->icon('heroicon-o-eye')
+                    ->label('Ver detalle')
+                    ->icon('heroicon-m-eye')
+                    ->iconButton()
+                    ->tooltip('Ver detalle')
+                    ->visible(fn ($record) => empty($record->comentarios))
                     ->modalHeading('Detalle de Evaluación')
                     ->modalSubmitActionLabel('Enviar a seguimiento')
-                    ->modalFooterActionsAlignment('right'),
+                    ->modalFooterActionsAlignment('right')
+                    ->form(fn (\Filament\Schemas\Schema $schema) => static::form($schema))
+                    ->after(function (\Illuminate\Database\Eloquent\Model $record) {
+                        if (!empty($record->comentarios)) {
+                            \App\Models\CasoSeguimiento::create([
+                                'empresa_id' => $record->empresa_id,
+                                'identificador_empleado' => $record->nombre_completo,
+                                'nivel_riesgo_detectado' => $record->nivel_riesgo_general,
+                                'estatus_atencion' => 'En seguimiento',
+                                'notas_clinicas' => $record->comentarios,
+                            ]);
+                        }
+                    }),
+
+                \Filament\Actions\Action::make('VerDetalle')
+                    ->label('Ver detalle')
+                    ->icon('heroicon-m-eye')
+                    ->iconButton()
+                    ->tooltip('Ver detalle')
+                    ->visible(fn ($record) => !empty($record->comentarios))
+                    ->modalHeading('Detalle de Evaluación')
+                    ->modalSubmitAction(false)
+                    ->modalCancelActionLabel('Cerrar')
+                    ->modalFooterActionsAlignment('right')
+                    ->form(fn (\Filament\Schemas\Schema $schema) => static::form($schema)),
             ])
             ->toolbarActions([
                 //

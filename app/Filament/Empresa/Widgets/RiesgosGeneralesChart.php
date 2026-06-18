@@ -16,15 +16,26 @@ class RiesgosGeneralesChart extends ChartWidget
     {
         $empresa = auth()->user();
 
-        $counts = $empresa->tamizajes()
+        $tamizajeCounts = $empresa->tamizajes()
             ->selectRaw('nivel_riesgo_general, count(*) as total')
             ->groupBy('nivel_riesgo_general')
             ->pluck('total', 'nivel_riesgo_general')
             ->toArray();
 
-        $leve = $counts['Leve'] ?? 0;
-        $moderado = $counts['Moderado'] ?? 0;
-        $urgente = $counts['Urgente'] ?? 0;
+        $manualCounts = $empresa->casosSeguimiento()
+            ->whereNotIn('identificador_empleado', function ($query) use ($empresa) {
+                $query->select('nombre_completo')
+                    ->from('tamizajes')
+                    ->where('empresa_id', $empresa->id);
+            })
+            ->selectRaw('nivel_riesgo_detectado, count(*) as total')
+            ->groupBy('nivel_riesgo_detectado')
+            ->pluck('total', 'nivel_riesgo_detectado')
+            ->toArray();
+
+        $leve = ($tamizajeCounts['Leve'] ?? 0) + ($manualCounts['Leve'] ?? 0);
+        $moderado = ($tamizajeCounts['Moderado'] ?? 0) + ($manualCounts['Moderado'] ?? 0);
+        $urgente = ($tamizajeCounts['Urgente'] ?? 0) + ($manualCounts['Urgente'] ?? 0);
 
         return [
             'datasets' => [

@@ -109,11 +109,37 @@ class EmpresaResource extends Resource
                             ->schema([
                                 TextEntry::make('total_tamizajes')
                                     ->label('Total de Tamizajes Realizados')
-                                    ->state(fn ($record) => $record->tamizajes()->count()),
+                                    ->state(function ($record) {
+                                        $enLinea = $record->tamizajes()->count();
+                                        $manuales = $record->casosSeguimiento()
+                                            ->whereNotIn('identificador_empleado', function ($query) use ($record) {
+                                                $query->select('nombre_completo')
+                                                    ->from('tamizajes')
+                                                    ->where('empresa_id', $record->id);
+                                            })->count();
+                                        return $enLinea + $manuales;
+                                    })
+                                    ->tooltip(function ($record) {
+                                        $enLinea = $record->tamizajes()->count();
+                                        $manuales = $record->casosSeguimiento()
+                                            ->whereNotIn('identificador_empleado', function ($query) use ($record) {
+                                                $query->select('nombre_completo')
+                                                    ->from('tamizajes')
+                                                    ->where('empresa_id', $record->id);
+                                            })->count();
+                                        return "En línea: {$enLinea} | Manuales: {$manuales}";
+                                    }),
                                 TextEntry::make('porcentaje_participacion')
                                     ->label('Porcentaje de Participación')
                                     ->state(function ($record) {
-                                        $evaluados = $record->tamizajes()->count();
+                                        $enLinea = $record->tamizajes()->count();
+                                        $manuales = $record->casosSeguimiento()
+                                            ->whereNotIn('identificador_empleado', function ($query) use ($record) {
+                                                $query->select('nombre_completo')
+                                                    ->from('tamizajes')
+                                                    ->where('empresa_id', $record->id);
+                                            })->count();
+                                        $evaluados = $enLinea + $manuales;
                                         $trabajadores = $record->numero_trabajadores ?: 1;
                                         return round(($evaluados / $trabajadores) * 100, 1) . '%';
                                     })
@@ -124,7 +150,17 @@ class EmpresaResource extends Resource
                                     }),
                                 TextEntry::make('riesgos_urgentes')
                                     ->label('Riesgos Urgentes')
-                                    ->state(fn ($record) => $record->tamizajes()->where('nivel_riesgo_general', 'Urgente')->count())
+                                    ->state(function ($record) {
+                                        $enLinea = $record->tamizajes()->where('nivel_riesgo_general', 'Urgente')->count();
+                                        $manuales = $record->casosSeguimiento()
+                                            ->where('nivel_riesgo_detectado', 'Urgente')
+                                            ->whereNotIn('identificador_empleado', function ($query) use ($record) {
+                                                $query->select('nombre_completo')
+                                                    ->from('tamizajes')
+                                                    ->where('empresa_id', $record->id);
+                                            })->count();
+                                        return $enLinea + $manuales;
+                                    })
                                     ->badge()
                                     ->color('danger'),
                                 TextEntry::make('distribucion_riesgos')
@@ -135,9 +171,21 @@ class EmpresaResource extends Resource
                                             ->groupBy('nivel_riesgo_general')
                                             ->pluck('total', 'nivel_riesgo_general')
                                             ->toArray();
-                                        $leve = $counts['Leve'] ?? 0;
-                                        $moderado = $counts['Moderado'] ?? 0;
-                                        $urgente = $counts['Urgente'] ?? 0;
+
+                                        $manualCounts = $record->casosSeguimiento()
+                                            ->whereNotIn('identificador_empleado', function ($query) use ($record) {
+                                                $query->select('nombre_completo')
+                                                    ->from('tamizajes')
+                                                    ->where('empresa_id', $record->id);
+                                            })
+                                            ->selectRaw('nivel_riesgo_detectado, count(*) as total')
+                                            ->groupBy('nivel_riesgo_detectado')
+                                            ->pluck('total', 'nivel_riesgo_detectado')
+                                            ->toArray();
+
+                                        $leve = ($counts['Leve'] ?? 0) + ($manualCounts['Leve'] ?? 0);
+                                        $moderado = ($counts['Moderado'] ?? 0) + ($manualCounts['Moderado'] ?? 0);
+                                        $urgente = ($counts['Urgente'] ?? 0) + ($manualCounts['Urgente'] ?? 0);
                                         return "Leve: {$leve} | Moderado: {$moderado} | Urgente: {$urgente}";
                                     }),
                             ])
