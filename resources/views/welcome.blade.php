@@ -560,13 +560,13 @@
         <div class="max-w-7xl mx-auto px-6 lg:px-8 space-y-12">
             <div class="grid grid-cols-1 md:grid-cols-12 gap-8 pb-12 border-b border-slate-900">
                 <!-- Left: Info -->
-                <div class="md:col-span-8 space-y-4 text-center md:text-left">
-                    <div class="flex items-center justify-center md:justify-start">
-                        <img src="{{ asset('images/+FELIZ-LOGO.png') }}" alt="+Feliz" class="w-auto object-contain" style="height: 120px;" />
+                <div class="md:col-span-8 text-center md:text-left flex flex-col justify-center">
+                    <div class="flex flex-col md:flex-row items-center justify-center md:justify-start gap-6">
+                        <img src="{{ asset('images/+FELIZ-LOGO.png') }}" alt="+Feliz" class="w-auto object-contain flex-shrink-0" style="height: 120px;" />
+                        <p class="text-sm text-slate-400 max-w-xl leading-relaxed text-center md:text-left">
+                            Iniciativa estatal para promover entornos organizacionales saludables, seguros y favorables para el desarrollo integral de la salud mental de los trabajadores.
+                        </p>
                     </div>
-                    <p class="text-sm text-slate-400 max-w-2xl">
-                        Iniciativa estatal para promover entornos organizacionales saludables, seguros y favorables para el desarrollo integral de la salud mental de los trabajadores.
-                    </p>
                 </div>
                 
                 <!-- Right: Contacto -->
