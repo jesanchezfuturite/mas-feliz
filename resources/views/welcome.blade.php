@@ -60,9 +60,8 @@
             
             <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 text-center space-y-8 relative z-10">
 
-                <h1 class="text-5xl sm:text-6xl md:text-7xl font-extrabold tracking-tight text-slate-900 dark:text-white leading-tight flex flex-col sm:flex-row items-center justify-center gap-2 sm:gap-6">
-                    <span>Iniciativa</span>
-                    <img src="{{ asset('images/+FELIZ-LOGO.png') }}" alt="+Feliz" class="h-20 sm:h-24 md:h-28 w-auto object-contain mt-2 sm:mt-0">
+                <h1 class="flex items-center justify-center">
+                    <img src="{{ asset('images/+FELIZ-LOGO.png') }}" alt="+Feliz" class="h-32 sm:h-40 md:h-48 w-auto object-contain hover:scale-105 transition-transform duration-300">
                 </h1>
                 
                 <p class="text-lg sm:text-xl md:text-2xl text-slate-600 dark:text-slate-400 max-w-3xl mx-auto font-light leading-relaxed">
