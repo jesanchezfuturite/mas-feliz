@@ -27,18 +27,18 @@
 
     <!-- Navigation Bar -->
     <header class="sticky top-0 z-40 bg-white/80 dark:bg-slate-900/80 backdrop-blur-md border-b border-slate-100 dark:border-slate-800/80 transition-all duration-300">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-24 flex items-center justify-between">
             <div class="flex items-center space-x-4">
                 @php
                     $partnerLogo = \App\Models\Setting::where('key', 'landing_partner_logo')->first()?->value;
                 @endphp
                 @if($partnerLogo)
-                    <img src="{{ Storage::disk('public')->url($partnerLogo) }}" alt="Partner" class="h-10 w-auto border-r border-slate-200 dark:border-slate-800 pr-4" />
+                    <img src="{{ Storage::disk('public')->url($partnerLogo) }}" alt="Partner" class="w-auto border-r border-slate-200 dark:border-slate-800 pr-4" style="height: 76px;" />
                 @endif
-                <img src="{{ asset('images/coahuila.png') }}" alt="Gobierno de Coahuila" class="h-14 w-auto object-contain" />
-                <span class="h-8 w-px bg-slate-200 dark:bg-slate-800"></span>
-                <img src="{{ asset('images/inspira.png') }}" alt="Inspira Coahuila" class="h-12 w-auto object-contain" />
-                <span class="h-8 w-px bg-slate-200 dark:bg-slate-800"></span>
+                <img src="{{ asset('images/coahuila.png') }}" alt="Gobierno de Coahuila" class="w-auto object-contain" style="height: 84px;" />
+                <span class="h-12 w-px bg-slate-200 dark:bg-slate-800"></span>
+                <img src="{{ asset('images/inspira.png') }}" alt="Inspira Coahuila" class="w-auto object-contain" style="height: 72px;" />
+                <span class="h-12 w-px bg-slate-200 dark:bg-slate-800"></span>
                 <span class="text-xs font-semibold text-slate-500 uppercase tracking-wider hidden sm:inline-block">Programa Estatal</span>
             </div>
             <nav class="flex items-center space-x-6">
