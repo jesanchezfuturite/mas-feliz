@@ -171,7 +171,7 @@
                 <!-- Section Header -->
                 <div class="text-center max-w-3xl mx-auto space-y-4 mb-16">
                     <h2 class="text-3xl sm:text-4xl font-bold tracking-tight text-slate-900 dark:text-white">
-                        Ámbitos de Reconocimiento
+                        ¿Quiénes pueden ser parte del Distintivo +Feliz?
                     </h2>
                     <p class="text-slate-500 dark:text-slate-400">
                         El distintivo +Feliz premia proyectos y planes en diferentes sectores de la sociedad. Encuentra la categoría adecuada para tu organización.
@@ -256,47 +256,68 @@
         </section>
 
         <!-- 20 Criterios Section -->
-        <section id="criterios" class="py-24 bg-white dark:bg-slate-900 transition-colors duration-300 border-t border-slate-100 dark:border-slate-800">
+        <section id="criterios" x-data="{ active: null }" class="py-24 bg-white dark:bg-slate-900 transition-colors duration-300 border-t border-slate-100 dark:border-slate-800">
             <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
                 
                 <div class="flex flex-col lg:flex-row items-center justify-between gap-16 lg:gap-8">
                     <!-- Left side: Title -->
-                    <div class="flex flex-col items-center lg:items-start space-y-6 text-center lg:text-left">
-                        <h2 class="text-5xl sm:text-6xl lg:text-7xl font-black tracking-tight text-slate-900 dark:text-white flex items-center gap-4">
-                            <span class="text-[#F49F00] drop-shadow-sm">20</span>
-                            <span>Criterios</span>
+                    <div class="flex flex-col items-center lg:items-start space-y-4 text-center lg:text-left max-w-md">
+                        <h2 class="text-3xl sm:text-4xl font-extrabold tracking-tight text-slate-900 dark:text-white leading-tight">
+                            El Distintivo <span class="text-[#92c644] font-black">+Feliz</span> evalúa 20 criterios
                         </h2>
-                        <div class="inline-flex items-center px-8 py-2.5 bg-[#92c644] rounded-full shadow-md">
-                            <span class="text-white font-black text-2xl tracking-wider uppercase">+Feliz</span>
-                        </div>
+                        <p class="text-sm text-slate-500 dark:text-slate-400">
+                            Divididos en tres ejes fundamentales de acción para el bienestar y la salud mental de la organización.
+                        </p>
                     </div>
 
                     <!-- Right side: Circles -->
                     <div class="flex flex-col sm:flex-row items-center justify-center gap-10 lg:gap-12">
                         <!-- Circle 1: Prevención -->
-                        <div class="flex flex-col items-center space-y-4">
-                            <div class="w-28 h-28 sm:w-36 sm:h-36 rounded-full bg-[#E6007E]/70 flex items-center justify-center shadow-lg transform transition-transform hover:-translate-y-2 duration-300">
+                        <div class="flex flex-col items-center space-y-4 cursor-pointer"
+                             @mouseenter="active = 1" @mouseleave="active = null" @click="active = (active === 1 ? null : 1)">
+                            <div class="w-28 h-28 sm:w-36 sm:h-36 rounded-full bg-[#E6007E]/70 flex items-center justify-center shadow-lg transform transition-all duration-300"
+                                 :class="active === 1 ? 'scale-105 ring-4 ring-[#E6007E]/30 -translate-y-2' : ''">
                                 <span class="text-5xl sm:text-6xl font-black text-white drop-shadow-md">6</span>
                             </div>
                             <span class="text-lg sm:text-xl font-bold text-slate-900 dark:text-white tracking-tight whitespace-nowrap">+ Prevención</span>
                         </div>
                         
                         <!-- Circle 2: Cuidado -->
-                        <div class="flex flex-col items-center space-y-4">
-                            <div class="w-28 h-28 sm:w-36 sm:h-36 rounded-full bg-[#F49F00]/70 flex items-center justify-center shadow-lg transform transition-transform hover:-translate-y-2 duration-300">
+                        <div class="flex flex-col items-center space-y-4 cursor-pointer"
+                             @mouseenter="active = 2" @mouseleave="active = null" @click="active = (active === 2 ? null : 2)">
+                            <div class="w-28 h-28 sm:w-36 sm:h-36 rounded-full bg-[#F49F00]/70 flex items-center justify-center shadow-lg transform transition-all duration-300"
+                                 :class="active === 2 ? 'scale-105 ring-4 ring-[#F49F00]/30 -translate-y-2' : ''">
                                 <span class="text-5xl sm:text-6xl font-black text-white drop-shadow-md">6</span>
                             </div>
                             <span class="text-lg sm:text-xl font-bold text-slate-900 dark:text-white tracking-tight whitespace-nowrap">+ Cuidado</span>
                         </div>
                         
                         <!-- Circle 3: Fortalecimiento -->
-                        <div class="flex flex-col items-center space-y-4">
-                            <div class="w-28 h-28 sm:w-36 sm:h-36 rounded-full bg-[#2AB288]/70 flex items-center justify-center shadow-lg transform transition-transform hover:-translate-y-2 duration-300">
+                        <div class="flex flex-col items-center space-y-4 cursor-pointer"
+                             @mouseenter="active = 3" @mouseleave="active = null" @click="active = (active === 3 ? null : 3)">
+                            <div class="w-28 h-28 sm:w-36 sm:h-36 rounded-full bg-[#2AB288]/70 flex items-center justify-center shadow-lg transform transition-all duration-300"
+                                 :class="active === 3 ? 'scale-105 ring-4 ring-[#2AB288]/30 -translate-y-2' : ''">
                                 <span class="text-5xl sm:text-6xl font-black text-white drop-shadow-md">8</span>
                             </div>
                             <span class="text-lg sm:text-xl font-bold text-slate-900 dark:text-white tracking-tight whitespace-nowrap">+ Fortalecimiento</span>
                         </div>
                     </div>
+                </div>
+
+                <!-- Description Box -->
+                <div class="mt-12 min-h-[80px] bg-slate-50 dark:bg-slate-950/40 border border-slate-100 dark:border-slate-800/80 rounded-2xl p-6 flex items-center justify-center text-center transition-all duration-300">
+                    <p x-show="active === null" class="text-sm text-slate-500 dark:text-slate-400 font-medium">
+                        Pasa el cursor o haz clic sobre los círculos para ver el detalle de cada eje de evaluación.
+                    </p>
+                    <p x-show="active === 1" class="text-sm text-slate-600 dark:text-slate-300 font-medium" x-transition>
+                        <strong class="text-[#E6007E]">+ Prevención (6 Criterios):</strong> Identificación oportuna de factores de riesgo psicosocial, políticas claras de no violencia laboral y establecimiento de un entorno seguro que evite el estrés de los colaboradores.
+                    </p>
+                    <p x-show="active === 2" class="text-sm text-slate-600 dark:text-slate-300 font-medium" x-transition>
+                        <strong class="text-[#F49F00]">+ Cuidado (6 Criterios):</strong> Canales de apoyo psicológico accesibles y confidenciales, protocolos internos para la contención emocional y la canalización adecuada en situaciones de crisis de salud mental.
+                    </p>
+                    <p x-show="active === 3" class="text-sm text-slate-600 dark:text-slate-300 font-medium" x-transition>
+                        <strong class="text-[#2AB288]">+ Fortalecimiento (8 Criterios):</strong> Capacitación en liderazgo positivo, talleres de resiliencia y balance trabajo-vida, promoviendo una cultura donde la salud emocional sea prioridad.
+                    </p>
                 </div>
 
             </div>
@@ -363,12 +384,6 @@
                                     <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
                                 </div>
                                 <span class="ml-4 text-lg text-slate-600 dark:text-slate-300 leading-relaxed">Fortalecimiento de la resiliencia organizacional</span>
-                            </li>
-                            <li class="flex items-start group">
-                                <div class="flex-shrink-0 w-6 h-6 rounded-full bg-[#92c644]/10 dark:bg-[#92c644]/20 text-[#92c644] flex items-center justify-center mt-1 group-hover:bg-[#92c644] group-hover:text-white transition-all duration-300">
-                                    <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
-                                </div>
-                                <span class="ml-4 text-lg text-slate-600 dark:text-slate-300 leading-relaxed">Acceso a incentivos relacionados a algunas dependencias de Gobierno</span>
                             </li>
                         </ul>
 
@@ -491,10 +506,10 @@
                         <div class="w-20 h-20 bg-[#E6007E] text-white rounded-full flex items-center justify-center transition-transform duration-300 shadow-md group-hover:scale-110 mb-4">
                             <!-- Checklist hand click SVG -->
                             <svg class="w-9 h-9" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" />
                             </svg>
                         </div>
-                        <span class="text-xs sm:text-sm font-semibold text-slate-800 dark:text-slate-200 leading-tight">5. Evaluación</span>
+                        <span class="text-xs sm:text-sm font-semibold text-slate-800 dark:text-slate-200 leading-tight">5. Evaluación y Dictaminación</span>
                     </div>
 
                     <!-- Arrow -->
@@ -545,26 +560,65 @@
     </main>
 
     <!-- Footer -->
-    <footer class="bg-white dark:bg-slate-900 border-t border-slate-100 dark:border-slate-800/80 py-12 text-center text-slate-500 dark:text-slate-400 text-sm transition-colors duration-300">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6">
-            <!-- Logo Row (Footer Support) -->
-            <div class="flex flex-wrap items-center justify-center gap-8 md:gap-12 pb-6 border-b border-slate-100 dark:border-slate-800/80">
-                <img src="{{ asset('images/pasos.png') }}" alt="Coahuila: A pasos de gigante" class="h-10 w-auto object-contain opacity-75 hover:opacity-100 transition-opacity duration-200" />
-                <span class="hidden md:inline h-6 w-px bg-slate-200 dark:bg-slate-800"></span>
-                <img src="{{ asset('images/secretaria-salud.png') }}" alt="Secretaría de Salud" class="h-10 w-auto object-contain opacity-75 hover:opacity-100 transition-opacity duration-200" />
-                <span class="hidden md:inline h-6 w-px bg-slate-200 dark:bg-slate-800"></span>
-                <img src="{{ asset('images/secretaria-economia.png') }}" alt="Secretaría de Economía" class="h-10 w-auto object-contain opacity-75 hover:opacity-100 transition-opacity duration-200" />
-            </div>
+    <footer class="bg-slate-950 text-slate-400 border-t border-slate-900 py-16 transition-colors duration-300">
+        <div class="max-w-7xl mx-auto px-6 lg:px-8 space-y-12">
             
-            <div class="flex flex-col md:flex-row items-center justify-between text-xs space-y-4 md:space-y-0 text-slate-500">
-                <div class="flex items-center justify-center space-x-2">
-                    <span class="font-bold text-slate-700 dark:text-slate-300">+Feliz Coahuila</span>
+            <div class="grid grid-cols-1 md:grid-cols-12 gap-8 md:gap-12 pb-12 border-b border-slate-900">
+                <!-- Left: Contact & Info -->
+                <div class="md:col-span-6 space-y-6 text-center md:text-left">
+                    <div class="flex items-center justify-center md:justify-start space-x-3">
+                        <img src="{{ asset('images/+FELIZ-LOGO.png') }}" alt="+Feliz" class="h-10 w-auto object-contain" />
+                        <span class="text-xl font-extrabold text-white tracking-tight">+Feliz Coahuila</span>
+                    </div>
+                    <p class="text-sm text-slate-400 max-w-md">
+                        Iniciativa estatal para promover entornos organizacionales saludables, seguros y favorables para el desarrollo integral de la salud mental de los trabajadores.
+                    </p>
+                    
+                    <!-- Contacto Section -->
+                    <div class="space-y-3 pt-2">
+                        <h4 class="text-xs font-bold uppercase tracking-wider text-slate-500">Contacto</h4>
+                        <div class="flex flex-col sm:flex-row items-center justify-center md:justify-start gap-4 text-sm">
+                            <a href="mailto:masfeliz@coahuila.gob.mx" class="flex items-center space-x-2 text-slate-300 hover:text-white transition-colors">
+                                <svg class="w-4 h-4 text-[#92c644]" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
+                                </svg>
+                                <span>masfeliz@coahuila.gob.mx</span>
+                            </a>
+                            <span class="hidden sm:inline text-slate-700">|</span>
+                            <a href="https://wa.me/528446636977" target="_blank" class="flex items-center space-x-2 text-slate-300 hover:text-white transition-colors">
+                                <svg class="w-4 h-4 text-[#92c644]" fill="currentColor" viewBox="0 0 24 24">
+                                    <path d="M12.012 2c-5.506 0-9.989 4.478-9.99 9.984a9.96 9.96 0 0 0 1.333 4.993L2 22l5.184-1.359a9.95 9.95 0 0 0 4.824 1.243h.004c5.507 0 9.99-4.478 9.99-9.985A9.998 9.998 0 0 0 12.012 2zm6.035 14.224c-.25.705-1.458 1.34-2.012 1.418-.549.078-1.229.144-3.666-.86-2.955-1.217-4.836-4.243-4.985-4.441-.148-.198-1.208-1.603-1.208-3.058 0-1.455.76-2.171 1.032-2.469.273-.297.594-.372.793-.372.198 0 .396.002.57.01.18.007.42-.069.658.502.247.594.842 2.057.917 2.206.074.148.124.32.025.518-.099.198-.148.32-.297.495-.148.175-.313.39-.446.522-.148.148-.303.309-.13.607.173.298.769 1.266 1.65 2.049 1.135 1.009 2.09 1.321 2.387 1.47.298.148.471.124.645-.076.173-.198.743-.865.94-1.162.198-.297.396-.248.669-.148.272.099 1.732.817 2.029.965.297.148.495.223.57.346.074.124.074.717-.176 1.423z"/>
+                                </svg>
+                                <span>WhatsApp: 844 663 6977</span>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Right: Logos Grid -->
+                <div class="md:col-span-6 flex flex-col justify-center space-y-6">
+                    <h4 class="text-xs font-bold uppercase tracking-wider text-slate-500 text-center md:text-left">Organizaciones Convocantes</h4>
+                    <div class="grid grid-cols-2 sm:grid-cols-5 gap-6 items-center justify-items-center bg-slate-900/40 p-6 rounded-2xl border border-slate-900/60">
+                        <img src="{{ asset('images/coahuila.png') }}" alt="GOB" class="h-10 w-auto object-contain opacity-80 hover:opacity-100 transition-opacity" />
+                        <img src="{{ asset('images/inspira.png') }}" alt="Inspira" class="h-10 w-auto object-contain opacity-80 hover:opacity-100 transition-opacity" />
+                        <img src="{{ asset('images/secretaria-economia.png') }}" alt="Secretaría de Economía" class="h-10 w-auto object-contain opacity-80 hover:opacity-100 transition-opacity" />
+                        <img src="{{ asset('images/secretaria-salud.png') }}" alt="Secretaría de Salud" class="h-10 w-auto object-contain opacity-80 hover:opacity-100 transition-opacity" />
+                        <img src="{{ asset('images/salud-mental.png') }}" alt="Salud Mental" class="h-10 w-auto object-contain opacity-80 hover:opacity-100 transition-opacity col-span-2 sm:col-span-1" />
+                    </div>
+                </div>
+            </div>
+
+            <!-- Credits -->
+            <div class="flex flex-col md:flex-row items-center justify-between text-xs space-y-4 md:space-y-0 text-slate-600">
+                <div class="flex items-center space-x-2">
+                    <span class="font-bold text-slate-500">+Feliz Coahuila</span>
                     <span>&copy; 2026. Todos los derechos reservados.</span>
                 </div>
-                <p class="max-w-md text-center md:text-right leading-relaxed text-slate-400 dark:text-slate-500 mx-auto md:mx-0">
-                    Iniciativa impulsada por la Oficina Inspira Coahuila y la Secretaría de Salud del Estado para promover entornos psicosociales protectores y saludables en los centros de trabajo.
+                <p class="max-w-md text-center md:text-right leading-relaxed mx-auto md:mx-0">
+                    Esta es una iniciativa impulsada por el Gobierno del Estado de Coahuila de Zaragoza para el cuidado, fomento y prevención de la salud mental de los trabajadores.
                 </p>
             </div>
+            
         </div>
     </footer>
 
