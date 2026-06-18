@@ -545,7 +545,7 @@
                         Registra tu Organización
                     </h2>
                     <p class="text-slate-500 dark:text-slate-400 text-sm">
-                        Completa el formulario oficial para inscribir tu centro de trabajo y postularte al distintivo estatal.
+                        Completa el formulario oficial para inscribir tu Organización y postularte al distintivo estatal.
                     </p>
                 </div>
 

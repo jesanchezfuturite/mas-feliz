@@ -77,7 +77,7 @@ new class extends Component
             <div class="space-y-2">
                 <h3 class="text-2xl sm:text-3xl font-bold text-slate-800 dark:text-slate-100">¡Registro Exitoso!</h3>
                 <p class="text-slate-500 dark:text-slate-400 max-w-md mx-auto">
-                    Los datos de la organización se han almacenado correctamente en el sistema gubernamental.
+                    Los datos de tu empresa se han almacenado correctamente.
                 </p>
             </div>
 
@@ -93,7 +93,6 @@ new class extends Component
     @else
         <div class="bg-gradient-to-r from-[#84b33d] to-[#749d36] px-8 py-6 text-white text-center">
             <h3 class="text-2xl font-bold">Formulario de Registro</h3>
-            <p class="text-lime-100 text-sm mt-1">Obtén el distintivo +Feliz registrando tu centro de trabajo</p>
         </div>
 
         <form wire:submit="save" class="p-8 space-y-6">
@@ -197,6 +196,16 @@ new class extends Component
                     @error('telefono') 
                         <p class="text-red-500 text-xs font-medium">{{ $message }}</p> 
                     @enderror
+                </div>
+            </div>
+
+            <!-- Aviso de Privacidad / Consentimiento -->
+            <div class="pt-4 border-t border-slate-100 dark:border-slate-800 flex flex-col space-y-4">
+                <div class="flex items-start space-x-3 text-xs text-slate-500 dark:text-slate-400">
+                    <input type="checkbox" id="accept_privacy" required checked class="mt-1 h-4 w-4 rounded border-slate-300 text-[#92c644] focus:ring-[#92c644]">
+                    <label for="accept_privacy" class="leading-relaxed">
+                        Acepto los términos del distintivo. La organización es responsable de la veracidad y protección de los datos proporcionados.
+                    </label>
                 </div>
             </div>
 
