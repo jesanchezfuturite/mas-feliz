@@ -3,82 +3,98 @@
 <head>
     <meta charset="utf-8">
     <title>Accesos al Tablero +Feliz</title>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700;800;900&display=swap" rel="stylesheet">
 </head>
-<body style="font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; background-color: #f4f6f9; margin: 0; padding: 0; -webkit-font-smoothing: antialiased;">
+<body style="font-family: 'Montserrat', Helvetica, Arial, sans-serif; background-color: #f4f6f9; margin: 0; padding: 0; -webkit-font-smoothing: antialiased;">
     <table width="100%" border="0" cellspacing="0" cellpadding="0" style="background-color: #f4f6f9; padding: 30px 0;">
         <tr>
             <td align="center">
-                <table width="600" border="0" cellspacing="0" cellpadding="0" style="background-color: #ffffff; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 10px rgba(0,0,0,0.05);">
-                    <!-- Header -->
-                    <tr>
-                        <td style="background: linear-gradient(135deg, #1e3a8a, #3b82f6); padding: 40px 30px; text-align: center;">
-                            <h1 style="color: #ffffff; margin: 0; font-size: 28px; font-weight: 700; letter-spacing: -0.5px;">+Feliz</h1>
-                            <p style="color: #bfdbfe; margin: 10px 0 0 0; font-size: 16px;">Reconocimiento de Acciones en Salud Mental</p>
-                        </td>
-                    </tr>
+                <table width="600" border="0" cellspacing="0" cellpadding="0" style="background-color: #ffffff; border: 1px solid #000; overflow: hidden; box-shadow: 0 4px 10px rgba(0,0,0,0.05);">
                     
+                    <!-- Top Section -->
                     <tr>
-                        <td style="padding: 40px 30px;">
-                            <p style="font-size: 16px; line-height: 24px; color: #334155; margin-top: 0;">
-                                Estimado/a <strong>{{ $empresa->nombre_responsable }}</strong> de <strong>{{ $empresa->nombre_empresa }}</strong>,
-                            </p>
-                            <p style="font-size: 18px; line-height: 26px; color: #1e3a8a; font-weight: 700; margin-top: 20px; margin-bottom: 15px;">
-                                ¡Gracias por registrarte al Distintivo +Feliz!
-                            </p>
-                            <p style="font-size: 16px; line-height: 24px; color: #334155;">
-                                El Gobierno del Estado de Coahuila, a través de la Oficina Inspira Coahuila, la Secretaría de Economía y la Secretaría de Salud, agradece tu interés en formar parte de esta iniciativa.
-                            </p>
-                            <p style="font-size: 16px; line-height: 24px; color: #334155;">
-                                El Distintivo +Feliz es un reconocimiento estatal que distingue a las organizaciones comprometidas con la prevención, cuidado y fortalecimiento de la salud mental de sus colaboradores.
-                            </p>
-                            <p style="font-size: 16px; line-height: 24px; color: #334155;">
-                                Hemos recibido correctamente tu registro. Te compartimos tus datos para ingresar a la plataforma y dar seguimiento a tu postulación:
-                            </p>
-                            
-                            <!-- Credentials Card -->
-                            <div style="background-color: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 25px; margin: 30px 0; text-align: left;">
-                                <table width="100%" border="0" cellspacing="0" cellpadding="5">
-                                    <tr>
-                                        <td width="35%" style="font-size: 14px; color: #64748b; font-weight: 600; text-transform: uppercase;">Folio:</td>
-                                        <td style="font-size: 16px; color: #0f172a; font-weight: 700; font-family: monospace;">{{ $empresa->folio }}</td>
-                                    </tr>
-                                    <tr>
-                                        <td style="font-size: 14px; color: #64748b; font-weight: 600; text-transform: uppercase;">Usuario:</td>
-                                        <td style="font-size: 16px; color: #0f172a; font-weight: 600;">{{ $empresa->correo }}</td>
-                                    </tr>
-                                    <tr>
-                                        <td style="font-size: 14px; color: #64748b; font-weight: 600; text-transform: uppercase;">Contraseña:</td>
-                                        <td style="font-size: 16px; color: #2563eb; font-weight: 700; font-family: monospace; letter-spacing: 1px;">{{ $passwordTemporal }}</td>
-                                    </tr>
-                                    <tr>
-                                        <td style="font-size: 14px; color: #64748b; font-weight: 600; text-transform: uppercase;">Liga de acceso:</td>
-                                        <td style="font-size: 15px; color: #3b82f6;"><a href="{{ url('/tablero') }}" style="color: #2563eb; text-decoration: underline;">{{ url('/tablero') }}</a></td>
-                                    </tr>
-                                </table>
-                            </div>
-                            
-                            <p style="font-size: 16px; line-height: 24px; color: #334155; margin-bottom: 30px;">
-                                Gracias por contribuir al fortalecimiento de espacios laborales comprometidos con la salud mental en nuestro Estado.
-                            </p>
-                            
-                            <!-- CTA Button -->
-                            <table width="100%" border="0" cellspacing="0" cellpadding="0" style="margin-top: 20px; margin-bottom: 20px;">
+                        <td style="background-color: #1EBBA3; padding: 40px 30px;">
+                            <table width="100%" border="0" cellspacing="0" cellpadding="0">
                                 <tr>
-                                    <td align="center">
-                                        <a href="{{ url('/tablero') }}" style="background-color: #2563eb; color: #ffffff; padding: 12px 30px; text-decoration: none; font-size: 16px; font-weight: 600; border-radius: 6px; display: inline-block; box-shadow: 0 4px 6px rgba(37,99,235,0.2);">
-                                            Acceder al Tablero
-                                        </a>
+                                    <td width="60%" style="vertical-align: middle;">
+                                        <h1 style="color: #ffffff; margin: 0; font-size: 38px; font-weight: 900; line-height: 1.1; letter-spacing: -1px;">
+                                            Gracias por<br>registrarte<br>al Distintivo
+                                        </h1>
+                                    </td>
+                                    <td width="40%" style="vertical-align: middle; text-align: right;">
+                                        <!-- Logo -->
+                                        <img src="{{ url('images/logo-mas-feliz.png') }}" alt="+ Feliz" style="max-width: 150px; height: auto;">
                                     </td>
                                 </tr>
                             </table>
                         </td>
                     </tr>
                     
-                    <!-- Footer -->
+                    <!-- Middle Section -->
                     <tr>
-                        <td style="background-color: #f8fafc; border-top: 1px solid #e2e8f0; padding: 20px 30px; text-align: center; font-size: 12px; color: #94a3b8;">
-                            Este es un correo automático, por favor no responda directamente a esta dirección.<br>
-                            &copy; 2026 Gobierno del Estado - Iniciativa Inspira +Feliz.
+                        <td style="background-color: #FCF6E9; padding: 40px 30px; color: #000000;">
+                            <p style="font-family: 'Montserrat', Helvetica, Arial, sans-serif; font-size: 16px; line-height: 24px; font-weight: 400; text-align: justify; color: #333333; margin-top: 0; margin-bottom: 25px;">
+                                El Gobierno del Estado de Coahuila, a través de la Oficina Inspira Coahuila, la Secretaría de Economía y la Secretaría de Salud, agradece tu interés en formar parte de esta iniciativa.
+                            </p>
+                            <p style="font-family: 'Montserrat', Helvetica, Arial, sans-serif; font-size: 16px; line-height: 24px; font-weight: 400; text-align: justify; color: #333333; margin-bottom: 25px;">
+                                El Distintivo <strong>+Feliz</strong> es un reconocimiento estatal que distingue a las organizaciones comprometidas con la prevención, cuidado y fortalecimiento de la salud mental de sus colaboradores.
+                            </p>
+                            <p style="font-family: 'Montserrat', Helvetica, Arial, sans-serif; font-size: 16px; line-height: 24px; font-weight: 400; text-align: justify; color: #333333; margin-bottom: 35px;">
+                                Hemos recibido correctamente tu registro. Te compartimos tus datos para ingresar a la plataforma y dar seguimiento a tu postulación:
+                            </p>
+                            
+                            <table width="100%" border="0" cellspacing="0" cellpadding="5" style="margin-bottom: 40px;">
+                                <tr>
+                                    <td width="30%" style="font-size: 16px; font-weight: 700; text-transform: uppercase;">USUARIO:</td>
+                                    <td style="font-size: 16px;">{{ $empresa->correo }}</td>
+                                </tr>
+                                <tr>
+                                    <td style="font-size: 16px; font-weight: 700; text-transform: uppercase;">CONTRASEÑA:</td>
+                                    <td style="font-size: 16px; font-family: monospace; letter-spacing: 1px;">{{ $passwordTemporal }}</td>
+                                </tr>
+                                <tr>
+                                    <td style="font-size: 16px; font-weight: 700;">Liga de acceso:</td>
+                                    <td style="font-size: 16px;"><a href="{{ url('/tablero') }}" style="color: #000000; text-decoration: underline; font-weight: 700;">{{ url('/tablero') }}</a></td>
+                                </tr>
+                            </table>
+                            
+                            <p style="font-size: 20px; line-height: 30px; font-weight: 800; text-align: center; margin-bottom: 0; padding: 0 10px;">
+                                Gracias por contribuir al fortalecimiento de espacios laborales comprometidos con la salud mental en nuestro Estado.
+                            </p>
+                        </td>
+                    </tr>
+                    
+                    <!-- Footer Section -->
+                    <tr>
+                        <td style="background-color: #000000; padding: 30px 20px;">
+                            <table width="100%" border="0" cellspacing="0" cellpadding="0">
+                                <tr>
+                                    <td align="center" style="vertical-align: middle;">
+                                        <table width="100%" border="0" cellspacing="0" cellpadding="0">
+                                            <tr>
+                                                <td width="20.66%" align="center" valign="middle" style="padding: 0 4px;">
+                                                    <img src="{{ url('images/coahuila-negativo.png') }}" alt="Coahuila" style="max-width: 100%; max-height: 55px; height: auto;">
+                                                </td>
+                                                <td width="12.66%" align="center" valign="middle" style="padding: 0 4px;">
+                                                    <img src="{{ url('images/pasos.png') }}" alt="A pasos de gigante" style="max-width: 100%; max-height: 45px; height: auto; filter: brightness(0) invert(1); -webkit-filter: brightness(0) invert(1);">
+                                                </td>
+                                                <td width="16.66%" align="center" valign="middle" style="padding: 0 4px;">
+                                                    <img src="{{ url('images/inspira-blanco.png') }}" alt="Inspira Coahuila" style="max-width: 100%; max-height: 44px; height: auto;">
+                                                </td>
+                                                <td width="16.66%" align="center" valign="middle" style="padding: 0 4px;">
+                                                    <img src="{{ url('images/sec-blanco.png') }}" alt="SEC" style="max-width: 100%; max-height: 40px; height: auto;">
+                                                </td>
+                                                <td width="16.66%" align="center" valign="middle" style="padding: 0 4px;">
+                                                    <img src="{{ url('images/ss-blanco.png') }}" alt="SS" style="max-width: 100%; max-height: 35px; height: auto;">
+                                                </td>
+                                                <td width="16.66%" align="center" valign="middle" style="padding: 0 4px;">
+                                                    <img src="{{ url('images/sm-blanco.png') }}" alt="Salud Mental" style="max-width: 100%; max-height: 55px; height: auto;">
+                                                </td>
+                                            </tr>
+                                        </table>
+                                    </td>
+                                </tr>
+                            </table>
                         </td>
                     </tr>
                 </table>
