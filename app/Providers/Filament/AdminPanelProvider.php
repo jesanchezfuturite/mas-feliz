@@ -62,6 +62,11 @@ class AdminPanelProvider extends PanelProvider
             ->authMiddleware([
                 Authenticate::class,
             ])
+            ->profile(\App\Filament\Pages\EditProfile::class)
+            ->renderHook(
+                PanelsRenderHook::USER_MENU_BEFORE,
+                fn (): string => Blade::render('<div class="mr-3 font-medium text-sm text-gray-700 dark:text-gray-200">{{ auth()->user()->name }} {{ auth()->user()->apellidos }}</div>')
+            )
             ->renderHook(
                 PanelsRenderHook::HEAD_END,
                 fn (): string => Blade::render('<style>
