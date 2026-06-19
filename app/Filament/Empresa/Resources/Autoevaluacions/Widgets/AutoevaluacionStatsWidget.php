@@ -10,26 +10,26 @@ use Illuminate\Database\Eloquent\Model;
 class AutoevaluacionStatsWidget extends StatsOverviewWidget
 {
     public ?Model $record = null;
+    public ?array $respuestasState = null;
 
-    protected $listeners = ['formUpdated' => '$refresh'];
+    protected $listeners = ['formUpdated'];
+
+    public function mount(): void
+    {
+        if ($this->record) {
+            $this->respuestasState = $this->record->respuestas ?? [];
+        }
+    }
+
+    public function formUpdated(array $respuestas): void
+    {
+        $this->respuestasState = $respuestas;
+    }
 
     protected function getStats(): array
     {
-        $page = $this->getPage();
-        $respuestas = [];
-        $estatus = 'Borrador';
-
-        if (method_exists($page, 'getRecord')) {
-            $record = $page->getRecord();
-            if ($record) {
-                $estatus = $record->estatus;
-                if ($page instanceof \Filament\Resources\Pages\EditRecord) {
-                    $respuestas = $page->data['respuestas'] ?? [];
-                } else {
-                    $respuestas = $record->respuestas ?? [];
-                }
-            }
-        }
+        $respuestas = $this->respuestasState ?? ($this->record ? ($this->record->respuestas ?? []) : []);
+        $estatus = $this->record ? ($this->record->estatus ?? 'Borrador') : 'Borrador';
 
         // 1. Calculate sum
         $sum = 0;

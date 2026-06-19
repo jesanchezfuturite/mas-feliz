@@ -553,8 +553,8 @@ class AutoevaluacionForm
                             ->columnSpan(3)
                             ->extraAttributes(['style' => 'display: flex; flex-direction: column; justify-content: flex-start; height: 100%;'])
                             ->live()
-                            ->afterStateUpdated(function ($state, $livewire) {
-                                $livewire->dispatch('formUpdated');
+                            ->afterStateUpdated(function ($state, $get, $livewire) {
+                                $livewire->dispatch('formUpdated', respuestas: $get('respuestas') ?? []);
                             }),
 
                         // Hidden fields that store the data inside the main form state
