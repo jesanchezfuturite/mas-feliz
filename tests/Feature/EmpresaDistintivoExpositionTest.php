@@ -146,4 +146,42 @@ class EmpresaDistintivoExpositionTest extends TestCase
             ->assertActionExists('descargar_distintivo')
             ->assertActionVisible('descargar_distintivo');
     }
+
+    public function test_admin_can_view_validated_autoevaluacion_via_http(): void
+    {
+        $user = \App\Models\User::create([
+            'name' => 'Admin Test User 9',
+            'email' => 'admin9@test.com',
+            'password' => bcrypt('password'),
+            'estatus' => true,
+        ]);
+
+        $empresa = Empresa::create([
+            'nombre_empresa' => 'Empresa Test Page 10',
+            'municipio' => 'Saltillo',
+            'dias_horario_servicio' => 'Lunes-Viernes',
+            'nombre_director' => 'Director Test',
+            'nombre_responsable' => 'Responsable Test',
+            'correo' => 'page10@test.com',
+            'telefono' => '1234567890',
+            'rubro' => 'Servicios',
+            'numero_trabajadores' => 10,
+            'password' => bcrypt('password'),
+        ]);
+
+        $autoevaluacion = Autoevaluacion::create([
+            'empresa_id' => $empresa->id,
+            'estatus' => 'Validado',
+            'respuestas' => [
+                'pdf_distintivo' => 'distintivos/empresa_1_folio_MF-2026-0001.pdf'
+            ],
+        ]);
+
+        $this->actingAs($user, 'web');
+        \Filament\Facades\Filament::setCurrentPanel(\Filament\Facades\Filament::getPanel('admin'));
+
+        $response = $this->get(\App\Filament\Resources\AutoevaluacionResource::getUrl('view', ['record' => $autoevaluacion->id]));
+
+        $response->assertStatus(200);
+    }
 }
