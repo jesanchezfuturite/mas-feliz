@@ -38,7 +38,7 @@ class AutoevaluacionsTable
                     ->color(fn (string $state): string => match ($state) {
                         'Borrador' => 'gray',
                         'En revisión' => 'warning',
-                        'Autorizada' => 'success',
+                        'Validado' => 'success',
                         default => 'primary',
                     }),
 

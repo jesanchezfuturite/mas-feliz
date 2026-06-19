@@ -5,12 +5,14 @@ namespace App\Models;
 use Filament\Models\Contracts\HasName;
 use Illuminate\Auth\Authenticatable as AuthenticatableTrait;
 use Illuminate\Contracts\Auth\Authenticatable;
+use Illuminate\Contracts\Auth\CanResetPassword;
+use Illuminate\Auth\Passwords\CanResetPassword as CanResetPasswordTrait;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Notifications\Notifiable;
 
-class Empresa extends Model implements Authenticatable, HasName
+class Empresa extends Model implements Authenticatable, HasName, CanResetPassword
 {
-    use AuthenticatableTrait, Notifiable;
+    use AuthenticatableTrait, Notifiable, CanResetPasswordTrait;
 
     protected $fillable = [
         'folio',
@@ -83,6 +85,52 @@ class Empresa extends Model implements Authenticatable, HasName
     public function casosSeguimiento()
     {
         return $this->hasMany(CasoSeguimiento::class);
+    }
+
+    /**
+     * Get the email address where password reset links are sent.
+     */
+    public function getEmailForPasswordReset(): string
+    {
+        return $this->correo;
+    }
+
+    /**
+     * Send the password reset notification.
+     *
+     * @param  string  $token
+     * @return void
+     */
+    public function sendPasswordResetNotification($token)
+    {
+        $this->notify(new \App\Notifications\ResetPasswordNotificationEs($token));
+    }
+
+    /**
+     * Create a new Eloquent query builder for the model.
+     *
+     * @param  \Illuminate\Database\Query\Builder  $query
+     * @return \Illuminate\Database\Eloquent\Builder|static
+     */
+    public function newEloquentBuilder($query)
+    {
+        return new class($query) extends \Illuminate\Database\Eloquent\Builder {
+            public function where($column, $operator = null, $value = null, $boolean = 'and')
+            {
+                if ($column === 'email') {
+                    $column = 'correo';
+                }
+                return parent::where($column, $operator, $value, $boolean);
+            }
+        };
+    }
+
+    /**
+     * Route notifications for the mail channel.
+     */
+    public function routeNotificationForMail(): string
+    {
+        return $this->correo;
     }
 
     /**

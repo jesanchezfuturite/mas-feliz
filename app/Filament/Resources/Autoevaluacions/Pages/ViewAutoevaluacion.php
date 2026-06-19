@@ -27,22 +27,29 @@ class ViewAutoevaluacion extends ViewRecord
         return 'Ver Autoevaluación (Puntaje Total: ' . $sum . ')';
     }
 
+    protected function getHeaderWidgets(): array
+    {
+        return [
+            \App\Filament\Empresa\Resources\Autoevaluacions\Widgets\AutoevaluacionStatsWidget::class,
+        ];
+    }
+
     protected function getHeaderActions(): array
     {
         return [
-            Action::make('autorizar')
-                ->label('Autorizar Autoevaluación')
+            Action::make('validar')
+                ->label('Validar Autoevaluación')
                 ->color('success')
                 ->icon('heroicon-o-check-circle')
                 ->requiresConfirmation()
-                ->modalHeading('Autorizar Autoevaluación')
-                ->modalDescription('¿Estás seguro de que deseas autorizar esta autoevaluación?')
-                ->modalSubmitActionLabel('Sí, autorizar')
+                ->modalHeading('Validar Autoevaluación')
+                ->modalDescription('¿Estás seguro de que deseas validar esta autoevaluación?')
+                ->modalSubmitActionLabel('Sí, validar')
                 ->hidden(fn ($record) => $record->estatus !== 'En revisión')
                 ->action(function ($record) {
-                    $record->update(['estatus' => 'Autorizada']);
+                    $record->update(['estatus' => 'Validado']);
                     \Filament\Notifications\Notification::make()
-                        ->title('Autoevaluación autorizada correctamente')
+                        ->title('Autoevaluación validada correctamente')
                         ->success()
                         ->send();
                 }),

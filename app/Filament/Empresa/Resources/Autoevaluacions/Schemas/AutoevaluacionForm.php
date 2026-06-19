@@ -45,7 +45,7 @@ class AutoevaluacionForm
         ];
 
         $requisitos = [
-            1 => 'NECESARIO',
+            1 => 'INDISPENSABLE',
             2 => 'NECESARIO',
             3 => 'NECESARIO',
             4 => 'INDISPENSABLE',
@@ -53,6 +53,18 @@ class AutoevaluacionForm
             6 => 'NECESARIO',
             7 => 'NECESARIO',
             8 => 'NECESARIO',
+            9 => 'INDISPENSABLE',
+            10 => 'NECESARIO',
+            11 => 'NECESARIO',
+            12 => 'NECESARIO',
+            13 => 'NECESARIO',
+            14 => 'NECESARIO',
+            15 => 'INDISPENSABLE',
+            16 => 'INDISPENSABLE',
+            17 => 'NECESARIO',
+            18 => 'NECESARIO',
+            19 => 'NECESARIO',
+            20 => 'DESEABLE',
         ];
 
         for ($i = 1; $i <= 20; $i++) {
@@ -475,6 +487,7 @@ class AutoevaluacionForm
                 ];
             }
 
+            $isAdmin = filament()->getCurrentPanel()->getId() === 'admin';
             $gridElementos = [];
             foreach ($elementos as $index => $item) {
                 $elemId = $index + 1;
@@ -512,13 +525,12 @@ class AutoevaluacionForm
 
                         Select::make("respuestas.criterio_{$i}.elemento_{$elemId}.score")
                             ->hiddenLabel()
-                            ->disabled(fn ($record) => $record && $record->estatus === 'Autorizada')
-                            ->options(function () {
-                                $isAdmin = filament()->getCurrentPanel()->getId() === 'admin';
+                            ->disabled(fn ($record) => $isAdmin || ($record && in_array($record->estatus, ['En revisión', 'Validado'])))
+                            ->options(function () use ($isAdmin) {
                                 $opts = [
-                                    '10' => 'Cumple (10)',
-                                    '5' => 'En proceso (5)',
-                                    '0' => 'No cumple (0)',
+                                    '10' => 'Cumple (10 puntos)',
+                                    '5' => 'En proceso (5 puntos)',
+                                    '0' => 'No cumple (0 puntos)',
                                     'NA' => 'No aplica',
                                 ];
                                 if ($isAdmin) {
@@ -533,7 +545,11 @@ class AutoevaluacionForm
                             })
                             ->placeholder('Seleccione una opción')
                             ->columnSpan(3)
-                            ->extraAttributes(['style' => 'display: flex; flex-direction: column; justify-content: flex-start; height: 100%;']),
+                            ->extraAttributes(['style' => 'display: flex; flex-direction: column; justify-content: flex-start; height: 100%;'])
+                            ->live()
+                            ->afterStateUpdated(function ($state, $livewire) {
+                                $livewire->dispatch('formUpdated');
+                            }),
 
                         // Hidden fields that store the data inside the main form state
                         Hidden::make("respuestas.criterio_{$i}.elemento_{$elemId}.comentario"),
@@ -552,15 +568,14 @@ class AutoevaluacionForm
                                 ->extraModalWindowAttributes([
                                     'style' => 'background-color: #ffffff !important; background: #ffffff !important;'
                                 ])
-                                ->modalSubmitAction(fn ($action) => $action->hidden(fn ($record) => $record && $record->estatus === 'Autorizada'))
-                                ->modalCancelAction(fn ($action) => $action->hidden(fn ($record) => $record && $record->estatus === 'Autorizada'))
-                                ->form(function () {
-                                    $isAdmin = filament()->getCurrentPanel()->getId() === 'admin';
+                                ->modalSubmitAction(fn ($action) => $action->hidden(fn ($record) => ! $isAdmin && $record && in_array($record->estatus, ['En revisión', 'Validado'])))
+                                ->modalCancelAction(fn ($action) => $action->hidden(fn ($record) => ! $isAdmin && $record && in_array($record->estatus, ['En revisión', 'Validado'])))
+                                ->form(function () use ($isAdmin) {
                                     return [
                                         Textarea::make('comentario')
                                             ->label('Comentario')
                                             ->rows(3)
-                                            ->disabled(fn ($record) => $isAdmin || ($record && $record->estatus === 'Autorizada')),
+                                            ->disabled(fn ($record) => $isAdmin || ($record && in_array($record->estatus, ['En revisión', 'Validado']))),
                                         
                                         Placeholder::make('archivo_link')
                                             ->label('Ver Evidencia')
@@ -573,18 +588,18 @@ class AutoevaluacionForm
                                                 $url = \Illuminate\Support\Facades\Storage::url($archivo);
                                                 return new \Illuminate\Support\HtmlString("<a href=\"{$url}\" target=\"_blank\" style=\"color: #2563eb; text-decoration: underline; font-weight: 500;\">Ver/Descargar Archivo</a>");
                                             })
-                                            ->visible(fn ($record) => $isAdmin || ($record && $record->estatus === 'Autorizada')),
+                                            ->visible(fn ($record) => $isAdmin || ($record && in_array($record->estatus, ['En revisión', 'Validado']))),
                                             
                                         FileUpload::make('archivo')
                                             ->label('Subir Evidencia')
                                             ->disk('public')
                                             ->directory('autoevaluaciones_evidencia')
-                                            ->visible(fn ($record) => ! ($isAdmin || ($record && $record->estatus === 'Autorizada'))),
+                                            ->visible(fn ($record) => ! ($isAdmin || ($record && in_array($record->estatus, ['En revisión', 'Validado'])))),
                                             
                                         Textarea::make('feedback')
                                             ->label('Retroalimentación del evaluador')
                                             ->rows(2)
-                                            ->disabled(fn ($record) => ! $isAdmin || ($record && $record->estatus === 'Autorizada')),
+                                            ->disabled(fn ($record) => ! $isAdmin || ($record && $record->estatus === 'Validado')),
                                     ];
                                 })
                                 ->fillForm(fn ($get) => [
@@ -592,9 +607,7 @@ class AutoevaluacionForm
                                     'archivo' => $get("respuestas.criterio_{$i}.elemento_{$elemId}.archivo"),
                                     'feedback' => $get("respuestas.criterio_{$i}.elemento_{$elemId}.feedback"),
                                 ])
-                                ->action(function (array $data, $set, $record) use ($i, $elemId) {
-                                    $isAdmin = filament()->getCurrentPanel()->getId() === 'admin';
-                                    
+                                ->action(function (array $data, $set, $record) use ($i, $elemId, $isAdmin) {
                                     if (array_key_exists('comentario', $data)) {
                                         $set("respuestas.criterio_{$i}.elemento_{$elemId}.comentario", $data['comentario']);
                                     }
@@ -624,12 +637,36 @@ class AutoevaluacionForm
             $categoria = $categorias[$i] ?? '';
             $requisito = $requisitos[$i] ?? null;
 
+            $badgeStyle = match($requisito) {
+                'INDISPENSABLE' => "background-color: #fef2f2; color: #dc2626; border: 1px solid #fca5a5;",
+                'NECESARIO' => "background-color: #fffbeb; color: #d97706; border: 1px solid #fcd34d;",
+                'DESEABLE' => "background-color: #ecfdf5; color: #059669; border: 1px solid #6ee7b7;",
+                default => "background-color: #f3f4f6; color: #4b5563; border: 1px solid #d1d5db;",
+            };
+
             $requisitoHtml = $requisito 
-                ? "<span style='background-color: #fff3e0; color: #e65100; border: 1px solid #ffcc80; padding: 0.25rem 0.75rem; border-radius: 9999px; font-weight: 700; font-size: 0.75rem; letter-spacing: 0.05em;'>{$requisito}</span>" 
+                ? "<span style='{$badgeStyle} padding: 0.25rem 0.75rem; border-radius: 9999px; font-weight: 700; font-size: 0.75rem; letter-spacing: 0.05em;'>{$requisito}</span>" 
                 : "";
 
             $tabs[] = Tab::make("Criterio {$i}")
                 ->label("Criterio {$i}")
+                ->visible(function ($get) use ($categoria, $requisito) {
+                    $filterEje = $get('filter_eje');
+                    $filterTipo = $get('filter_tipo');
+
+                    $matchEje = true;
+                    if (!empty($filterEje)) {
+                        $cleanCat = str_replace('+', '', $categoria);
+                        $matchEje = (strtoupper($cleanCat) === strtoupper($filterEje));
+                    }
+
+                    $matchTipo = true;
+                    if (!empty($filterTipo)) {
+                        $matchTipo = (strtoupper($requisito) === strtoupper($filterTipo));
+                    }
+
+                    return $matchEje && $matchTipo;
+                })
                 ->schema([
                     Placeholder::make("titulo_criterio_{$i}")
                         ->hiddenLabel()
@@ -642,6 +679,85 @@ class AutoevaluacionForm
                                 </div>
                             </div>
                         ")),
+
+                    Placeholder::make("evaluacion_criterio_status_{$i}")
+                        ->hiddenLabel()
+                        ->content(function ($get) use ($i) {
+                            $status = $get("respuestas.criterio_{$i}.status") ?? 'Borrador';
+                            $feedback = $get("respuestas.criterio_{$i}.feedback");
+
+                            $statusBadge = match($status) {
+                                'Validado' => '<span style="background-color: #ecfdf5; color: #065f46; font-size: 0.875rem; padding: 0.25rem 0.75rem; border-radius: 9999px; font-weight: 700; border: 1px solid #a7f3d0;">Validado</span>',
+                                'En Revisión' => '<span style="background-color: #fffbeb; color: #92400e; font-size: 0.875rem; padding: 0.25rem 0.75rem; border-radius: 9999px; font-weight: 700; border: 1px solid #fde68a;">En Revisión</span>',
+                                default => '<span style="background-color: #f3f4f6; color: #374151; font-size: 0.875rem; padding: 0.25rem 0.75rem; border-radius: 9999px; font-weight: 700; border: 1px solid #e5e7eb;">Pendiente de Evaluar</span>',
+                            };
+
+                            $feedbackHtml = $feedback 
+                                ? "<div style='margin-top: 0.5rem; padding: 0.75rem; background-color: #f9fafb; border-left: 4px solid #3b82f6; border-radius: 0.25rem; font-size: 0.875rem; color: #4b5563;'><strong style='color: #1f2937;'>Retroalimentación del Evaluador:</strong><br>{$feedback}</div>" 
+                                : "";
+
+                            return new HtmlString("
+                                <div style='margin-bottom: 1.5rem; padding: 1rem; border: 1px solid #e5e7eb; border-radius: 0.5rem; background-color: #f9fafb;'>
+                                    <div style='display: flex; align-items: center; gap: 1rem;'>
+                                        <span style='font-weight: 600; color: #374151;'>Estatus de Evaluación del Criterio:</span>
+                                        {$statusBadge}
+                                    </div>
+                                    {$feedbackHtml}
+                                </div>
+                            ");
+                        }),
+
+                    Actions::make([
+                        Action::make("evaluar_criterio_{$i}")
+                            ->label('Evaluar Criterio')
+                            ->icon('heroicon-m-check-badge')
+                            ->color('primary')
+                            ->visible(fn () => filament()->getCurrentPanel()->getId() === 'admin')
+                            ->modalHeading("Evaluar Criterio {$i}")
+                            ->modalSubmitActionLabel('Guardar Evaluación')
+                            ->form([
+                                Select::make('status')
+                                    ->label('Estatus del Criterio')
+                                    ->options([
+                                        'En Revisión' => 'En Revisión',
+                                        'Validado' => 'Validado',
+                                    ])
+                                    ->required(),
+                                Textarea::make('feedback')
+                                    ->label('Retroalimentación')
+                                    ->rows(3),
+                            ])
+                            ->fillForm(fn ($get) => [
+                                'status' => $get("respuestas.criterio_{$i}.status") ?? 'En Revisión',
+                                'feedback' => $get("respuestas.criterio_{$i}.feedback"),
+                            ])
+                            ->action(function (array $data, $set, $record) use ($i) {
+                                $set("respuestas.criterio_{$i}.status", $data['status']);
+                                $set("respuestas.criterio_{$i}.feedback", $data['feedback']);
+
+                                if ($record) {
+                                    $respuestas = $record->respuestas ?? [];
+                                    if (!is_array($respuestas)) {
+                                        $respuestas = [];
+                                    }
+                                    if (!isset($respuestas["criterio_{$i}"]) || !is_array($respuestas["criterio_{$i}"])) {
+                                        $respuestas["criterio_{$i}"] = [];
+                                    }
+                                    $respuestas["criterio_{$i}"]['status'] = $data['status'];
+                                    $respuestas["criterio_{$i}"]['feedback'] = $data['feedback'];
+                                    $record->update(['respuestas' => $respuestas]);
+
+                                    \Filament\Notifications\Notification::make()
+                                        ->title("Criterio {$i} evaluado correctamente")
+                                        ->success()
+                                        ->send();
+                                }
+                            })
+                    ])
+                    ->visible(fn () => filament()->getCurrentPanel()->getId() === 'admin')
+                    ->columnSpan('full')
+                    ->extraAttributes(['style' => 'margin-bottom: 1.5rem;']),
+
                     ...$gridElementos,
                 ]);
         }
@@ -649,6 +765,34 @@ class AutoevaluacionForm
         return $schema
             ->columns(1)
             ->components([
+                Grid::make(2)
+                    ->schema([
+                        Select::make('filter_eje')
+                            ->label('Filtrar por Eje')
+                            ->options([
+                                'FORTALECIMIENTO' => 'Fortalecimiento',
+                                'PREVENCIÓN' => 'Prevención',
+                                'CUIDADO/ATENCIÓN' => 'Cuidado / Atención',
+                            ])
+                            ->placeholder('Todos los Ejes')
+                            ->selectablePlaceholder()
+                            ->dehydrated(false)
+                            ->live(),
+                        
+                        Select::make('filter_tipo')
+                            ->label('Filtrar por Tipo')
+                            ->options([
+                                'INDISPENSABLE' => 'Indispensable',
+                                'NECESARIO' => 'Necesario',
+                                'DESEABLE' => 'Deseable',
+                            ])
+                            ->placeholder('Todos los Tipos')
+                            ->selectablePlaceholder()
+                            ->dehydrated(false)
+                            ->live(),
+                    ])
+                    ->columnSpan('full'),
+
                 Tabs::make('Criterios')
                     ->tabs($tabs)
                     ->columnSpan('full')
@@ -733,3 +877,4 @@ class AutoevaluacionForm
             ]);
     }
 }
+

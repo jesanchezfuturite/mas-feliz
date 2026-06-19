@@ -30,9 +30,16 @@ class EditAutoevaluacion extends EditRecord
         return "Editar Autoevaluación (Puntaje Total: {$total})";
     }
 
+    protected function getHeaderWidgets(): array
+    {
+        return [
+            \App\Filament\Empresa\Resources\Autoevaluacions\Widgets\AutoevaluacionStatsWidget::class,
+        ];
+    }
+
     protected function getHeaderActions(): array
     {
-        if ($this->record->estatus === 'Autorizada') {
+        if (in_array($this->record->estatus, ['En revisión', 'Validado'])) {
             return [];
         }
 
@@ -43,7 +50,7 @@ class EditAutoevaluacion extends EditRecord
 
     protected function getFormActions(): array
     {
-        if ($this->record->estatus === 'Autorizada') {
+        if (in_array($this->record->estatus, ['En revisión', 'Validado'])) {
             return [];
         }
 
