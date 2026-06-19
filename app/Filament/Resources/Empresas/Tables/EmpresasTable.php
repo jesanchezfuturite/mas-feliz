@@ -60,6 +60,15 @@ class EmpresasTable
                     ->tooltip('Ver Autoevaluación')
                     ->url(fn ($record) => optional($record->autoevaluaciones()->latest()->first())->id ? \App\Filament\Resources\AutoevaluacionResource::getUrl('view', ['record' => $record->autoevaluaciones()->latest()->first()->id]) : null)
                     ->hidden(fn ($record) => !in_array(optional($record->autoevaluaciones()->latest()->first())->estatus, ['En revisión', 'Validado'])),
+                \Filament\Actions\Action::make('descargar_distintivo')
+                    ->label('Ver Distintivo')
+                    ->icon('heroicon-o-document-arrow-down')
+                    ->color('success')
+                    ->iconButton()
+                    ->tooltip('Ver Distintivo')
+                    ->visible(fn ($record) => !empty($record?->ruta_pdf) && $record?->estatus === 'Dictaminado')
+                    ->url(fn ($record) => !empty($record?->ruta_pdf) ? '/storage/' . $record->ruta_pdf : null)
+                    ->openUrlInNewTab(),
                 ViewAction::make()
                     ->iconButton()
                     ->color('gray')

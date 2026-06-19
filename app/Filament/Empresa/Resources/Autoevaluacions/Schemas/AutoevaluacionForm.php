@@ -506,6 +506,10 @@ class AutoevaluacionForm
                                 $comentario = $get("respuestas.criterio_{$i}.elemento_{$elemId}.comentario");
                                 $archivo = $get("respuestas.criterio_{$i}.elemento_{$elemId}.archivo");
                                 $feedback = $get("respuestas.criterio_{$i}.elemento_{$elemId}.feedback");
+                                $calificacion = $get("respuestas.criterio_{$i}.elemento_{$elemId}.calificacion_politica");
+                                $evaluadorEmail = $get("respuestas.criterio_{$i}.elemento_{$elemId}.evaluador_email");
+
+                                $tooltipAttr = $evaluadorEmail ? " title=\"Evaluado por: {$evaluadorEmail}\"" : "";
 
                                 $badges = [];
                                 if ($comentario) {
@@ -515,8 +519,13 @@ class AutoevaluacionForm
                                     $url = \Illuminate\Support\Facades\Storage::url($archivo);
                                     $badges[] = "<a href=\"{$url}\" target=\"_blank\" style=\"background-color: #f0fdf4; color: #15803d; font-size: 0.75rem; padding: 0.125rem 0.5rem; border-radius: 9999px; font-weight: 500; border: 1px solid #bbf7d0; text-decoration: none; cursor: pointer; display: inline-block;\">📎 Evidencia</a>";
                                 }
+                                if ($calificacion === 'Aprobado') {
+                                    $badges[] = "<span{$tooltipAttr} style=\"background-color: #f0fdf4; color: #166534; font-size: 0.75rem; padding: 0.125rem 0.5rem; border-radius: 9999px; font-weight: 600; border: 1px solid #bbf7d0; cursor: help;\">✅ Aprobado</span>";
+                                } elseif ($calificacion === 'Rechazado') {
+                                    $badges[] = "<span{$tooltipAttr} style=\"background-color: #fef2f2; color: #991b1b; font-size: 0.75rem; padding: 0.125rem 0.5rem; border-radius: 9999px; font-weight: 600; border: 1px solid #fecaca; cursor: help;\">❌ Rechazado</span>";
+                                }
                                 if ($feedback) {
-                                    $badges[] = '<span style="background-color: #fdf4ff; color: #a21caf; font-size: 0.75rem; padding: 0.125rem 0.5rem; border-radius: 9999px; font-weight: 500; border: 1px solid #fbcfe8;">💬 Retroalimentación</span>';
+                                    $badges[] = "<span{$tooltipAttr} style=\"background-color: #fdf4ff; color: #a21caf; font-size: 0.75rem; padding: 0.125rem 0.5rem; border-radius: 9999px; font-weight: 500; border: 1px solid #fbcfe8; cursor: help;\">💬 Retroalimentación</span>";
                                 }
 
                                 $badgesHtml = !empty($badges) ? '<div style="margin-top: 0.75rem; display: flex; gap: 0.5rem; flex-wrap: wrap;">' . implode('', $badges) . '</div>' : '';
@@ -560,6 +569,8 @@ class AutoevaluacionForm
                         // Hidden fields that store the data inside the main form state
                         Hidden::make("respuestas.criterio_{$i}.elemento_{$elemId}.comentario"),
                         Hidden::make("respuestas.criterio_{$i}.elemento_{$elemId}.archivo"),
+                        Hidden::make("respuestas.criterio_{$i}.elemento_{$elemId}.calificacion_politica"),
+                        Hidden::make("respuestas.criterio_{$i}.elemento_{$elemId}.evaluador_email"),
                         Hidden::make("respuestas.criterio_{$i}.elemento_{$elemId}.feedback"),
 
                         Actions::make([
@@ -601,16 +612,28 @@ class AutoevaluacionForm
                                             ->disk('public')
                                             ->directory('autoevaluaciones_evidencia')
                                             ->visible(fn ($record) => ! ($isAdmin || ($record && in_array($record->estatus, ['En revisión', 'Validado'])))),
+
+                                        Select::make('calificacion_politica')
+                                            ->label('Calificación de la política')
+                                            ->options([
+                                                'Aprobado' => 'Aprobar',
+                                                'Rechazado' => 'Rechazar',
+                                            ])
+                                            ->required(fn () => $isAdmin)
+                                            ->live()
+                                            ->disabled(fn ($record) => ! $isAdmin || ($record && $record->estatus === 'Validado')),
                                             
                                         Textarea::make('feedback')
                                             ->label('Retroalimentación del evaluador')
                                             ->rows(2)
+                                            ->required(fn ($get) => $get('calificacion_politica') === 'Rechazado')
                                             ->disabled(fn ($record) => ! $isAdmin || ($record && $record->estatus === 'Validado')),
                                     ];
                                 })
                                 ->fillForm(fn ($get) => [
                                     'comentario' => $get("respuestas.criterio_{$i}.elemento_{$elemId}.comentario"),
                                     'archivo' => $get("respuestas.criterio_{$i}.elemento_{$elemId}.archivo"),
+                                    'calificacion_politica' => $get("respuestas.criterio_{$i}.elemento_{$elemId}.calificacion_politica"),
                                     'feedback' => $get("respuestas.criterio_{$i}.elemento_{$elemId}.feedback"),
                                 ])
                                 ->action(function (array $data, $set, $record) use ($i, $elemId, $isAdmin) {
@@ -620,6 +643,9 @@ class AutoevaluacionForm
                                     if (array_key_exists('archivo', $data)) {
                                         $set("respuestas.criterio_{$i}.elemento_{$elemId}.archivo", $data['archivo']);
                                     }
+                                    if (array_key_exists('calificacion_politica', $data)) {
+                                        $set("respuestas.criterio_{$i}.elemento_{$elemId}.calificacion_politica", $data['calificacion_politica']);
+                                    }
                                     if (array_key_exists('feedback', $data)) {
                                         $set("respuestas.criterio_{$i}.elemento_{$elemId}.feedback", $data['feedback']);
                                     }
@@ -627,13 +653,23 @@ class AutoevaluacionForm
                                     // If admin, save feedback directly since the form is read-only
                                     if ($record && $isAdmin) {
                                         $respuestas = $record->respuestas ?? [];
+                                        if (array_key_exists('calificacion_politica', $data)) {
+                                            $respuestas["criterio_{$i}"]["elemento_{$elemId}"]['calificacion_politica'] = $data['calificacion_politica'];
+                                        }
                                         if (array_key_exists('feedback', $data)) {
                                             $respuestas["criterio_{$i}"]["elemento_{$elemId}"]['feedback'] = $data['feedback'];
                                         }
+                                        
+                                        $evaluadorEmail = auth()->user()?->email;
+                                        $respuestas["criterio_{$i}"]["elemento_{$elemId}"]['evaluador_email'] = $evaluadorEmail;
+                                        $set("respuestas.criterio_{$i}.elemento_{$elemId}.evaluador_email", $evaluadorEmail);
+
                                         $record->update(['respuestas' => $respuestas]);
                                     }
                                 })
-                        ])->columnSpan(1)->extraAttributes(['style' => 'justify-content: flex-start !important; width: 100%; margin-top: 0 !important; margin-bottom: 0 !important;'])
+                        ])
+                            ->key("detalles_actions_{$i}_{$elemId}")
+                            ->columnSpan(1)->extraAttributes(['style' => 'justify-content: flex-start !important; width: 100%; margin-top: 0 !important; margin-bottom: 0 !important;'])
                     ])
                     ->extraAttributes([
                         'style' => 'border: 1px solid #f3f4f6; border-radius: 0.5rem; padding: 1rem; margin-bottom: 1rem; align-items: center; background-color: #ffffff; box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);'
@@ -673,16 +709,19 @@ class AutoevaluacionForm
                         ->content(function ($get) use ($i) {
                             $status = $get("respuestas.criterio_{$i}.status") ?? 'Borrador';
                             $feedback = $get("respuestas.criterio_{$i}.feedback");
+                            $evaluadorEmail = $get("respuestas.criterio_{$i}.evaluador_email");
+
+                            $tooltipAttr = $evaluadorEmail ? " title=\"Evaluado por: {$evaluadorEmail}\"" : "";
 
                             $statusBadge = match($status) {
-                                'Validado' => '<span style="background-color: #ecfdf5; color: #065f46; font-size: 0.875rem; padding: 0.25rem 0.75rem; border-radius: 9999px; font-weight: 700; border: 1px solid #a7f3d0;">Validado</span>',
-                                'En Revisión' => '<span style="background-color: #fffbeb; color: #92400e; font-size: 0.875rem; padding: 0.25rem 0.75rem; border-radius: 9999px; font-weight: 700; border: 1px solid #fde68a;">En Revisión</span>',
-                                'Rechazado' => '<span style="background-color: #fef2f2; color: #991b1b; font-size: 0.875rem; padding: 0.25rem 0.75rem; border-radius: 9999px; font-weight: 700; border: 1px solid #fecaca;">Rechazado</span>',
+                                'Aprobado', 'Validado' => "<span{$tooltipAttr} style=\"background-color: #ecfdf5; color: #065f46; font-size: 0.875rem; padding: 0.25rem 0.75rem; border-radius: 9999px; font-weight: 700; border: 1px solid #a7f3d0; cursor: help;\">Aprobado</span>",
+                                'En Revisión' => "<span{$tooltipAttr} style=\"background-color: #fffbeb; color: #92400e; font-size: 0.875rem; padding: 0.25rem 0.75rem; border-radius: 9999px; font-weight: 700; border: 1px solid #fde68a; cursor: help;\">En Revisión</span>",
+                                'Rechazado' => "<span{$tooltipAttr} style=\"background-color: #fef2f2; color: #991b1b; font-size: 0.875rem; padding: 0.25rem 0.75rem; border-radius: 9999px; font-weight: 700; border: 1px solid #fecaca; cursor: help;\">Rechazado</span>",
                                 default => '<span style="background-color: #f3f4f6; color: #374151; font-size: 0.875rem; padding: 0.25rem 0.75rem; border-radius: 9999px; font-weight: 700; border: 1px solid #e5e7eb;">Pendiente de Evaluar</span>',
                             };
 
                             $feedbackHtml = $feedback 
-                                ? "<div style='margin-top: 0.5rem; padding: 0.75rem; background-color: #f9fafb; border-left: 4px solid #3b82f6; border-radius: 0.25rem; font-size: 0.875rem; color: #4b5563;'><strong style='color: #1f2937;'>Retroalimentación del Evaluador:</strong><br>{$feedback}</div>" 
+                                ? "<div style='margin-top: 0.5rem; padding: 0.75rem; background-color: #f9fafb; border-left: 4px solid #3b82f6; border-radius: 0.25rem; font-size: 0.875rem; color: #4b5563;'><strong style='color: #1f2937;'>Retroalimentación del Evaluador:</strong>" . ($evaluadorEmail ? " <span style='font-size: 0.75rem; color: #6b7280; font-weight: normal;'>(Otorgado por: {$evaluadorEmail})</span>" : "") . "<br>{$feedback}</div>" 
                                 : "";
 
                             return new HtmlString("
@@ -702,44 +741,37 @@ class AutoevaluacionForm
                             ->icon('heroicon-m-check-badge')
                             ->color('primary')
                             ->visible(fn () => filament()->getCurrentPanel()->getId() === 'admin')
+                            ->disabled(fn ($record) => $record && ($record->respuestas["criterio_{$i}"]['status'] ?? null) === 'Aprobado')
                             ->modalHeading("Evaluar Criterio {$i}")
                             ->modalSubmitActionLabel('Guardar Evaluación')
-                            ->form([
-                                Select::make('estatus')
-                                    ->label('Estatus del Criterio')
-                                    ->options([
-                                        'En Revisión' => 'En Revisión',
-                                        'Validado' => 'Validado',
-                                        'Rechazado' => 'Rechazado',
-                                    ])
-                                    ->live()
-                                    ->required(),
-                                Textarea::make('retroalimentacion')
-                                    ->label('Retroalimentación')
-                                    ->rows(3)
-                                    ->required(fn (\Filament\Schemas\Components\Utilities\Get $get) => in_array($get('estatus'), ['Validado', 'Rechazado'])),
+                            ->form(fn ($record) => [
+                                Textarea::make('retroalimentacion_general')
+                                    ->label('Retroalimentación General')
+                                    ->rows(3),
                             ])
                             ->fillForm(fn ($get) => [
-                                'estatus' => $get("respuestas.criterio_{$i}.status") ?? 'En Revisión',
-                                'retroalimentacion' => $get("respuestas.criterio_{$i}.feedback"),
+                                'retroalimentacion_general' => $get("respuestas.criterio_{$i}.feedback"),
                             ])
                             ->action(function (array $data, $set, $record) use ($i, $elementos) {
-                                if ($data['estatus'] === 'Validado') {
-                                    $numElements = count($elementos);
-                                    $respuestas = $record ? ($record->respuestas ?? []) : [];
-                                    
-                                    for ($e = 1; $e <= $numElements; $e++) {
-                                        $score = $respuestas["criterio_{$i}"]["elemento_{$e}"]['score'] ?? null;
-                                        if ($score === null || $score === '') {
-                                            throw \Illuminate\Validation\ValidationException::withMessages([
-                                                'estatus' => 'No puedes validar el criterio si existen políticas sin evaluar.',
-                                            ]);
-                                        }
+                                $respuestas = $record ? ($record->respuestas ?? []) : [];
+                                $numElements = count($elementos);
+                                $allApproved = true;
+
+                                for ($e = 1; $e <= $numElements; $e++) {
+                                    $calif = $respuestas["criterio_{$i}"]["elemento_{$e}"]['calificacion_politica'] ?? null;
+                                    if ($calif !== 'Aprobado') {
+                                        $allApproved = false;
+                                        break;
                                     }
                                 }
 
-                                $set("respuestas.criterio_{$i}.status", $data['estatus']);
-                                $set("respuestas.criterio_{$i}.feedback", $data['retroalimentacion']);
+                                $status = $allApproved ? 'Aprobado' : 'Rechazado';
+
+                                $set("respuestas.criterio_{$i}.status", $status);
+                                $set("respuestas.criterio_{$i}.feedback", $data['retroalimentacion_general']);
+
+                                $evaluadorEmail = auth()->user()?->email;
+                                $set("respuestas.criterio_{$i}.evaluador_email", $evaluadorEmail);
 
                                 if ($record) {
                                     $respuestas = $record->respuestas ?? [];
@@ -749,12 +781,13 @@ class AutoevaluacionForm
                                     if (!isset($respuestas["criterio_{$i}"]) || !is_array($respuestas["criterio_{$i}"])) {
                                         $respuestas["criterio_{$i}"] = [];
                                     }
-                                    $respuestas["criterio_{$i}"]['status'] = $data['estatus'];
-                                    $respuestas["criterio_{$i}"]['feedback'] = $data['retroalimentacion'];
+                                    $respuestas["criterio_{$i}"]['status'] = $status;
+                                    $respuestas["criterio_{$i}"]['feedback'] = $data['retroalimentacion_general'];
+                                    $respuestas["criterio_{$i}"]['evaluador_email'] = $evaluadorEmail;
                                     $record->update(['respuestas' => $respuestas]);
 
                                     \Filament\Notifications\Notification::make()
-                                        ->title("Criterio {$i} evaluado correctamente")
+                                        ->title("Criterio {$i} evaluado automáticamente como {$status}")
                                         ->success()
                                         ->send();
                                 }

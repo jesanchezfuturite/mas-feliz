@@ -12,6 +12,8 @@ class AutoevaluacionStatsWidget extends StatsOverviewWidget
     public ?Model $record = null;
     public ?array $respuestasState = null;
 
+    protected ?string $pollingInterval = null;
+
     protected $listeners = ['formUpdated'];
 
     public function mount(): void

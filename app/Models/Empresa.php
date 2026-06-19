@@ -140,4 +140,24 @@ class Empresa extends Model implements Authenticatable, HasName, CanResetPasswor
     {
         return $this->nombre_empresa;
     }
+
+    /**
+     * Get the relative path to the generated PDF Distinctive.
+     */
+    public function getRutaPdfAttribute(): ?string
+    {
+        $latest = $this->autoevaluaciones()->latest()->first();
+        return $latest ? ($latest->respuestas['pdf_distintivo'] ?? null) : null;
+    }
+
+    /**
+     * Get the evaluation status compatible with Filament's Dictaminado status expectation.
+     */
+    public function getEstatusAttribute(): ?string
+    {
+        if (in_array($this->estatus_distintivo, ['Validado', 'Aprobado'])) {
+            return 'Dictaminado';
+        }
+        return $this->estatus_distintivo;
+    }
 }

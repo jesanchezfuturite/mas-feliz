@@ -19,6 +19,11 @@ class AutoevaluacionResource extends Resource
         return AutoevaluacionForm::configure($schema);
     }
 
+    public static function canView(\Illuminate\Database\Eloquent\Model $record): bool
+    {
+        return in_array($record->estatus, ['En revisión', 'Validado']);
+    }
+
     public static function getPages(): array
     {
         return [
