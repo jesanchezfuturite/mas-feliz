@@ -54,7 +54,9 @@ class EditAutoevaluacion extends EditRecord
             return [];
         }
 
-        return parent::getFormActions();
+        return [
+            $this->getSaveFormAction(),
+        ];
     }
 
     protected function getRedirectUrl(): string
