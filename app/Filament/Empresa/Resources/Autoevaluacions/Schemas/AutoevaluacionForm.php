@@ -67,6 +67,12 @@ class AutoevaluacionForm
             20 => 'DESEABLE',
         ];
 
+        $indispensablesComponents = [];
+        $necesariosFortalecimiento = [];
+        $necesariosPrevencion = [];
+        $necesariosCuidado = [];
+        $deseablesComponents = [];
+
         for ($i = 1; $i <= 20; $i++) {
             if ($i === 1) {
                 $mainText = 'Criterio 1.- Política documentada y participación';
@@ -648,38 +654,16 @@ class AutoevaluacionForm
                 ? "<span style='{$badgeStyle} padding: 0.25rem 0.75rem; border-radius: 9999px; font-weight: 700; font-size: 0.75rem; letter-spacing: 0.05em;'>{$requisito}</span>" 
                 : "";
 
-            $tabs[] = Tab::make("Criterio {$i}")
-                ->label("Criterio {$i}")
-                ->visible(function ($get) use ($categoria, $requisito) {
-                    $filterEje = $get('filter_eje');
-                    $filterTipo = $get('filter_tipo');
-
-                    $matchEje = true;
-                    if (!empty($filterEje)) {
-                        $cleanCat = str_replace('+', '', $categoria);
-                        $matchEje = (strtoupper($cleanCat) === strtoupper($filterEje));
-                    }
-
-                    $matchTipo = true;
-                    if (!empty($filterTipo)) {
-                        $matchTipo = (strtoupper($requisito) === strtoupper($filterTipo));
-                    }
-
-                    return $matchEje && $matchTipo;
-                })
+            $criterioSection = \Filament\Schemas\Components\Section::make("Criterio {$i}.- {$mainText}")
+                ->description(new HtmlString("
+                    <div style='display: flex; justify-content: flex-end; align-items: center; gap: 0.75rem; margin-top: 0.25rem;'>
+                        {$requisitoHtml}
+                        <span style='color: #556ee6; font-weight: 800; font-size: 0.875rem; letter-spacing: 0.05em;'>{$categoria}</span>
+                    </div>
+                "))
+                ->collapsible()
+                ->collapsed()
                 ->schema([
-                    Placeholder::make("titulo_criterio_{$i}")
-                        ->hiddenLabel()
-                        ->content(new HtmlString("
-                            <div style='display: flex; flex-direction: column; margin-bottom: 1rem;'>
-                                <h3 style='font-size: 1.25rem; font-weight: 700; color: #111827; margin: 0; padding-bottom: 0.5rem; border-bottom: 2px solid #e5e7eb;'>{$mainText}</h3>
-                                <div style='display: flex; justify-content: flex-end; align-items: center; gap: 0.75rem; margin-top: 0.75rem;'>
-                                    {$requisitoHtml}
-                                    <span style='color: #556ee6; font-weight: 800; font-size: 0.875rem; letter-spacing: 0.05em;'>{$categoria}</span>
-                                </div>
-                            </div>
-                        ")),
-
                     Placeholder::make("evaluacion_criterio_status_{$i}")
                         ->hiddenLabel()
                         ->content(function ($get) use ($i) {
@@ -760,43 +744,51 @@ class AutoevaluacionForm
 
                     ...$gridElementos,
                 ]);
+
+            if ($requisito === 'INDISPENSABLE') {
+                $indispensablesComponents[] = $criterioSection;
+            } elseif ($requisito === 'DESEABLE') {
+                $deseablesComponents[] = $criterioSection;
+            } else {
+                if ($categoria === '+FORTALECIMIENTO') {
+                    $necesariosFortalecimiento[] = $criterioSection;
+                } elseif ($categoria === '+PREVENCIÓN') {
+                    $necesariosPrevencion[] = $criterioSection;
+                } else {
+                    $necesariosCuidado[] = $criterioSection;
+                }
+            }
         }
 
         return $schema
             ->columns(1)
             ->components([
-                Grid::make(2)
-                    ->schema([
-                        Select::make('filter_eje')
-                            ->label('Filtrar por Eje')
-                            ->options([
-                                'FORTALECIMIENTO' => 'Fortalecimiento',
-                                'PREVENCIÓN' => 'Prevención',
-                                'CUIDADO/ATENCIÓN' => 'Cuidado / Atención',
-                            ])
-                            ->placeholder('Todos los Ejes')
-                            ->selectablePlaceholder()
-                            ->dehydrated(false)
-                            ->live(),
+                Tabs::make('Tipos de Criterios')
+                    ->tabs([
+                        Tab::make('Criterios Indispensables')
+                            ->icon('heroicon-o-shield-check')
+                            ->schema($indispensablesComponents),
                         
-                        Select::make('filter_tipo')
-                            ->label('Filtrar por Tipo')
-                            ->options([
-                                'INDISPENSABLE' => 'Indispensable',
-                                'NECESARIO' => 'Necesario',
-                                'DESEABLE' => 'Deseable',
-                            ])
-                            ->placeholder('Todos los Tipos')
-                            ->selectablePlaceholder()
-                            ->dehydrated(false)
-                            ->live(),
+                        Tab::make('Criterios Necesarios')
+                            ->icon('heroicon-o-document-duplicate')
+                            ->schema([
+                                Tabs::make('Ejes')
+                                    ->tabs([
+                                        Tab::make('Fortalecimiento')
+                                            ->schema($necesariosFortalecimiento),
+                                        Tab::make('Prevención')
+                                            ->schema($necesariosPrevencion),
+                                        Tab::make('Cuidado y Atención')
+                                            ->schema($necesariosCuidado),
+                                    ])
+                                    ->columnSpan('full')
+                            ]),
+                        
+                        Tab::make('Criterios Deseables')
+                            ->icon('heroicon-o-sparkles')
+                            ->schema($deseablesComponents),
                     ])
                     ->columnSpan('full'),
-
-                Tabs::make('Criterios')
-                    ->tabs($tabs)
-                    ->columnSpan('full')
-                    ->extraAttributes(['class' => 'antigraviti-sidebar-tabs']),
 
                 Placeholder::make('custom-css')
                     ->content(new HtmlString('<div style="display: none;"><style>
@@ -804,57 +796,6 @@ class AutoevaluacionForm
                             background-color: transparent !important;
                             padding: 0 !important;
                             box-shadow: none !important;
-                        }
-                        
-                        /* Antigraviti Sidebar Layout for Tabs */
-                        .antigraviti-sidebar-tabs {
-                            display: flex;
-                            flex-direction: row;
-                            gap: 1rem;
-                            align-items: flex-start;
-                            width: 100%;
-                            max-width: 100%;
-                            box-sizing: border-box;
-                        }
-                        
-                        /* Style the tab navigation list (Left Sidebar) */
-                        .antigraviti-sidebar-tabs > nav {
-                            flex-direction: column !important;
-                            min-width: 175px;
-                            width: 175px;
-                            border-right: 1px solid #e5e7eb;
-                            padding-right: 0.5rem;
-                            overflow-x: hidden;
-                        }
-                        
-                        /* Adjust tab buttons inside sidebar */
-                        .antigraviti-sidebar-tabs > nav button {
-                            justify-content: flex-start !important;
-                            text-align: left;
-                            padding: 0.75rem 1rem !important;
-                            border-radius: 0.5rem;
-                            border-bottom: none !important;
-                            margin-bottom: 0.25rem;
-                            white-space: normal !important;
-                        }
-                        
-                        /* Active tab styling */
-                        .antigraviti-sidebar-tabs > nav button[aria-selected="true"] {
-                            background-color: #eff6ff;
-                            color: #1d4ed8;
-                            font-weight: 600;
-                            box-shadow: inset 3px 0 0 0 #3b82f6;
-                        }
-                        
-                        /* Style the content panel (Right Side) */
-                        .antigraviti-sidebar-tabs > div[role="tabpanel"] {
-                            flex: 1;
-                            min-width: 0; /* Prevent flex overflow */
-                            background: white;
-                            border-radius: 1rem;
-                            padding: 1.5rem;
-                            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
-                            box-sizing: border-box;
                         }
                         
                         /* Force Modal Background to be Solid White */
@@ -877,4 +818,5 @@ class AutoevaluacionForm
             ]);
     }
 }
+
 
