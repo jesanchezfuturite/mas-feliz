@@ -654,7 +654,11 @@ class AutoevaluacionForm
                 ? "<span style='{$badgeStyle} padding: 0.25rem 0.75rem; border-radius: 9999px; font-weight: 700; font-size: 0.75rem; letter-spacing: 0.05em;'>{$requisito}</span>" 
                 : "";
 
-            $criterioSection = \Filament\Schemas\Components\Section::make("Criterio {$i}.- {$mainText}")
+            $sectionTitle = str_starts_with($mainText, "Criterio {$i}.-") 
+                ? $mainText 
+                : "Criterio {$i}.- {$mainText}";
+
+            $criterioSection = \Filament\Schemas\Components\Section::make($sectionTitle)
                 ->description(new HtmlString("
                     <div style='display: flex; justify-content: flex-end; align-items: center; gap: 0.75rem; margin-top: 0.25rem;'>
                         {$requisitoHtml}
@@ -673,6 +677,7 @@ class AutoevaluacionForm
                             $statusBadge = match($status) {
                                 'Validado' => '<span style="background-color: #ecfdf5; color: #065f46; font-size: 0.875rem; padding: 0.25rem 0.75rem; border-radius: 9999px; font-weight: 700; border: 1px solid #a7f3d0;">Validado</span>',
                                 'En Revisión' => '<span style="background-color: #fffbeb; color: #92400e; font-size: 0.875rem; padding: 0.25rem 0.75rem; border-radius: 9999px; font-weight: 700; border: 1px solid #fde68a;">En Revisión</span>',
+                                'Rechazado' => '<span style="background-color: #fef2f2; color: #991b1b; font-size: 0.875rem; padding: 0.25rem 0.75rem; border-radius: 9999px; font-weight: 700; border: 1px solid #fecaca;">Rechazado</span>',
                                 default => '<span style="background-color: #f3f4f6; color: #374151; font-size: 0.875rem; padding: 0.25rem 0.75rem; border-radius: 9999px; font-weight: 700; border: 1px solid #e5e7eb;">Pendiente de Evaluar</span>',
                             };
 
@@ -700,24 +705,41 @@ class AutoevaluacionForm
                             ->modalHeading("Evaluar Criterio {$i}")
                             ->modalSubmitActionLabel('Guardar Evaluación')
                             ->form([
-                                Select::make('status')
+                                Select::make('estatus')
                                     ->label('Estatus del Criterio')
                                     ->options([
                                         'En Revisión' => 'En Revisión',
                                         'Validado' => 'Validado',
+                                        'Rechazado' => 'Rechazado',
                                     ])
+                                    ->live()
                                     ->required(),
-                                Textarea::make('feedback')
+                                Textarea::make('retroalimentacion')
                                     ->label('Retroalimentación')
-                                    ->rows(3),
+                                    ->rows(3)
+                                    ->required(fn (\Filament\Schemas\Components\Utilities\Get $get) => in_array($get('estatus'), ['Validado', 'Rechazado'])),
                             ])
                             ->fillForm(fn ($get) => [
-                                'status' => $get("respuestas.criterio_{$i}.status") ?? 'En Revisión',
-                                'feedback' => $get("respuestas.criterio_{$i}.feedback"),
+                                'estatus' => $get("respuestas.criterio_{$i}.status") ?? 'En Revisión',
+                                'retroalimentacion' => $get("respuestas.criterio_{$i}.feedback"),
                             ])
-                            ->action(function (array $data, $set, $record) use ($i) {
-                                $set("respuestas.criterio_{$i}.status", $data['status']);
-                                $set("respuestas.criterio_{$i}.feedback", $data['feedback']);
+                            ->action(function (array $data, $set, $record) use ($i, $elementos) {
+                                if ($data['estatus'] === 'Validado') {
+                                    $numElements = count($elementos);
+                                    $respuestas = $record ? ($record->respuestas ?? []) : [];
+                                    
+                                    for ($e = 1; $e <= $numElements; $e++) {
+                                        $score = $respuestas["criterio_{$i}"]["elemento_{$e}"]['score'] ?? null;
+                                        if ($score === null || $score === '') {
+                                            throw \Illuminate\Validation\ValidationException::withMessages([
+                                                'estatus' => 'No puedes validar el criterio si existen políticas sin evaluar.',
+                                            ]);
+                                        }
+                                    }
+                                }
+
+                                $set("respuestas.criterio_{$i}.status", $data['estatus']);
+                                $set("respuestas.criterio_{$i}.feedback", $data['retroalimentacion']);
 
                                 if ($record) {
                                     $respuestas = $record->respuestas ?? [];
@@ -727,8 +749,8 @@ class AutoevaluacionForm
                                     if (!isset($respuestas["criterio_{$i}"]) || !is_array($respuestas["criterio_{$i}"])) {
                                         $respuestas["criterio_{$i}"] = [];
                                     }
-                                    $respuestas["criterio_{$i}"]['status'] = $data['status'];
-                                    $respuestas["criterio_{$i}"]['feedback'] = $data['feedback'];
+                                    $respuestas["criterio_{$i}"]['status'] = $data['estatus'];
+                                    $respuestas["criterio_{$i}"]['feedback'] = $data['retroalimentacion'];
                                     $record->update(['respuestas' => $respuestas]);
 
                                     \Filament\Notifications\Notification::make()
@@ -738,6 +760,7 @@ class AutoevaluacionForm
                                 }
                             })
                     ])
+                    ->key("evaluar_criterio_actions_{$i}")
                     ->visible(fn () => filament()->getCurrentPanel()->getId() === 'admin')
                     ->columnSpan('full')
                     ->extraAttributes(['style' => 'margin-bottom: 1.5rem;']),

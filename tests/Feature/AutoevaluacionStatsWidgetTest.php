@@ -174,4 +174,67 @@ class AutoevaluacionStatsWidgetTest extends TestCase
         ])
             ->assertSuccessful();
     }
+
+    public function test_evaluar_criterio_action_validation(): void
+    {
+        $user = \App\Models\User::create([
+            'name' => 'Admin Test User 2',
+            'email' => 'admin2@test.com',
+            'password' => bcrypt('password'),
+        ]);
+
+        $empresa = Empresa::create([
+            'nombre_empresa' => 'Empresa Test Page 3',
+            'municipio' => 'Saltillo',
+            'dias_horario_servicio' => 'Lunes-Viernes',
+            'nombre_director' => 'Director Test',
+            'nombre_responsable' => 'Responsable Test',
+            'correo' => 'page3@test.com',
+            'telefono' => '1234567890',
+            'rubro' => 'Servicios',
+            'numero_trabajadores' => 10,
+            'password' => bcrypt('password'),
+        ]);
+
+        // Autoevaluacion initially has no answers
+        $autoevaluacion = Autoevaluacion::create([
+            'empresa_id' => $empresa->id,
+            'estatus' => 'Borrador',
+            'respuestas' => [],
+        ]);
+
+        $this->actingAs($user, 'web');
+        \Filament\Facades\Filament::setCurrentPanel(\Filament\Facades\Filament::getPanel('admin'));
+
+        // 1. Trying to validate with unevaluated sub-policies should fail
+        Livewire::test(\App\Filament\Resources\Autoevaluacions\Pages\ViewAutoevaluacion::class, [
+            'record' => $autoevaluacion->getKey(),
+        ])
+            ->callFormComponentAction('evaluar_criterio_actions_1', 'evaluar_criterio_1', [
+                'estatus' => 'Validado',
+                'retroalimentacion' => 'Test feedback',
+            ])
+            ->assertHasErrors(['estatus']);
+
+        // 2. Filling answers for all 7 elements of Criterion 1
+        $respuestas = [];
+        for ($e = 1; $e <= 7; $e++) {
+            $respuestas['criterio_1']["elemento_{$e}"] = ['score' => '10'];
+        }
+        $autoevaluacion->update(['respuestas' => $respuestas]);
+
+        // 3. Now validating Criterion 1 should succeed
+        Livewire::test(\App\Filament\Resources\Autoevaluacions\Pages\ViewAutoevaluacion::class, [
+            'record' => $autoevaluacion->getKey(),
+        ])
+            ->callFormComponentAction('evaluar_criterio_actions_1', 'evaluar_criterio_1', [
+                'estatus' => 'Validado',
+                'retroalimentacion' => 'Excelente trabajo',
+            ])
+            ->assertHasNoFormComponentActionErrors();
+
+        $autoevaluacion->refresh();
+        $this->assertEquals('Validado', $autoevaluacion->respuestas['criterio_1']['status']);
+        $this->assertEquals('Excelente trabajo', $autoevaluacion->respuestas['criterio_1']['feedback']);
+    }
 }
