@@ -49,6 +49,16 @@ class AutoevaluacionResource extends Resource
             ->where('empresa_id', auth()->id());
     }
 
+    public static function canDelete(\Illuminate\Database\Eloquent\Model $record): bool
+    {
+        return false;
+    }
+
+    public static function canDeleteAny(): bool
+    {
+        return false;
+    }
+
     public static function getPages(): array
     {
         return [
@@ -58,3 +68,4 @@ class AutoevaluacionResource extends Resource
         ];
     }
 }
+

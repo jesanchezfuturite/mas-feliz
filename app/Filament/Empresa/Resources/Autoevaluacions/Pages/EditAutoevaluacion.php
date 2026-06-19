@@ -3,7 +3,6 @@
 namespace App\Filament\Empresa\Resources\Autoevaluacions\Pages;
 
 use App\Filament\Empresa\Resources\Autoevaluacions\AutoevaluacionResource;
-use Filament\Actions\DeleteAction;
 use Filament\Resources\Pages\EditRecord;
 
 class EditAutoevaluacion extends EditRecord
@@ -34,17 +33,6 @@ class EditAutoevaluacion extends EditRecord
     {
         return [
             \App\Filament\Empresa\Resources\Autoevaluacions\Widgets\AutoevaluacionStatsWidget::class,
-        ];
-    }
-
-    protected function getHeaderActions(): array
-    {
-        if (in_array($this->record->estatus, ['En revisión', 'Validado'])) {
-            return [];
-        }
-
-        return [
-            DeleteAction::make(),
         ];
     }
 
