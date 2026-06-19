@@ -94,6 +94,12 @@ class EmpresaResource extends Resource
                                 TextEntry::make('retroalimentacion_gobierno')
                                     ->label('Retroalimentación del Gobierno')
                                     ->placeholder('Sin comentarios'),
+                                TextEntry::make('ruta_pdf')
+                                    ->label('Distintivo Otorgado')
+                                    ->formatStateUsing(fn () => 'Descargar PDF')
+                                    ->url(fn ($record) => !empty($record?->ruta_pdf) ? '/storage/' . $record->ruta_pdf : null)
+                                    ->openUrlInNewTab()
+                                    ->visible(fn ($record) => !empty($record?->ruta_pdf)),
                             ])
                             ->columns(2),
 

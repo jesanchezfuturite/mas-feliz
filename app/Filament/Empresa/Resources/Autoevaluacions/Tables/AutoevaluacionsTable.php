@@ -3,8 +3,6 @@
 namespace App\Filament\Empresa\Resources\Autoevaluacions\Tables;
 
 use Filament\Actions\Action;
-use Filament\Actions\BulkActionGroup;
-use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
@@ -38,7 +36,7 @@ class AutoevaluacionsTable
                     ->color(fn (string $state): string => match ($state) {
                         'Borrador' => 'gray',
                         'En revisión' => 'warning',
-                        'Autorizada' => 'success',
+                        'Validado' => 'success',
                         default => 'primary',
                     }),
 
@@ -105,11 +103,6 @@ class AutoevaluacionsTable
                             ])->output();
                         }, 'Acuse_Autoevaluacion_' . $record->empresa->folio . '.pdf');
                     }),
-            ])
-            ->toolbarActions([
-                BulkActionGroup::make([
-                    DeleteBulkAction::make(),
-                ]),
             ]);
     }
 }

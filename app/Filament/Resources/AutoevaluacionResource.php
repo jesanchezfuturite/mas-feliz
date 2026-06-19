@@ -15,8 +15,13 @@ class AutoevaluacionResource extends Resource
 
     public static function form(Schema $schema): Schema
     {
-        // Re-use the exact same form from the Empresa panel, but disabled
-        return AutoevaluacionForm::configure($schema)->disabled();
+        // Re-use the exact same form from the Empresa panel
+        return AutoevaluacionForm::configure($schema);
+    }
+
+    public static function canView(\Illuminate\Database\Eloquent\Model $record): bool
+    {
+        return in_array($record->estatus, ['En revisión', 'Validado']);
     }
 
     public static function getPages(): array

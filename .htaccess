@@ -16,6 +16,7 @@
 
 # 3. Seguridad: Denegar acceso a carpetas del sistema
 RedirectMatch 404 ^/\.(git|github|cursor|vscode|zed)/
+
 RedirectMatch 404 ^/(app|bootstrap|config|database|resources|routes|storage|tests|vendor)/
 
 # php -- BEGIN cPanel-generated handler, do not edit
@@ -36,3 +37,5 @@ Require valid-user
 #----------------------------------------------------------------cp:ppd
 # End section managed by cPanel: Password Protected Directories -cp:ppd
 #----------------------------------------------------------------cp:ppd
+=======
+RedirectMatch 404 ^/(app|bootstrap|config|database|resources|routes|tests|vendor)/

@@ -45,7 +45,7 @@ class AutoevaluacionForm
         ];
 
         $requisitos = [
-            1 => 'NECESARIO',
+            1 => 'INDISPENSABLE',
             2 => 'NECESARIO',
             3 => 'NECESARIO',
             4 => 'INDISPENSABLE',
@@ -53,7 +53,25 @@ class AutoevaluacionForm
             6 => 'NECESARIO',
             7 => 'NECESARIO',
             8 => 'NECESARIO',
+            9 => 'INDISPENSABLE',
+            10 => 'NECESARIO',
+            11 => 'NECESARIO',
+            12 => 'NECESARIO',
+            13 => 'NECESARIO',
+            14 => 'NECESARIO',
+            15 => 'INDISPENSABLE',
+            16 => 'INDISPENSABLE',
+            17 => 'NECESARIO',
+            18 => 'NECESARIO',
+            19 => 'NECESARIO',
+            20 => 'DESEABLE',
         ];
+
+        $indispensablesComponents = [];
+        $necesariosFortalecimiento = [];
+        $necesariosPrevencion = [];
+        $necesariosCuidado = [];
+        $deseablesComponents = [];
 
         for ($i = 1; $i <= 20; $i++) {
             if ($i === 1) {
@@ -475,6 +493,7 @@ class AutoevaluacionForm
                 ];
             }
 
+            $isAdmin = filament()->getCurrentPanel()->getId() === 'admin';
             $gridElementos = [];
             foreach ($elementos as $index => $item) {
                 $elemId = $index + 1;
@@ -487,6 +506,10 @@ class AutoevaluacionForm
                                 $comentario = $get("respuestas.criterio_{$i}.elemento_{$elemId}.comentario");
                                 $archivo = $get("respuestas.criterio_{$i}.elemento_{$elemId}.archivo");
                                 $feedback = $get("respuestas.criterio_{$i}.elemento_{$elemId}.feedback");
+                                $calificacion = $get("respuestas.criterio_{$i}.elemento_{$elemId}.calificacion_politica");
+                                $evaluadorEmail = $get("respuestas.criterio_{$i}.elemento_{$elemId}.evaluador_email");
+
+                                $tooltipAttr = $evaluadorEmail ? " title=\"Evaluado por: {$evaluadorEmail}\"" : "";
 
                                 $badges = [];
                                 if ($comentario) {
@@ -496,8 +519,13 @@ class AutoevaluacionForm
                                     $url = \Illuminate\Support\Facades\Storage::url($archivo);
                                     $badges[] = "<a href=\"{$url}\" target=\"_blank\" style=\"background-color: #f0fdf4; color: #15803d; font-size: 0.75rem; padding: 0.125rem 0.5rem; border-radius: 9999px; font-weight: 500; border: 1px solid #bbf7d0; text-decoration: none; cursor: pointer; display: inline-block;\">📎 Evidencia</a>";
                                 }
+                                if ($calificacion === 'Aprobado') {
+                                    $badges[] = "<span{$tooltipAttr} style=\"background-color: #f0fdf4; color: #166534; font-size: 0.75rem; padding: 0.125rem 0.5rem; border-radius: 9999px; font-weight: 600; border: 1px solid #bbf7d0; cursor: help;\">✅ Aprobado</span>";
+                                } elseif ($calificacion === 'Rechazado') {
+                                    $badges[] = "<span{$tooltipAttr} style=\"background-color: #fef2f2; color: #991b1b; font-size: 0.75rem; padding: 0.125rem 0.5rem; border-radius: 9999px; font-weight: 600; border: 1px solid #fecaca; cursor: help;\">❌ Rechazado</span>";
+                                }
                                 if ($feedback) {
-                                    $badges[] = '<span style="background-color: #fdf4ff; color: #a21caf; font-size: 0.75rem; padding: 0.125rem 0.5rem; border-radius: 9999px; font-weight: 500; border: 1px solid #fbcfe8;">💬 Retroalimentación</span>';
+                                    $badges[] = "<span{$tooltipAttr} style=\"background-color: #fdf4ff; color: #a21caf; font-size: 0.75rem; padding: 0.125rem 0.5rem; border-radius: 9999px; font-weight: 500; border: 1px solid #fbcfe8; cursor: help;\">💬 Retroalimentación</span>";
                                 }
 
                                 $badgesHtml = !empty($badges) ? '<div style="margin-top: 0.75rem; display: flex; gap: 0.5rem; flex-wrap: wrap;">' . implode('', $badges) . '</div>' : '';
@@ -512,13 +540,12 @@ class AutoevaluacionForm
 
                         Select::make("respuestas.criterio_{$i}.elemento_{$elemId}.score")
                             ->hiddenLabel()
-                            ->disabled(fn ($record) => $record && $record->estatus === 'Autorizada')
-                            ->options(function () {
-                                $isAdmin = filament()->getCurrentPanel()->getId() === 'admin';
+                            ->disabled(fn ($record) => $isAdmin || ($record && in_array($record->estatus, ['En revisión', 'Validado'])))
+                            ->options(function () use ($isAdmin) {
                                 $opts = [
-                                    '10' => 'Cumple (10)',
-                                    '5' => 'En proceso (5)',
-                                    '0' => 'No cumple (0)',
+                                    '10' => 'Cumple (10 puntos)',
+                                    '5' => 'En proceso (5 puntos)',
+                                    '0' => 'No cumple (0 puntos)',
                                     'NA' => 'No aplica',
                                 ];
                                 if ($isAdmin) {
@@ -533,11 +560,17 @@ class AutoevaluacionForm
                             })
                             ->placeholder('Seleccione una opción')
                             ->columnSpan(3)
-                            ->extraAttributes(['style' => 'display: flex; flex-direction: column; justify-content: flex-start; height: 100%;']),
+                            ->extraAttributes(['style' => 'display: flex; flex-direction: column; justify-content: flex-start; height: 100%;'])
+                            ->live()
+                            ->afterStateUpdated(function ($state, $get, $livewire) {
+                                $livewire->dispatch('formUpdated', respuestas: $get('respuestas') ?? []);
+                            }),
 
                         // Hidden fields that store the data inside the main form state
                         Hidden::make("respuestas.criterio_{$i}.elemento_{$elemId}.comentario"),
                         Hidden::make("respuestas.criterio_{$i}.elemento_{$elemId}.archivo"),
+                        Hidden::make("respuestas.criterio_{$i}.elemento_{$elemId}.calificacion_politica"),
+                        Hidden::make("respuestas.criterio_{$i}.elemento_{$elemId}.evaluador_email"),
                         Hidden::make("respuestas.criterio_{$i}.elemento_{$elemId}.feedback"),
 
                         Actions::make([
@@ -552,15 +585,14 @@ class AutoevaluacionForm
                                 ->extraModalWindowAttributes([
                                     'style' => 'background-color: #ffffff !important; background: #ffffff !important;'
                                 ])
-                                ->modalSubmitAction(fn ($action) => $action->hidden(fn ($record) => $record && $record->estatus === 'Autorizada'))
-                                ->modalCancelAction(fn ($action) => $action->hidden(fn ($record) => $record && $record->estatus === 'Autorizada'))
-                                ->form(function () {
-                                    $isAdmin = filament()->getCurrentPanel()->getId() === 'admin';
+                                ->modalSubmitAction(fn ($action) => $action->hidden(fn ($record) => ! $isAdmin && $record && in_array($record->estatus, ['En revisión', 'Validado'])))
+                                ->modalCancelAction(fn ($action) => $action->hidden(fn ($record) => ! $isAdmin && $record && in_array($record->estatus, ['En revisión', 'Validado'])))
+                                ->form(function () use ($isAdmin) {
                                     return [
                                         Textarea::make('comentario')
                                             ->label('Comentario')
                                             ->rows(3)
-                                            ->disabled(fn ($record) => $isAdmin || ($record && $record->estatus === 'Autorizada')),
+                                            ->disabled(fn ($record) => $isAdmin || ($record && in_array($record->estatus, ['En revisión', 'Validado']))),
                                         
                                         Placeholder::make('archivo_link')
                                             ->label('Ver Evidencia')
@@ -573,33 +605,46 @@ class AutoevaluacionForm
                                                 $url = \Illuminate\Support\Facades\Storage::url($archivo);
                                                 return new \Illuminate\Support\HtmlString("<a href=\"{$url}\" target=\"_blank\" style=\"color: #2563eb; text-decoration: underline; font-weight: 500;\">Ver/Descargar Archivo</a>");
                                             })
-                                            ->visible(fn ($record) => $isAdmin || ($record && $record->estatus === 'Autorizada')),
+                                            ->visible(fn ($record) => $isAdmin || ($record && in_array($record->estatus, ['En revisión', 'Validado']))),
                                             
                                         FileUpload::make('archivo')
                                             ->label('Subir Evidencia')
                                             ->disk('public')
                                             ->directory('autoevaluaciones_evidencia')
-                                            ->visible(fn ($record) => ! ($isAdmin || ($record && $record->estatus === 'Autorizada'))),
+                                            ->visible(fn ($record) => ! ($isAdmin || ($record && in_array($record->estatus, ['En revisión', 'Validado'])))),
+
+                                        Select::make('calificacion_politica')
+                                            ->label('Calificación de la política')
+                                            ->options([
+                                                'Aprobado' => 'Aprobar',
+                                                'Rechazado' => 'Rechazar',
+                                            ])
+                                            ->required(fn () => $isAdmin)
+                                            ->live()
+                                            ->disabled(fn ($record) => ! $isAdmin || ($record && $record->estatus === 'Validado')),
                                             
                                         Textarea::make('feedback')
                                             ->label('Retroalimentación del evaluador')
                                             ->rows(2)
-                                            ->disabled(fn ($record) => ! $isAdmin || ($record && $record->estatus === 'Autorizada')),
+                                            ->required(fn ($get) => $get('calificacion_politica') === 'Rechazado')
+                                            ->disabled(fn ($record) => ! $isAdmin || ($record && $record->estatus === 'Validado')),
                                     ];
                                 })
                                 ->fillForm(fn ($get) => [
                                     'comentario' => $get("respuestas.criterio_{$i}.elemento_{$elemId}.comentario"),
                                     'archivo' => $get("respuestas.criterio_{$i}.elemento_{$elemId}.archivo"),
+                                    'calificacion_politica' => $get("respuestas.criterio_{$i}.elemento_{$elemId}.calificacion_politica"),
                                     'feedback' => $get("respuestas.criterio_{$i}.elemento_{$elemId}.feedback"),
                                 ])
-                                ->action(function (array $data, $set, $record) use ($i, $elemId) {
-                                    $isAdmin = filament()->getCurrentPanel()->getId() === 'admin';
-                                    
+                                ->action(function (array $data, $set, $record) use ($i, $elemId, $isAdmin) {
                                     if (array_key_exists('comentario', $data)) {
                                         $set("respuestas.criterio_{$i}.elemento_{$elemId}.comentario", $data['comentario']);
                                     }
                                     if (array_key_exists('archivo', $data)) {
                                         $set("respuestas.criterio_{$i}.elemento_{$elemId}.archivo", $data['archivo']);
+                                    }
+                                    if (array_key_exists('calificacion_politica', $data)) {
+                                        $set("respuestas.criterio_{$i}.elemento_{$elemId}.calificacion_politica", $data['calificacion_politica']);
                                     }
                                     if (array_key_exists('feedback', $data)) {
                                         $set("respuestas.criterio_{$i}.elemento_{$elemId}.feedback", $data['feedback']);
@@ -608,13 +653,23 @@ class AutoevaluacionForm
                                     // If admin, save feedback directly since the form is read-only
                                     if ($record && $isAdmin) {
                                         $respuestas = $record->respuestas ?? [];
+                                        if (array_key_exists('calificacion_politica', $data)) {
+                                            $respuestas["criterio_{$i}"]["elemento_{$elemId}"]['calificacion_politica'] = $data['calificacion_politica'];
+                                        }
                                         if (array_key_exists('feedback', $data)) {
                                             $respuestas["criterio_{$i}"]["elemento_{$elemId}"]['feedback'] = $data['feedback'];
                                         }
+                                        
+                                        $evaluadorEmail = auth()->user()?->email;
+                                        $respuestas["criterio_{$i}"]["elemento_{$elemId}"]['evaluador_email'] = $evaluadorEmail;
+                                        $set("respuestas.criterio_{$i}.elemento_{$elemId}.evaluador_email", $evaluadorEmail);
+
                                         $record->update(['respuestas' => $respuestas]);
                                     }
                                 })
-                        ])->columnSpan(1)->extraAttributes(['style' => 'justify-content: flex-start !important; width: 100%; margin-top: 0 !important; margin-bottom: 0 !important;'])
+                        ])
+                            ->key("detalles_actions_{$i}_{$elemId}")
+                            ->columnSpan(1)->extraAttributes(['style' => 'justify-content: flex-start !important; width: 100%; margin-top: 0 !important; margin-bottom: 0 !important;'])
                     ])
                     ->extraAttributes([
                         'style' => 'border: 1px solid #f3f4f6; border-radius: 0.5rem; padding: 1rem; margin-bottom: 1rem; align-items: center; background-color: #ffffff; box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);'
@@ -624,35 +679,172 @@ class AutoevaluacionForm
             $categoria = $categorias[$i] ?? '';
             $requisito = $requisitos[$i] ?? null;
 
+            $badgeStyle = match($requisito) {
+                'INDISPENSABLE' => "background-color: #fef2f2; color: #dc2626; border: 1px solid #fca5a5;",
+                'NECESARIO' => "background-color: #fffbeb; color: #d97706; border: 1px solid #fcd34d;",
+                'DESEABLE' => "background-color: #ecfdf5; color: #059669; border: 1px solid #6ee7b7;",
+                default => "background-color: #f3f4f6; color: #4b5563; border: 1px solid #d1d5db;",
+            };
+
             $requisitoHtml = $requisito 
-                ? "<span style='background-color: #fff3e0; color: #e65100; border: 1px solid #ffcc80; padding: 0.25rem 0.75rem; border-radius: 9999px; font-weight: 700; font-size: 0.75rem; letter-spacing: 0.05em;'>{$requisito}</span>" 
+                ? "<span style='{$badgeStyle} padding: 0.25rem 0.75rem; border-radius: 9999px; font-weight: 700; font-size: 0.75rem; letter-spacing: 0.05em;'>{$requisito}</span>" 
                 : "";
 
-            $tabs[] = Tab::make("Criterio {$i}")
-                ->label("Criterio {$i}")
+            $sectionTitle = str_starts_with($mainText, "Criterio {$i}.-") 
+                ? $mainText 
+                : "Criterio {$i}.- {$mainText}";
+
+            $criterioSection = \Filament\Schemas\Components\Section::make($sectionTitle)
+                ->description(new HtmlString("
+                    <div style='display: flex; justify-content: flex-end; align-items: center; gap: 0.75rem; margin-top: 0.25rem;'>
+                        {$requisitoHtml}
+                        <span style='color: #556ee6; font-weight: 800; font-size: 0.875rem; letter-spacing: 0.05em;'>{$categoria}</span>
+                    </div>
+                "))
+                ->collapsible()
+                ->collapsed()
                 ->schema([
-                    Placeholder::make("titulo_criterio_{$i}")
+                    Placeholder::make("evaluacion_criterio_status_{$i}")
                         ->hiddenLabel()
-                        ->content(new HtmlString("
-                            <div style='display: flex; flex-direction: column; margin-bottom: 1rem;'>
-                                <h3 style='font-size: 1.25rem; font-weight: 700; color: #111827; margin: 0; padding-bottom: 0.5rem; border-bottom: 2px solid #e5e7eb;'>{$mainText}</h3>
-                                <div style='display: flex; justify-content: flex-end; align-items: center; gap: 0.75rem; margin-top: 0.75rem;'>
-                                    {$requisitoHtml}
-                                    <span style='color: #556ee6; font-weight: 800; font-size: 0.875rem; letter-spacing: 0.05em;'>{$categoria}</span>
+                        ->content(function ($get) use ($i) {
+                            $status = $get("respuestas.criterio_{$i}.status") ?? 'Borrador';
+                            $feedback = $get("respuestas.criterio_{$i}.feedback");
+                            $evaluadorEmail = $get("respuestas.criterio_{$i}.evaluador_email");
+
+                            $tooltipAttr = $evaluadorEmail ? " title=\"Evaluado por: {$evaluadorEmail}\"" : "";
+
+                            $statusBadge = match($status) {
+                                'Aprobado', 'Validado' => "<span{$tooltipAttr} style=\"background-color: #ecfdf5; color: #065f46; font-size: 0.875rem; padding: 0.25rem 0.75rem; border-radius: 9999px; font-weight: 700; border: 1px solid #a7f3d0; cursor: help;\">Aprobado</span>",
+                                'En Revisión' => "<span{$tooltipAttr} style=\"background-color: #fffbeb; color: #92400e; font-size: 0.875rem; padding: 0.25rem 0.75rem; border-radius: 9999px; font-weight: 700; border: 1px solid #fde68a; cursor: help;\">En Revisión</span>",
+                                'Rechazado' => "<span{$tooltipAttr} style=\"background-color: #fef2f2; color: #991b1b; font-size: 0.875rem; padding: 0.25rem 0.75rem; border-radius: 9999px; font-weight: 700; border: 1px solid #fecaca; cursor: help;\">Rechazado</span>",
+                                default => '<span style="background-color: #f3f4f6; color: #374151; font-size: 0.875rem; padding: 0.25rem 0.75rem; border-radius: 9999px; font-weight: 700; border: 1px solid #e5e7eb;">Pendiente de Evaluar</span>',
+                            };
+
+                            $feedbackHtml = $feedback 
+                                ? "<div style='margin-top: 0.5rem; padding: 0.75rem; background-color: #f9fafb; border-left: 4px solid #3b82f6; border-radius: 0.25rem; font-size: 0.875rem; color: #4b5563;'><strong style='color: #1f2937;'>Retroalimentación del Evaluador:</strong>" . ($evaluadorEmail ? " <span style='font-size: 0.75rem; color: #6b7280; font-weight: normal;'>(Otorgado por: {$evaluadorEmail})</span>" : "") . "<br>{$feedback}</div>" 
+                                : "";
+
+                            return new HtmlString("
+                                <div style='margin-bottom: 1.5rem; padding: 1rem; border: 1px solid #e5e7eb; border-radius: 0.5rem; background-color: #f9fafb;'>
+                                    <div style='display: flex; align-items: center; gap: 1rem;'>
+                                        <span style='font-weight: 600; color: #374151;'>Estatus de Evaluación del Criterio:</span>
+                                        {$statusBadge}
+                                    </div>
+                                    {$feedbackHtml}
                                 </div>
-                            </div>
-                        ")),
+                            ");
+                        }),
+
+                    Actions::make([
+                        Action::make("evaluar_criterio_{$i}")
+                            ->label('Evaluar Criterio')
+                            ->icon('heroicon-m-check-badge')
+                            ->color('primary')
+                            ->visible(fn () => filament()->getCurrentPanel()->getId() === 'admin')
+                            ->disabled(fn ($record) => $record && ($record->respuestas["criterio_{$i}"]['status'] ?? null) === 'Aprobado')
+                            ->modalHeading("Evaluar Criterio {$i}")
+                            ->modalSubmitActionLabel('Guardar Evaluación')
+                            ->form(fn ($record) => [
+                                Textarea::make('retroalimentacion_general')
+                                    ->label('Retroalimentación General')
+                                    ->rows(3),
+                            ])
+                            ->fillForm(fn ($get) => [
+                                'retroalimentacion_general' => $get("respuestas.criterio_{$i}.feedback"),
+                            ])
+                            ->action(function (array $data, $set, $record) use ($i, $elementos) {
+                                $respuestas = $record ? ($record->respuestas ?? []) : [];
+                                $numElements = count($elementos);
+                                $allApproved = true;
+
+                                for ($e = 1; $e <= $numElements; $e++) {
+                                    $calif = $respuestas["criterio_{$i}"]["elemento_{$e}"]['calificacion_politica'] ?? null;
+                                    if ($calif !== 'Aprobado') {
+                                        $allApproved = false;
+                                        break;
+                                    }
+                                }
+
+                                $status = $allApproved ? 'Aprobado' : 'Rechazado';
+
+                                $set("respuestas.criterio_{$i}.status", $status);
+                                $set("respuestas.criterio_{$i}.feedback", $data['retroalimentacion_general']);
+
+                                $evaluadorEmail = auth()->user()?->email;
+                                $set("respuestas.criterio_{$i}.evaluador_email", $evaluadorEmail);
+
+                                if ($record) {
+                                    $respuestas = $record->respuestas ?? [];
+                                    if (!is_array($respuestas)) {
+                                        $respuestas = [];
+                                    }
+                                    if (!isset($respuestas["criterio_{$i}"]) || !is_array($respuestas["criterio_{$i}"])) {
+                                        $respuestas["criterio_{$i}"] = [];
+                                    }
+                                    $respuestas["criterio_{$i}"]['status'] = $status;
+                                    $respuestas["criterio_{$i}"]['feedback'] = $data['retroalimentacion_general'];
+                                    $respuestas["criterio_{$i}"]['evaluador_email'] = $evaluadorEmail;
+                                    $record->update(['respuestas' => $respuestas]);
+
+                                    \Filament\Notifications\Notification::make()
+                                        ->title("Criterio {$i} evaluado automáticamente como {$status}")
+                                        ->success()
+                                        ->send();
+                                }
+                            })
+                    ])
+                    ->key("evaluar_criterio_actions_{$i}")
+                    ->visible(fn () => filament()->getCurrentPanel()->getId() === 'admin')
+                    ->columnSpan('full')
+                    ->extraAttributes(['style' => 'margin-bottom: 1.5rem;']),
+
                     ...$gridElementos,
                 ]);
+
+            if ($requisito === 'INDISPENSABLE') {
+                $indispensablesComponents[] = $criterioSection;
+            } elseif ($requisito === 'DESEABLE') {
+                $deseablesComponents[] = $criterioSection;
+            } else {
+                if ($categoria === '+FORTALECIMIENTO') {
+                    $necesariosFortalecimiento[] = $criterioSection;
+                } elseif ($categoria === '+PREVENCIÓN') {
+                    $necesariosPrevencion[] = $criterioSection;
+                } else {
+                    $necesariosCuidado[] = $criterioSection;
+                }
+            }
         }
 
         return $schema
             ->columns(1)
             ->components([
-                Tabs::make('Criterios')
-                    ->tabs($tabs)
-                    ->columnSpan('full')
-                    ->extraAttributes(['class' => 'antigraviti-sidebar-tabs']),
+                Tabs::make('Tipos de Criterios')
+                    ->tabs([
+                        Tab::make('Criterios Indispensables')
+                            ->icon('heroicon-o-shield-check')
+                            ->schema($indispensablesComponents),
+                        
+                        Tab::make('Criterios Necesarios')
+                            ->icon('heroicon-o-document-duplicate')
+                            ->schema([
+                                Tabs::make('Ejes')
+                                    ->tabs([
+                                        Tab::make('Fortalecimiento')
+                                            ->schema($necesariosFortalecimiento),
+                                        Tab::make('Prevención')
+                                            ->schema($necesariosPrevencion),
+                                        Tab::make('Cuidado y Atención')
+                                            ->schema($necesariosCuidado),
+                                    ])
+                                    ->columnSpan('full')
+                            ]),
+                        
+                        Tab::make('Criterios Deseables')
+                            ->icon('heroicon-o-sparkles')
+                            ->schema($deseablesComponents),
+                    ])
+                    ->columnSpan('full'),
 
                 Placeholder::make('custom-css')
                     ->content(new HtmlString('<div style="display: none;"><style>
@@ -660,57 +852,6 @@ class AutoevaluacionForm
                             background-color: transparent !important;
                             padding: 0 !important;
                             box-shadow: none !important;
-                        }
-                        
-                        /* Antigraviti Sidebar Layout for Tabs */
-                        .antigraviti-sidebar-tabs {
-                            display: flex;
-                            flex-direction: row;
-                            gap: 1rem;
-                            align-items: flex-start;
-                            width: 100%;
-                            max-width: 100%;
-                            box-sizing: border-box;
-                        }
-                        
-                        /* Style the tab navigation list (Left Sidebar) */
-                        .antigraviti-sidebar-tabs > nav {
-                            flex-direction: column !important;
-                            min-width: 175px;
-                            width: 175px;
-                            border-right: 1px solid #e5e7eb;
-                            padding-right: 0.5rem;
-                            overflow-x: hidden;
-                        }
-                        
-                        /* Adjust tab buttons inside sidebar */
-                        .antigraviti-sidebar-tabs > nav button {
-                            justify-content: flex-start !important;
-                            text-align: left;
-                            padding: 0.75rem 1rem !important;
-                            border-radius: 0.5rem;
-                            border-bottom: none !important;
-                            margin-bottom: 0.25rem;
-                            white-space: normal !important;
-                        }
-                        
-                        /* Active tab styling */
-                        .antigraviti-sidebar-tabs > nav button[aria-selected="true"] {
-                            background-color: #eff6ff;
-                            color: #1d4ed8;
-                            font-weight: 600;
-                            box-shadow: inset 3px 0 0 0 #3b82f6;
-                        }
-                        
-                        /* Style the content panel (Right Side) */
-                        .antigraviti-sidebar-tabs > div[role="tabpanel"] {
-                            flex: 1;
-                            min-width: 0; /* Prevent flex overflow */
-                            background: white;
-                            border-radius: 1rem;
-                            padding: 1.5rem;
-                            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
-                            box-sizing: border-box;
                         }
                         
                         /* Force Modal Background to be Solid White */
@@ -733,3 +874,5 @@ class AutoevaluacionForm
             ]);
     }
 }
+
+

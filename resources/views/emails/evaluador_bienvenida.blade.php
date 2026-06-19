@@ -13,12 +13,12 @@
                     
                     <!-- Top Section -->
                     <tr>
-                        <td style="background-color: #1EBBA3; padding: 40px 30px;">
+                        <td style="background-color: #f1cb5a; padding: 40px 30px;">
                             <table width="100%" border="0" cellspacing="0" cellpadding="0">
                                 <tr>
                                     <td width="60%" style="vertical-align: middle;">
                                         <h1 style="color: #ffffff; margin: 0; font-size: 38px; font-weight: 900; line-height: 1.1; letter-spacing: -1px;">
-                                            Gracias por<br>registrarte<br>al Distintivo
+                                            Bienvenido<br>al equipo<br>+Feliz
                                         </h1>
                                     </td>
                                     <td width="40%" style="vertical-align: middle; text-align: right;">
@@ -34,19 +34,19 @@
                     <tr>
                         <td style="background-color: #FCF6E9; padding: 40px 30px; color: #000000;">
                             <p style="font-family: 'Montserrat', Helvetica, Arial, sans-serif; font-size: 16px; line-height: 24px; font-weight: 400; text-align: justify; color: #333333; margin-top: 0; margin-bottom: 25px;">
-                                El Gobierno del Estado de Coahuila, a través de la Oficina Inspira Coahuila, la Secretaría de Economía y la Secretaría de Salud, agradece tu interés en formar parte de esta iniciativa.
+                                Hola <strong>{{ $evaluador->nombres }} {{ $evaluador->apellidos }}</strong>, el Gobierno del Estado de Coahuila, a través de la Oficina Inspira Coahuila, la Secretaría de Economía y la Secretaría de Salud, agradece tu apoyo y colaboración en esta iniciativa.
                             </p>
                             <p style="font-family: 'Montserrat', Helvetica, Arial, sans-serif; font-size: 16px; line-height: 24px; font-weight: 400; text-align: justify; color: #333333; margin-bottom: 25px;">
                                 El Distintivo <strong>+Feliz</strong> es un reconocimiento estatal que distingue a las organizaciones comprometidas con la prevención, cuidado y fortalecimiento de la salud mental de sus colaboradores.
                             </p>
                             <p style="font-family: 'Montserrat', Helvetica, Arial, sans-serif; font-size: 16px; line-height: 24px; font-weight: 400; text-align: justify; color: #333333; margin-bottom: 35px;">
-                                Hemos recibido correctamente tu registro. Te compartimos tus datos para ingresar a la plataforma y dar seguimiento a tu postulación:
+                                Te compartimos tus credenciales como Evaluador para ingresar a la plataforma y dar seguimiento a las organizaciones:
                             </p>
                             
                             <table width="100%" border="0" cellspacing="0" cellpadding="5" style="margin-bottom: 40px;">
                                 <tr>
                                     <td width="30%" style="font-size: 16px; font-weight: 700; text-transform: uppercase;">USUARIO:</td>
-                                    <td style="font-size: 16px;">{{ $empresa->correo }}</td>
+                                    <td style="font-size: 16px;">{{ $evaluador->correo }}</td>
                                 </tr>
                                 <tr>
                                     <td style="font-size: 16px; font-weight: 700; text-transform: uppercase;">CONTRASEÑA:</td>
@@ -54,7 +54,7 @@
                                 </tr>
                                 <tr>
                                     <td style="font-size: 16px; font-weight: 700;">Liga de acceso:</td>
-                                    <td style="font-size: 16px;"><a href="{{ url('/tablero') }}" style="color: #000000; text-decoration: underline; font-weight: 700;">{{ url('/tablero') }}</a></td>
+                                    <td style="font-size: 16px;"><a href="{{ url('/admin') }}" style="color: #000000; text-decoration: underline; font-weight: 700;">{{ url('/admin') }}</a></td>
                                 </tr>
                             </table>
                             
