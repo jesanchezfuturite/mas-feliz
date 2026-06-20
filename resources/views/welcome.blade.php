@@ -42,7 +42,7 @@
             <nav class="flex items-center space-x-6">
                 <a href="#ambitos" class="text-sm font-medium text-slate-600 dark:text-slate-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors">Ámbitos</a>
                 <a href="#registro" class="text-sm font-medium text-slate-600 dark:text-slate-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors">Registro</a>
-                <a href="/admin" class="px-4 py-2 text-sm font-semibold text-white bg-[#92c644] hover:bg-[#84b33d] rounded-lg shadow-sm hover:shadow transition-all duration-150">
+                <a href="/tablero" class="px-4 py-2 text-sm font-semibold text-white bg-[#92c644] hover:bg-[#84b33d] rounded-lg shadow-sm hover:shadow transition-all duration-150">
                     Acceso Portal
                 </a>
             </nav>
