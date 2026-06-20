@@ -32,7 +32,7 @@ class EmpresaPanelProvider extends PanelProvider
             ->authPasswordBroker('empresas')
             ->brandName('+Feliz - Empresas')
             ->brandLogo(fn () => view('filament.logo'))
-            ->brandLogoHeight('3rem')
+            ->brandLogoHeight('5rem')
             ->favicon(asset('images/favicon.png'))
             ->colors([
                 'primary' => Color::hex('#556ee6'),
@@ -66,6 +66,10 @@ class EmpresaPanelProvider extends PanelProvider
                 Authenticate::class,
             ])
             ->renderHook(
+                \Filament\View\PanelsRenderHook::FOOTER,
+                fn (): string => view('filament.footer-logos')->render()
+            )
+            ->renderHook(
                 \Filament\View\PanelsRenderHook::HEAD_END,
                 fn (): string => \Illuminate\Support\Facades\Blade::render('<style>
                     .fi-sidebar { background-color: #2a3042 !important; }
@@ -74,6 +78,8 @@ class EmpresaPanelProvider extends PanelProvider
                     .fi-sidebar .fi-active > .fi-sidebar-item-btn { background-color: rgba(255, 255, 255, 0.1) !important; }
                     .fi-sidebar .fi-active > .fi-sidebar-item-btn, .fi-sidebar .fi-active > .fi-sidebar-item-btn * { color: #ffffff !important; font-weight: 600; }
                     .fi-sidebar .fi-sidebar-item-btn { color: #888ea8 !important; font-weight: 500 !important; padding: 0.75rem 1.25rem !important; margin: 0.25rem 0 !important; }
+                    .fi-sidebar .fi-sidebar-item-btn:hover { background-color: rgba(255, 255, 255, 0.1) !important; }
+                    .fi-sidebar .fi-sidebar-item-btn:hover, .fi-sidebar .fi-sidebar-item-btn:hover * { color: #ffffff !important; font-weight: 600; }
                     .fi-btn.fi-color-custom, .fi-btn.fi-color-primary { background-color: #556ee6 !important; padding: 0.75rem 2rem !important; height: auto !important; border-radius: 0.5rem !important; border: none !important; color: #ffffff !important; }
                     .fi-btn.fi-color-gray { padding: 0.75rem 2rem !important; height: auto !important; border-radius: 0.5rem !important; }
                     .fi-btn.fi-color-custom:hover, .fi-btn.fi-color-primary:hover { background-color: #4458b8 !important; color: #ffffff !important; }

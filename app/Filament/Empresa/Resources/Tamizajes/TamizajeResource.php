@@ -22,7 +22,7 @@ class TamizajeResource extends Resource
     protected static ?string $modelLabel = 'Evaluación Realizada';
     protected static ?string $pluralModelLabel = 'Evaluaciones Realizadas';
     protected static ?string $navigationLabel = 'Evaluaciones Realizadas';
-    protected static string|BackedEnum|null $navigationIcon = 'heroicon-o-clipboard-document-list';
+    protected static string|BackedEnum|null $navigationIcon = 'heroicon-o-document-check';
 
     public static function getEloquentQuery(): \Illuminate\Database\Eloquent\Builder
     {
