@@ -23,7 +23,7 @@
                                     </td>
                                     <td width="40%" style="vertical-align: middle; text-align: right;">
                                         <!-- Logo -->
-                                        <img src="{{ $message->embed(public_path('images/logo-mas-feliz.png')) }}" alt="+ Feliz" style="max-width: 150px; height: auto;">
+                                        <img src="{{ url('images/logo-mas-feliz.png') }}" alt="+ Feliz" style="max-width: 150px; height: auto;">
                                     </td>
                                 </tr>
                             </table>
@@ -79,22 +79,22 @@
                                         <table width="100%" border="0" cellspacing="0" cellpadding="0">
                                             <tr>
                                                 <td width="20.66%" align="center" valign="middle" style="padding: 0 4px;">
-                                                    <img src="{{ $message->embed(public_path('images/coahuila-negativo.png')) }}" alt="Coahuila" style="max-width: 100%; max-height: 55px; height: auto;">
+                                                    <img src="{{ url('images/coahuila-negativo.png') }}" alt="Coahuila" style="max-width: 100%; max-height: 55px; height: auto;">
                                                 </td>
                                                 <td width="12.66%" align="center" valign="middle" style="padding: 0 4px;">
-                                                    <img src="{{ $message->embed(public_path('images/pasos.png')) }}" alt="A pasos de gigante" style="max-width: 100%; max-height: 45px; height: auto; filter: brightness(0) invert(1); -webkit-filter: brightness(0) invert(1);">
+                                                    <img src="{{ url('images/pasos.png') }}" alt="A pasos de gigante" style="max-width: 100%; max-height: 45px; height: auto; filter: brightness(0) invert(1); -webkit-filter: brightness(0) invert(1);">
                                                 </td>
                                                 <td width="16.66%" align="center" valign="middle" style="padding: 0 4px;">
-                                                    <img src="{{ $message->embed(public_path('images/inspira-blanco.png')) }}" alt="Inspira Coahuila" style="max-width: 100%; max-height: 44px; height: auto;">
+                                                    <img src="{{ url('images/inspira-blanco.png') }}" alt="Inspira Coahuila" style="max-width: 100%; max-height: 44px; height: auto;">
                                                 </td>
                                                 <td width="16.66%" align="center" valign="middle" style="padding: 0 4px;">
-                                                    <img src="{{ $message->embed(public_path('images/sec-blanco.png')) }}" alt="SEC" style="max-width: 100%; max-height: 40px; height: auto;">
+                                                    <img src="{{ url('images/sec-blanco.png') }}" alt="SEC" style="max-width: 100%; max-height: 40px; height: auto;">
                                                 </td>
                                                 <td width="16.66%" align="center" valign="middle" style="padding: 0 4px;">
-                                                    <img src="{{ $message->embed(public_path('images/ss-blanco.png')) }}" alt="SS" style="max-width: 100%; max-height: 35px; height: auto;">
+                                                    <img src="{{ url('images/ss-blanco.png') }}" alt="SS" style="max-width: 100%; max-height: 35px; height: auto;">
                                                 </td>
                                                 <td width="16.66%" align="center" valign="middle" style="padding: 0 4px;">
-                                                    <img src="{{ $message->embed(public_path('images/sm-blanco.png')) }}" alt="Salud Mental" style="max-width: 100%; max-height: 55px; height: auto;">
+                                                    <img src="{{ url('images/sm-blanco.png') }}" alt="Salud Mental" style="max-width: 100%; max-height: 55px; height: auto;">
                                                 </td>
                                             </tr>
                                         </table>
