@@ -37,5 +37,3 @@ RedirectMatch 404 ^/(app|bootstrap|config|database|resources|routes|storage|test
 #----------------------------------------------------------------cp:ppd
 # End section managed by cPanel: Password Protected Directories -cp:ppd
 #----------------------------------------------------------------cp:ppd
-=======
-RedirectMatch 404 ^/(app|bootstrap|config|database|resources|routes|tests|vendor)/
