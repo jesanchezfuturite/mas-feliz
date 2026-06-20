@@ -30,6 +30,9 @@ class AppServiceProvider extends ServiceProvider
     {
         Schema::defaultStringLength(191);
 
+        // Force Spanish locale globally
+        app()->setLocale('es');
+
         Mail::extend('brevo', function () {
             return (new BrevoTransportFactory())->create(
                 Dsn::fromString(config('services.brevo.dsn'))
