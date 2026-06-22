@@ -65,16 +65,18 @@
                 </h1>
                 
                 <p class="text-lg sm:text-xl md:text-2xl text-slate-600 max-w-3xl mx-auto font-light leading-relaxed">
-                    Un reconocimiento oficial para visibilizar y galardonar las acciones sobresalientes en la <strong class="font-semibold text-slate-800">prevención, cuidado y fortalecimiento de la Salud Mental</strong> dentro de nuestra comunidad.
+                    Un reconocimiento oficial para visibilizar las acciones sobresalientes en la <strong class="font-semibold text-slate-800">prevención, cuidado y fortalecimiento de la Salud Mental</strong> dentro de nuestra comunidad.
                 </p>
 
                 <div class="flex flex-col sm:flex-row items-center justify-center gap-4 pt-4">
                     <a href="#registro" class="w-full sm:w-auto px-8 py-4 bg-gradient-to-r from-[#92c644] to-[#84b33d] hover:from-[#84b33d] hover:to-[#749d36] text-white font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all duration-150 transform hover:-translate-y-0.5 text-center">
                         Registrar mi Organización
                     </a>
+                    <!--
                     <a href="#ambitos" class="w-full sm:w-auto px-8 py-4 bg-white border border-slate-200 text-slate-700 hover:bg-slate-50:bg-slate-800/50 font-semibold rounded-xl transition-all duration-150 text-center">
-                        Conoce los Ámbitos
+                        Conoce los ambitos
                     </a>
+-->
                 </div>
             </div>
         </section>
@@ -89,7 +91,7 @@
                         ¿Qué es?
                     </h2>
                     <p class="text-lg sm:text-xl text-slate-600 leading-relaxed">
-                        <strong class="font-bold text-[#92c644]">+Feliz</strong>, es un distintivo otorgado por el Gobierno del Estado de Coahuila a través de la Oficina Inspira Coahuila y la Secretaría de Salud para reconocer a las organizaciones que implementan acciones sistemáticas, medibles y sostenidas para la <strong class="font-semibold text-slate-800">prevención, cuidado y fortalecimiento</strong> de la <strong class="font-semibold text-slate-800">Salud Mental</strong> de sus colaboradores.
+                        <strong class="font-bold text-[#92c644]">+Feliz</strong>, es un distintivo otorgado por el Gobierno del Estado de Coahuila a través de la Oficina Inspira Coahuila, la Secretaría de Economía y la Secretaría de Salud para reconocer a las organizaciones que implementan acciones sistemáticas, medibles y sostenidas para la <strong class="font-semibold text-slate-800">prevención, cuidado y fortalecimiento</strong> de la <strong class="font-semibold text-slate-800">Salud Mental</strong> de sus colaboradores.
                     </p>
                 </div>
 
@@ -129,7 +131,7 @@
                                 </svg>
                             </div>
                             <p class="ml-4 text-slate-600 leading-relaxed">
-                                <strong class="font-medium text-slate-800">Sensibilizar a las organizaciones</strong> sobre la importancia de priorizar la salud mental como un elemento clave en la productividad, bienestar y retención de talento.
+                                <strong class="font-medium text-slate-800">Sensibilizar a las organizaciones</strong> sobre la importancia de priorizar la salud mental como un elemento clave en la productividad y retención de talento.
                             </p>
                         </li>
                         <!-- Objective 4 -->
@@ -151,7 +153,7 @@
                                 </svg>
                             </div>
                             <p class="ml-4 text-slate-600 leading-relaxed">
-                                <strong class="font-medium text-slate-800">Impulsar la corresponsabilidad</strong> entre sector público y sector privado para la prevención de trastornos mentales, problemas de estrés laboral, entre otros.
+                                <strong class="font-medium text-slate-800">Impulsar la corresponsabilidad</strong> entre sector público y sector privado para la prevención y atención de la salud mental.
                             </p>
                         </li>
                     </ul>
@@ -187,7 +189,7 @@
                         </div>
                         <h3 class="text-xl font-bold mb-3 text-slate-800">Ámbito Público</h3>
                         <p class="text-slate-500 text-sm leading-relaxed">
-                            Organismos descentralizados, dependencias gubernamentales y áreas municipales que implementen políticas de bienestar psicosocial.
+                            Dependencias y oficinas de Gobierno Municipal y Estatal
                         </p>
                     </div>
 
@@ -201,7 +203,7 @@
                         </div>
                         <h3 class="text-xl font-bold mb-3 text-slate-800">Ámbito Educativo</h3>
                         <p class="text-slate-500 text-sm leading-relaxed">
-                            Escuelas, colegios, institutos y universidades enfocados en guiar, formar y asegurar la salud emocional de estudiantes y docentes.
+                            Escuelas públicas y privadas de todos los niveles educativos, incluyendo el sector público y privado.
                         </p>
                     </div>
 
@@ -215,7 +217,7 @@
                         </div>
                         <h3 class="text-xl font-bold mb-3 text-slate-800">Ámbito Productivo o Industrial</h3>
                         <p class="text-slate-500 text-sm leading-relaxed">
-                            Organizaciones comerciales, fábricas y corporativos que cuenten con programas preventivos contra el estrés y fatiga laboral.
+                            Empresas públicas, privadas y fabricas.
                         </p>
                     </div>
 
@@ -229,7 +231,7 @@
                         </div>
                         <h3 class="text-xl font-bold mb-3 text-slate-800">Ámbito Social y Comunitario</h3>
                         <p class="text-slate-500 text-sm leading-relaxed">
-                            Organizaciones no gubernamentales, colectivos de asistencia y centros deportivos que fomenten el tejido social y la resiliencia.
+                            ONG, Fundaciones, Cooperativas, Organizaciones de vecinos, Clubes, Centros comunitarios, etc.
                         </p>
                     </div>
 
@@ -243,7 +245,7 @@
                         </div>
                         <h3 class="text-xl font-bold mb-3 text-slate-800">Otros Ámbitos</h3>
                         <p class="text-slate-500 text-sm leading-relaxed">
-                            Cualquier otra iniciativa fuera de las categorías anteriores que trabaje activamente por mejorar el ecosistema emocional de las personas.
+                            Ámbitos complementarios no contemplados en los anteriores.
                         </p>
                     </div>
 
@@ -262,7 +264,7 @@
                             El Distintivo <span class="text-[#92c644] font-black">+Feliz</span> evalúa 20 criterios
                         </h2>
                         <p class="text-sm text-slate-500">
-                            Divididos en tres ejes fundamentales de acción para el bienestar y la salud mental de la organización.
+                            Divididos en tres ejes fundamentales de acción para la salud mental de la organización.
                         </p>
                     </div>
 
@@ -285,7 +287,7 @@
                                  :class="active === 2 ? 'scale-105 ring-4 ring-[#F49F00]/30 -translate-y-2' : ''">
                                 <span class="text-5xl sm:text-6xl font-black text-white drop-shadow-md">6</span>
                             </div>
-                            <span class="text-lg sm:text-xl font-bold text-slate-900 tracking-tight whitespace-nowrap">+ Cuidado</span>
+                            <span class="text-lg sm:text-xl font-bold text-slate-900 tracking-tight whitespace-nowrap">+ Cuidado/Atención</span>
                         </div>
                         
                         <!-- Circle 3: Fortalecimiento -->
@@ -381,6 +383,12 @@
                                 </div>
                                 <span class="ml-4 text-lg text-slate-600 leading-relaxed">Fortalecimiento de la resiliencia organizacional</span>
                             </li>
+                            <li class="flex items-start group">
+                                <div class="flex-shrink-0 w-6 h-6 rounded-full bg-[#92c644]/10 text-[#92c644] flex items-center justify-center mt-1 group-hover:bg-[#92c644] group-hover:text-white transition-all duration-300">
+                                    <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
+                                </div>
+                                <span class="ml-4 text-lg text-slate-600 leading-relaxed">Visibilidad en páginas del Gobierno del Estado</span>
+                            </li>
                         </ul>
 
                         <!-- Bottom text box -->
@@ -448,7 +456,7 @@
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M17 8h2a2 2 0 012 2v6a2 2 0 01-2 2h-2v4l-4-4H9a1.994 1.994 0 01-1.414-.586m0 0L11 14h4a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2v4l.586-.586z" />
                             </svg>
                         </div>
-                        <span class="text-xs sm:text-sm font-semibold text-slate-800 leading-tight">2. Diagnóstico inicial</span>
+                        <span class="text-xs sm:text-sm font-semibold text-slate-800 leading-tight">2. Diagnóstico inicial/Autoevaluación</span>
                     </div>
 
                     <!-- Arrow -->
@@ -486,7 +494,7 @@
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
                             </svg>
                         </div>
-                        <span class="text-xs sm:text-sm font-semibold text-slate-800 leading-tight">4. Plan de acción</span>
+                        <span class="text-xs sm:text-sm font-semibold text-slate-800 leading-tight">4. Plan de acción/Implementación</span>
                     </div>
 
                     <!-- Arrow -->
