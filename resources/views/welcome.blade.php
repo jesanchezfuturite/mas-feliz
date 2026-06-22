@@ -308,13 +308,22 @@
                         Pasa el cursor o haz clic sobre los círculos para ver el detalle de cada eje de evaluación.
                     </p>
                     <p x-show="active === 1" class="text-sm text-slate-600 font-medium" x-transition>
-                        <strong class="text-[#E6007E]">+ Prevención (6 Criterios):</strong> Identificación oportuna de factores de riesgo psicosocial, políticas claras de no violencia laboral y establecimiento de un entorno seguro que evite el estrés de los colaboradores.
+                        El eje <b>+Prevención</b> tiene como objetivo identificar de manera temprana los factores individuales y organizacionales que pueden afectar la salud mental de las personas trabajadoras, con el fin de reducir riesgos y fortalecer factores protectores antes de que generen consecuencias mayores.
+Este eje promueve la evaluación periódica de la salud mental del personal, la identificación y gestión de riesgos psicosociales, el análisis del clima organizacional, la sensibilización y capacitación del personal, así como el desarrollo de acciones orientadas a la promoción de la salud mental.
+A través de estas estrategias, las organizaciones fortalecen su capacidad para anticipar riesgos, tomar decisiones basadas en evidencia y desarrollar entornos laborales más seguros, respetuosos y protectores para las personas trabajadoras.
+
                     </p>
                     <p x-show="active === 2" class="text-sm text-slate-600 font-medium" x-transition>
-                        <strong class="text-[#F49F00]">+ Cuidado (6 Criterios):</strong> Canales de apoyo psicológico accesibles y confidenciales, protocolos internos para la contención emocional y la canalización adecuada en situaciones de crisis de salud mental.
+                        El eje <b>+Cuidado/Atención</b> integra las acciones y mecanismos que permiten a las organizaciones brindar apoyo oportuno a las personas trabajadoras, así como generar condiciones organizacionales y físicas que favorezcan la protección de la salud mental.
+Este eje considera la implementación de entornos laborales protectores, condiciones adecuadas del ambiente físico, acceso a servicios de apoyo psicológico, difusión de recursos de atención, mecanismos de orientación y canalización, así como protocolos para la atención de situaciones de crisis de salud mental.
+Su propósito es asegurar que las personas trabajadoras cuenten con recursos accesibles, oportunos y confidenciales para recibir apoyo cuando lo requieran, contribuyendo a la protección de su salud mental y al fortalecimiento de la capacidad de respuesta de la organización ante situaciones de riesgo.
+
                     </p>
                     <p x-show="active === 3" class="text-sm text-slate-600 font-medium" x-transition>
-                        <strong class="text-[#2AB288]">+ Fortalecimiento (8 Criterios):</strong> Capacitación en liderazgo positivo, talleres de resiliencia y balance trabajo-vida, promoviendo una cultura donde la salud emocional sea prioridad.
+                        El eje <b>+Fortalecimiento</b> tiene como objetivo consolidar las estructuras, políticas, mecanismos de coordinación y procesos institucionales necesarios para integrar la salud mental como un componente permanente de la gestión organizacional.
+Este eje impulsa la participación activa de la alta dirección, la definición de responsabilidades, la operación de instancias formales de coordinación, el establecimiento de políticas institucionales y la implementación de mecanismos de seguimiento, evaluación y mejora continua.
+A través de estas acciones, las organizaciones fortalecen su capacidad para sostener en el tiempo las estrategias de salud mental, asegurar su integración en los procesos institucionales y promover una cultura organizacional orientada al cuidado, la corresponsabilidad y la protección de las personas trabajadoras.
+
                     </p>
                 </div>
 
@@ -614,10 +623,9 @@
                     <!-- Subtle Glow / Lens Flare Effect -->
                     <div class="absolute -inset-6 bg-[radial-gradient(circle,rgba(255,255,255,0.1)_0%,rgba(255,255,255,0)_70%)] blur-lg pointer-events-none rounded-full"></div>
                     
-                    <img src="{{ asset('images/coahuila.png') }}" alt="GOB" class="relative z-10 h-12 md:h-16 w-auto object-contain hover:scale-105 transition-transform duration-300" />
-                    <img src="{{ asset('images/inspira.png') }}" alt="Inspira" class="relative z-10 h-12 md:h-16 w-auto object-contain hover:scale-105 transition-transform duration-300" />
                     <img src="{{ asset('images/secretaria-economia.png') }}" alt="Secretaría de Economía" class="relative z-10 h-12 md:h-16 w-auto object-contain hover:scale-105 transition-transform duration-300" />
                     <img src="{{ asset('images/secretaria-salud.png') }}" alt="Secretaría de Salud" class="relative z-10 h-12 md:h-16 w-auto object-contain hover:scale-105 transition-transform duration-300" />
+                    <img src="{{ asset('images/salud-mental.png') }}" alt="Salud Mental" class="relative z-10 h-6 md:h-8 w-auto object-contain hover:scale-105 transition-transform duration-300" />
                 </div>
             </div>
         </div>

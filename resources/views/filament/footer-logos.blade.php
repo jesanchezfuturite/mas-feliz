@@ -3,4 +3,5 @@
     <img src="{{ asset('images/inspira.png') }}" alt="Inspira Coahuila" style="height: 3.6rem; width: auto; object-fit: contain;" />
     <img src="{{ asset('images/secretaria-economia.png') }}" alt="Secretaría de Economía" style="height: 3.6rem; width: auto; object-fit: contain;" />
     <img src="{{ asset('images/secretaria-salud.png') }}" alt="Secretaría de Salud" style="height: 3.6rem; width: auto; object-fit: contain;" />
+    <img src="{{ asset('images/salud-mental.png') }}" alt="Salud Mental" style="height: 1.8rem; width: auto; object-fit: contain;" />
 </div>

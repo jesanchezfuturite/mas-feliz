@@ -66,15 +66,31 @@ class ResponderTamizajeTest extends TestCase
     public function test_tamizaje_calculates_leve_risk_correctly(): void
     {
         Livewire::test(ResponderTamizaje::class, ['token' => $this->empresa->token_tamizaje])
+            ->set('nombre_completo', 'Juan Pérez')
+            ->set('genero', 'Masculino')
+            ->set('edad', '30')
+            ->set('actividad_trabajo', 'Administrativo')
+            ->set('tiempo_trabajando', '2 años')
             ->set('ansiedad_1', '0')
             ->set('ansiedad_2', '1')
             ->set('ansiedad_3', '0')
+            ->set('ansiedad_4', '0')
+            ->set('ansiedad_5', '0')
+            ->set('ansiedad_6', '0')
+            ->set('ansiedad_7', '0')
             ->set('depresion_1', '1')
             ->set('depresion_2', '0')
             ->set('depresion_3', '0')
+            ->set('depresion_4', '0')
+            ->set('depresion_5', '0')
+            ->set('depresion_6', '0')
+            ->set('depresion_7', '0')
+            ->set('depresion_8', '0')
+            ->set('depresion_9', '0')
             ->set('suicidio_1', '0')
             ->set('suicidio_2', '0')
             ->set('suicidio_3', '0')
+            ->set('suicidio_4', '0')
             ->call('submit')
             ->assertHasNoErrors()
             ->assertSet('success', true);
@@ -92,25 +108,41 @@ class ResponderTamizajeTest extends TestCase
     public function test_tamizaje_calculates_urgente_risk_due_to_suicidal_score(): void
     {
         Livewire::test(ResponderTamizaje::class, ['token' => $this->empresa->token_tamizaje])
+            ->set('nombre_completo', 'Juan Pérez')
+            ->set('genero', 'Masculino')
+            ->set('edad', '30')
+            ->set('actividad_trabajo', 'Administrativo')
+            ->set('tiempo_trabajando', '2 años')
             ->set('ansiedad_1', '0')
             ->set('ansiedad_2', '0')
             ->set('ansiedad_3', '0')
+            ->set('ansiedad_4', '0')
+            ->set('ansiedad_5', '0')
+            ->set('ansiedad_6', '0')
+            ->set('ansiedad_7', '0')
             ->set('depresion_1', '0')
             ->set('depresion_2', '0')
             ->set('depresion_3', '0')
-            ->set('suicidio_1', '2') // 2 points (Casi siempre)
+            ->set('depresion_4', '0')
+            ->set('depresion_5', '0')
+            ->set('depresion_6', '0')
+            ->set('depresion_7', '0')
+            ->set('depresion_8', '0')
+            ->set('depresion_9', '0')
+            ->set('suicidio_1', '1') // 1 point (valid in:0,1)
             ->set('suicidio_2', '0')
             ->set('suicidio_3', '0')
+            ->set('suicidio_4', '0')
             ->call('submit')
             ->assertHasNoErrors()
             ->assertSet('success', true);
 
-        // Sum = 2. But suicide score is >= 2, which triggers Urgente.
+        // Sum = 1. But suicide score is >= 1, which triggers Urgente.
         $this->assertDatabaseHas('tamizajes', [
             'empresa_id' => $this->empresa->id,
             'riesgo_ansiedad' => 0,
             'riesgo_depresion' => 0,
-            'riesgo_conducta_suicida' => 2,
+            'riesgo_conducta_suicida' => 1,
             'nivel_riesgo_general' => 'Urgente',
         ]);
     }

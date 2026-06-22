@@ -43,7 +43,7 @@ class EmpresaPanelProvider extends PanelProvider
             ->profile(\App\Filament\Empresa\Pages\EditProfile::class)
             ->darkMode(false)
             ->pages([
-                Dashboard::class,
+                \App\Filament\Empresa\Pages\Dashboard::class,
             ])
             ->discoverWidgets(in: app_path('Filament/Empresa/Widgets'), for: 'App\Filament\Empresa\Widgets')
             ->widgets([

@@ -16,6 +16,11 @@ use Filament\Tables\Table;
 
 class AutoevaluacionResource extends Resource
 {
+    public static function canAccess(): bool
+    {
+        return \App\Models\Setting::where('key', 'global_config')->first()?->herramientas_empresa_activas ?? false;
+    }
+
     protected static ?string $model = Autoevaluacion::class;
 
     protected static ?string $modelLabel = 'Autoevaluación';

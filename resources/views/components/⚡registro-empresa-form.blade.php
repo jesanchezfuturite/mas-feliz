@@ -10,10 +10,14 @@ use Illuminate\Support\Str;
 new class extends Component
 {
     public string $nombre_empresa = '';
+    public string $rfc = '';
+    public string $ambito = '';
+    public string $domicilio = '';
     public string $municipio = '';
     public string $dias_horario_servicio = '';
     public string $nombre_director = '';
     public string $nombre_responsable = '';
+    public string $cargo_enlace = '';
     public string $correo = '';
     public string $telefono = '';
     public string $rubro = '';
@@ -24,10 +28,14 @@ new class extends Component
 
     protected array $rules = [
         'nombre_empresa' => 'required|string|max:255',
-        'municipio' => 'required|string|max:255',
+        'rfc' => 'nullable|string|max:15',
+        'ambito' => 'required|string|in:Público,Privado,Productivo/Industrial,Social/Comunitario,Otro',
+        'domicilio' => 'required|string|max:255',
+        'municipio' => 'required|string|in:Abasolo,Acuña,Allende,Arteaga,Candela,Castaños,Cuatro Ciénegas,Escobedo,Francisco I. Madero,Frontera,General Cepeda,Guerrero,Hidalgo,Jiménez,Juárez,Lamadrid,Matamoros,Monclova,Morelos,Múzquiz,Nadadores,Nava,Ocampo,Parras,Piedras Negras,Progreso,Ramos Arizpe,Sabinas,Sacramento,Saltillo,San Buenaventura,San Juan de Sabinas,San Pedro,Sierra Mojada,Torreón,Viesca,Villa Unión,Zaragoza',
         'dias_horario_servicio' => 'required|string|max:255',
         'nombre_director' => 'required|string|max:255',
         'nombre_responsable' => 'required|string|max:255',
+        'cargo_enlace' => 'required|string|max:255',
         'correo' => 'required|email|max:255|unique:empresas,correo',
         'telefono' => 'required|string|max:255',
         'rubro' => 'required|string|max:255',
@@ -44,10 +52,14 @@ new class extends Component
         // Guardar en la base de datos
         $empresa = Empresa::create([
             'nombre_empresa' => $this->nombre_empresa,
+            'rfc' => $this->rfc ?: null,
+            'ambito' => $this->ambito,
+            'domicilio' => $this->domicilio,
             'municipio' => $this->municipio,
             'dias_horario_servicio' => $this->dias_horario_servicio,
             'nombre_director' => $this->nombre_director,
             'nombre_responsable' => $this->nombre_responsable,
+            'cargo_enlace' => $this->cargo_enlace,
             'correo' => $this->correo,
             'password' => Hash::make($passwordTemporal),
             'telefono' => $this->telefono,
@@ -110,46 +122,54 @@ new class extends Component
                     @enderror
                 </div>
 
+                <!-- RFC (Opcional) -->
+                <div class="space-y-2">
+                    <label for="rfc" class="block text-sm font-semibold text-slate-700">RFC (Opcional)</label>
+                    <input type="text" id="rfc" wire:model="rfc" 
+                        class="w-full px-4 py-2.5 rounded-lg border border-slate-200 focus:ring-2 focus:ring-[#92c644] focus:border-[#92c644] transition duration-150 outline-none" 
+                        placeholder="Ej. ABC123456XYZ">
+                    @error('rfc') 
+                        <p class="text-red-500 text-xs font-medium">{{ $message }}</p> 
+                    @enderror
+                </div>
+
                 <!-- Municipio -->
                 <div class="space-y-2">
                     <label for="municipio" class="block text-sm font-semibold text-slate-700">Municipio</label>
-                    <input type="text" id="municipio" wire:model="municipio" 
-                        class="w-full px-4 py-2.5 rounded-lg border border-slate-200 focus:ring-2 focus:ring-[#92c644] focus:border-[#92c644] transition duration-150 outline-none" 
-                        placeholder="Ej. Saltillo">
+                    <select id="municipio" wire:model="municipio" 
+                        class="w-full px-4 py-2.5 rounded-lg border border-slate-200 focus:ring-2 focus:ring-[#92c644] focus:border-[#92c644] transition duration-150 outline-none bg-white">
+                        <option value="">Selecciona un municipio</option>
+                        @foreach(['Abasolo', 'Acuña', 'Allende', 'Arteaga', 'Candela', 'Castaños', 'Cuatro Ciénegas', 'Escobedo', 'Francisco I. Madero', 'Frontera', 'General Cepeda', 'Guerrero', 'Hidalgo', 'Jiménez', 'Juárez', 'Lamadrid', 'Matamoros', 'Monclova', 'Morelos', 'Múzquiz', 'Nadadores', 'Nava', 'Ocampo', 'Parras', 'Piedras Negras', 'Progreso', 'Ramos Arizpe', 'Sabinas', 'Sacramento', 'Saltillo', 'San Buenaventura', 'San Juan de Sabinas', 'San Pedro', 'Sierra Mojada', 'Torreón', 'Viesca', 'Villa Unión', 'Zaragoza'] as $muni)
+                            <option value="{{ $muni }}">{{ $muni }}</option>
+                        @endforeach
+                    </select>
                     @error('municipio') 
                         <p class="text-red-500 text-xs font-medium">{{ $message }}</p> 
                     @enderror
                 </div>
 
-                <!-- Rubro -->
+                <!-- Ámbito -->
                 <div class="space-y-2">
-                    <label for="rubro" class="block text-sm font-semibold text-slate-700">Rubro</label>
-                    <input type="text" id="rubro" wire:model="rubro" 
-                        class="w-full px-4 py-2.5 rounded-lg border border-slate-200 focus:ring-2 focus:ring-[#92c644] focus:border-[#92c644] transition duration-150 outline-none" 
-                        placeholder="Ej. Tecnología, Manufactura">
-                    @error('rubro') 
+                    <label for="ambito" class="block text-sm font-semibold text-slate-700">Ámbito</label>
+                    <select id="ambito" wire:model="ambito" 
+                        class="w-full px-4 py-2.5 rounded-lg border border-slate-200 focus:ring-2 focus:ring-[#92c644] focus:border-[#92c644] transition duration-150 outline-none bg-white">
+                        <option value="">Selecciona un ámbito</option>
+                        @foreach(['Público', 'Privado', 'Productivo/Industrial', 'Social/Comunitario', 'Otro'] as $amb)
+                            <option value="{{ $amb }}">{{ $amb }}</option>
+                        @endforeach
+                    </select>
+                    @error('ambito') 
                         <p class="text-red-500 text-xs font-medium">{{ $message }}</p> 
                     @enderror
                 </div>
 
-                <!-- Número de Trabajadores -->
-                <div class="space-y-2">
-                    <label for="numero_trabajadores" class="block text-sm font-semibold text-slate-700">Número de Trabajadores</label>
-                    <input type="number" id="numero_trabajadores" wire:model="numero_trabajadores" 
-                        class="w-full px-4 py-2.5 rounded-lg border border-slate-200 focus:ring-2 focus:ring-[#92c644] focus:border-[#92c644] transition duration-150 outline-none" 
-                        placeholder="Ej. 120" min="1">
-                    @error('numero_trabajadores') 
-                        <p class="text-red-500 text-xs font-medium">{{ $message }}</p> 
-                    @enderror
-                </div>
-
-                <!-- Horario de Servicio -->
+                <!-- Domicilio -->
                 <div class="space-y-2 md:col-span-2">
-                    <label for="dias_horario_servicio" class="block text-sm font-semibold text-slate-700">Días y Horario de Servicio</label>
-                    <input type="text" id="dias_horario_servicio" wire:model="dias_horario_servicio" 
+                    <label for="domicilio" class="block text-sm font-semibold text-slate-700">Domicilio</label>
+                    <input type="text" id="domicilio" wire:model="domicilio" 
                         class="w-full px-4 py-2.5 rounded-lg border border-slate-200 focus:ring-2 focus:ring-[#92c644] focus:border-[#92c644] transition duration-150 outline-none" 
-                        placeholder="Ej. Lunes a Viernes de 9:00 AM a 6:00 PM">
-                    @error('dias_horario_servicio') 
+                        placeholder="Ej. Calle Victoria #123, Col. Centro, Saltillo, Coahuila">
+                    @error('domicilio') 
                         <p class="text-red-500 text-xs font-medium">{{ $message }}</p> 
                     @enderror
                 </div>
@@ -159,19 +179,30 @@ new class extends Component
                     <label for="nombre_director" class="block text-sm font-semibold text-slate-700">Nombre del Director</label>
                     <input type="text" id="nombre_director" wire:model="nombre_director" 
                         class="w-full px-4 py-2.5 rounded-lg border border-slate-200 focus:ring-2 focus:ring-[#92c644] focus:border-[#92c644] transition duration-150 outline-none" 
-                        placeholder="Ej. Ing. Carlos Salinas">
+                        placeholder="Ej. Gerardo Sánchez">
                     @error('nombre_director') 
                         <p class="text-red-500 text-xs font-medium">{{ $message }}</p> 
                     @enderror
                 </div>
 
-                <!-- Responsable -->
+                <!-- Responsable (Persona enlace) -->
                 <div class="space-y-2">
-                    <label for="nombre_responsable" class="block text-sm font-semibold text-slate-700">Nombre del Responsable del Proyecto</label>
+                    <label for="nombre_responsable" class="block text-sm font-semibold text-slate-700">Persona enlace (responsable del llenado de la información y seguimiento)</label>
                     <input type="text" id="nombre_responsable" wire:model="nombre_responsable" 
                         class="w-full px-4 py-2.5 rounded-lg border border-slate-200 focus:ring-2 focus:ring-[#92c644] focus:border-[#92c644] transition duration-150 outline-none" 
                         placeholder="Ej. Lic. Ana María Gómez">
                     @error('nombre_responsable') 
+                        <p class="text-red-500 text-xs font-medium">{{ $message }}</p> 
+                    @enderror
+                </div>
+
+                <!-- Cargo de la persona enlace -->
+                <div class="space-y-2">
+                    <label for="cargo_enlace" class="block text-sm font-semibold text-slate-700">Cargo de la persona enlace</label>
+                    <input type="text" id="cargo_enlace" wire:model="cargo_enlace" 
+                        class="w-full px-4 py-2.5 rounded-lg border border-slate-200 focus:ring-2 focus:ring-[#92c644] focus:border-[#92c644] transition duration-150 outline-none" 
+                        placeholder="Ej. Gerente de Recursos Humanos">
+                    @error('cargo_enlace') 
                         <p class="text-red-500 text-xs font-medium">{{ $message }}</p> 
                     @enderror
                 </div>
@@ -194,6 +225,39 @@ new class extends Component
                         class="w-full px-4 py-2.5 rounded-lg border border-slate-200 focus:ring-2 focus:ring-[#92c644] focus:border-[#92c644] transition duration-150 outline-none" 
                         placeholder="Ej. +52 81 1234 5678">
                     @error('telefono') 
+                        <p class="text-red-500 text-xs font-medium">{{ $message }}</p> 
+                    @enderror
+                </div>
+
+                <!-- Rubro -->
+                <div class="space-y-2">
+                    <label for="rubro" class="block text-sm font-semibold text-slate-700">Rubro</label>
+                    <input type="text" id="rubro" wire:model="rubro" 
+                        class="w-full px-4 py-2.5 rounded-lg border border-slate-200 focus:ring-2 focus:ring-[#92c644] focus:border-[#92c644] transition duration-150 outline-none" 
+                        placeholder="Ej. Tecnología, Manufactura">
+                    @error('rubro') 
+                        <p class="text-red-500 text-xs font-medium">{{ $message }}</p> 
+                    @enderror
+                </div>
+
+                <!-- Número de Trabajadores (Número de colaboradores) -->
+                <div class="space-y-2">
+                    <label for="numero_trabajadores" class="block text-sm font-semibold text-slate-700">Número de colaboradores</label>
+                    <input type="number" id="numero_trabajadores" wire:model="numero_trabajadores" 
+                        class="w-full px-4 py-2.5 rounded-lg border border-slate-200 focus:ring-2 focus:ring-[#92c644] focus:border-[#92c644] transition duration-150 outline-none" 
+                        placeholder="Ej. 120" min="1">
+                    @error('numero_trabajadores') 
+                        <p class="text-red-500 text-xs font-medium">{{ $message }}</p> 
+                    @enderror
+                </div>
+
+                <!-- Horario de Servicio (Horarios de la empresa) -->
+                <div class="space-y-2 md:col-span-2">
+                    <label for="dias_horario_servicio" class="block text-sm font-semibold text-slate-700">Horarios de la empresa</label>
+                    <input type="text" id="dias_horario_servicio" wire:model="dias_horario_servicio" 
+                        class="w-full px-4 py-2.5 rounded-lg border border-slate-200 focus:ring-2 focus:ring-[#92c644] focus:border-[#92c644] transition duration-150 outline-none" 
+                        placeholder="Ej. Lunes a Viernes de 9:00 AM a 6:00 PM">
+                    @error('dias_horario_servicio') 
                         <p class="text-red-500 text-xs font-medium">{{ $message }}</p> 
                     @enderror
                 </div>

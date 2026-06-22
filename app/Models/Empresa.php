@@ -3,6 +3,8 @@
 namespace App\Models;
 
 use Filament\Models\Contracts\HasName;
+use Filament\Models\Contracts\FilamentUser;
+use Filament\Panel;
 use Illuminate\Auth\Authenticatable as AuthenticatableTrait;
 use Illuminate\Contracts\Auth\Authenticatable;
 use Illuminate\Contracts\Auth\CanResetPassword;
@@ -10,7 +12,7 @@ use Illuminate\Auth\Passwords\CanResetPassword as CanResetPasswordTrait;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Notifications\Notifiable;
 
-class Empresa extends Model implements Authenticatable, HasName, CanResetPassword
+class Empresa extends Model implements Authenticatable, HasName, CanResetPassword, FilamentUser
 {
     use AuthenticatableTrait, Notifiable, CanResetPasswordTrait;
 
@@ -18,10 +20,14 @@ class Empresa extends Model implements Authenticatable, HasName, CanResetPasswor
         'folio',
         'token_tamizaje',
         'nombre_empresa',
+        'rfc',
+        'ambito',
+        'domicilio',
         'municipio',
         'dias_horario_servicio',
         'nombre_director',
         'nombre_responsable',
+        'cargo_enlace',
         'correo',
         'password',
         'telefono',
@@ -159,5 +165,10 @@ class Empresa extends Model implements Authenticatable, HasName, CanResetPasswor
             return 'Dictaminado';
         }
         return $this->estatus_distintivo;
+    }
+
+    public function canAccessPanel(Panel $panel): bool
+    {
+        return $panel->getId() === 'empresa';
     }
 }

@@ -51,10 +51,31 @@ class EmpresaResource extends Resource
                                     ->label('Folio'),
                                 TextEntry::make('nombre_empresa')
                                     ->label('Nombre de la Empresa'),
+                                TextEntry::make('rfc')
+                                    ->label('RFC')
+                                    ->placeholder('Ninguno'),
+                                TextEntry::make('ambito')
+                                    ->label('Ámbito'),
+                                TextEntry::make('domicilio')
+                                    ->label('Domicilio'),
+                                TextEntry::make('municipio')
+                                    ->label('Municipio'),
                                 TextEntry::make('rubro')
                                     ->label('Rubro'),
                                 TextEntry::make('numero_trabajadores')
-                                    ->label('Número de Trabajadores'),
+                                    ->label('Número de colaboradores'),
+                                TextEntry::make('nombre_director')
+                                    ->label('Nombre del Director'),
+                                TextEntry::make('nombre_responsable')
+                                    ->label('Persona enlace'),
+                                TextEntry::make('cargo_enlace')
+                                    ->label('Cargo de la Persona Enlace'),
+                                TextEntry::make('correo')
+                                    ->label('Correo Electrónico'),
+                                TextEntry::make('telefono')
+                                    ->label('Teléfono'),
+                                TextEntry::make('dias_horario_servicio')
+                                    ->label('Horarios de la empresa'),
                             ])
                             ->columns(2),
 

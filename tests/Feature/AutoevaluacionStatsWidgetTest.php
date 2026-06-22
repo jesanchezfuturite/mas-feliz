@@ -128,6 +128,11 @@ class AutoevaluacionStatsWidgetTest extends TestCase
             'respuestas' => [],
         ]);
 
+        \App\Models\Setting::updateOrCreate(
+            ['key' => 'global_config'],
+            ['herramientas_empresa_activas' => true]
+        );
+
         $this->actingAs($empresa, 'empresa');
 
         \Filament\Facades\Filament::setCurrentPanel(\Filament\Facades\Filament::getPanel('empresa'));
