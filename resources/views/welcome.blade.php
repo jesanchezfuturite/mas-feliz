@@ -72,11 +72,11 @@
                     <a href="#registro" class="w-full sm:w-auto px-8 py-4 bg-gradient-to-r from-[#92c644] to-[#84b33d] hover:from-[#84b33d] hover:to-[#749d36] text-white font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all duration-150 transform hover:-translate-y-0.5 text-center">
                         Registrar mi Organización
                     </a>
-                    <!--
+                    
                     <a href="#ambitos" class="w-full sm:w-auto px-8 py-4 bg-white border border-slate-200 text-slate-700 hover:bg-slate-50:bg-slate-800/50 font-semibold rounded-xl transition-all duration-150 text-center">
-                        Conoce los ambitos
+                        Conoce +
                     </a>
--->
+
                 </div>
             </div>
         </section>
