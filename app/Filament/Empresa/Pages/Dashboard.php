@@ -7,6 +7,11 @@ use App\Models\Setting;
 
 class Dashboard extends BaseDashboard
 {
+    protected static ?string $navigationLabel = 'Escritorio';
+    protected static ?int $navigationSort = 1;
+    protected static string|\BackedEnum|null $navigationIcon = 'heroicon-o-home';
+    protected static ?string $title = 'Escritorio';
+
     public function getView(): string
     {
         $activas = Setting::where('key', 'global_config')->first()?->herramientas_empresa_activas ?? false;

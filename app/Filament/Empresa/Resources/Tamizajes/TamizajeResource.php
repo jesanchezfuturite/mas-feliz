@@ -24,10 +24,11 @@ class TamizajeResource extends Resource
 
     protected static ?string $model = Tamizaje::class;
 
-    protected static ?string $modelLabel = 'Evaluación Realizada';
-    protected static ?string $pluralModelLabel = 'Evaluaciones Realizadas';
-    protected static ?string $navigationLabel = 'Evaluaciones Realizadas';
-    protected static string|BackedEnum|null $navigationIcon = 'heroicon-o-document-check';
+    protected static ?string $modelLabel = 'Diagnóstico/ Tamizaje';
+    protected static ?string $pluralModelLabel = 'Diagnósticos/ Tamizajes';
+    protected static ?string $navigationLabel = 'Diagnóstico/ Tamizaje (Apoyo al criterio indispensable 4)';
+    protected static ?int $navigationSort = 4;
+    protected static string|BackedEnum|null $navigationIcon = 'heroicon-o-document-chart-bar';
 
     public static function getEloquentQuery(): \Illuminate\Database\Eloquent\Builder
     {

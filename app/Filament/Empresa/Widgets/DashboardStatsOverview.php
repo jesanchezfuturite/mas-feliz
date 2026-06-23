@@ -7,6 +7,19 @@ use Filament\Widgets\StatsOverviewWidget\Stat;
 
 class DashboardStatsOverview extends StatsOverviewWidget
 {
+    public function getView(): string
+    {
+        $empresa = auth()->user();
+        $autoevaluacion = $empresa->autoevaluaciones()->first();
+        $hasSubmitted = $autoevaluacion && in_array($autoevaluacion->estatus, ['En revisión', 'Validado']);
+
+        if (!$hasSubmitted) {
+            return 'filament.empresa.widgets.stats-locked';
+        }
+
+        return parent::getView();
+    }
+
     protected function getStats(): array
     {
         $empresa = auth()->user();

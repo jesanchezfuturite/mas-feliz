@@ -57,7 +57,7 @@ class ViewAutoevaluacion extends ViewRecord
                         return false;
                     }
 
-                    $indispensableIds = [1, 4, 9, 15, 16];
+                    $indispensableIds = [4, 9, 10, 15, 16];
                     $respuestas = $record->respuestas ?? [];
 
                     foreach ($indispensableIds as $id) {
@@ -184,12 +184,12 @@ class ViewAutoevaluacion extends ViewRecord
             }
         }
 
-        $indispensableIds = [1, 4, 9, 15, 16];
+        $indispensableIds = [4, 9, 10, 15, 16];
         $criterioElementsCount = [
-            1 => 7,
-            4 => 7,
-            9 => 7,
-            15 => 6,
+            4 => 3,
+            9 => 5,
+            10 => 5,
+            15 => 3,
             16 => 5,
         ];
 

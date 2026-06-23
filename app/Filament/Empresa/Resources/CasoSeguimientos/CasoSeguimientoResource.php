@@ -23,11 +23,13 @@ class CasoSeguimientoResource extends Resource
 
     protected static ?string $model = CasoSeguimiento::class;
 
-    protected static ?string $modelLabel = 'Caso de Seguimiento';
+    protected static ?string $modelLabel = 'Caso en seguimiento';
 
-    protected static ?string $pluralModelLabel = 'Casos de Seguimiento';
+    protected static ?string $pluralModelLabel = 'Casos en seguimiento';
 
-    protected static ?string $navigationLabel = 'Casos de Seguimiento';
+    protected static ?string $navigationLabel = 'Atención/ Casos en seguimiento (Apoyo al criterio indispensable 15)';
+
+    protected static ?int $navigationSort = 5;
 
     protected static string|BackedEnum|null $navigationIcon = 'heroicon-o-clipboard-document-list';
 

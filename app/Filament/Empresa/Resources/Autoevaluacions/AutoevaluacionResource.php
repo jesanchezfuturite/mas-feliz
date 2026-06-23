@@ -27,7 +27,9 @@ class AutoevaluacionResource extends Resource
 
     protected static ?string $pluralModelLabel = 'Autoevaluaciones';
 
-    protected static ?string $navigationLabel = 'Autoevaluaciones';
+    protected static ?string $navigationLabel = 'Autoevaluación';
+
+    protected static ?int $navigationSort = 2;
 
     protected static string|BackedEnum|null $navigationIcon = 'heroicon-o-clipboard-document-check';
 

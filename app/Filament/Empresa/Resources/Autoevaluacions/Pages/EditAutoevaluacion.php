@@ -11,6 +11,11 @@ class EditAutoevaluacion extends EditRecord
 
     public function getTitle(): string | \Illuminate\Contracts\Support\Htmlable
     {
+        $isAdmin = filament()->getCurrentPanel()?->getId() === 'admin';
+        if (! $isAdmin) {
+            return "Editar Autoevaluación";
+        }
+
         $respuestas = $this->data['respuestas'] ?? ($this->record->respuestas ?? []);
         $total = 0;
         
@@ -31,6 +36,11 @@ class EditAutoevaluacion extends EditRecord
 
     protected function getHeaderWidgets(): array
     {
+        $isAdmin = filament()->getCurrentPanel()?->getId() === 'admin';
+        if (! $isAdmin) {
+            return [];
+        }
+
         return [
             \App\Filament\Empresa\Resources\Autoevaluacions\Widgets\AutoevaluacionStatsWidget::class,
         ];

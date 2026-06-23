@@ -46,9 +46,66 @@ class ResponderTamizajeTest extends TestCase
         $response->assertStatus(404);
     }
 
+    public function test_consentimiento_requires_valid_consent_to_advance(): void
+    {
+        Livewire::test(ResponderTamizaje::class, ['token' => $this->empresa->token_tamizaje])
+            ->set('consentimiento_otorgado', null)
+            ->call('irADemograficos')
+            ->assertHasErrors(['consentimiento_otorgado' => 'required'])
+            ->set('consentimiento_otorgado', 'no')
+            ->call('irADemograficos')
+            ->assertHasErrors(['consentimiento_otorgado' => 'in'])
+            ->set('consentimiento_otorgado', 'si')
+            ->call('irADemograficos')
+            ->assertHasErrors([
+                'declaracion_1' => 'accepted',
+                'declaracion_2' => 'accepted',
+                'declaracion_3' => 'accepted',
+                'declaracion_4' => 'accepted',
+                'declaracion_5' => 'accepted',
+            ])
+            ->set('declaracion_1', true)
+            ->set('declaracion_2', true)
+            ->set('declaracion_3', true)
+            ->set('declaracion_4', true)
+            ->set('declaracion_5', true)
+            ->call('irADemograficos')
+            ->assertHasNoErrors()
+            ->assertSet('step', 'demograficos');
+    }
+
+    public function test_demographics_require_all_fields_to_advance(): void
+    {
+        Livewire::test(ResponderTamizaje::class, ['token' => $this->empresa->token_tamizaje])
+            ->set('step', 'demograficos')
+            ->call('irACuestionario')
+            ->assertHasErrors([
+                'nombre_completo' => 'required',
+                'genero' => 'required',
+                'edad' => 'required',
+                'actividad_trabajo' => 'required',
+                'tiempo_trabajando' => 'required',
+            ])
+            ->set('nombre_completo', 'Juan Pérez')
+            ->set('genero', 'Hombre')
+            ->set('edad', '25 a 34 años')
+            ->set('actividad_trabajo', 'Administrativas')
+            ->set('tiempo_trabajando', 'De 6 meses a 1 año')
+            ->call('irACuestionario')
+            ->assertHasNoErrors()
+            ->assertSet('step', 'cuestionario');
+    }
+
     public function test_tamizaje_validation_requires_all_fields(): void
     {
         Livewire::test(ResponderTamizaje::class, ['token' => $this->empresa->token_tamizaje])
+            ->set('consentimiento_otorgado', 'si')
+            ->set('nombre_completo', 'Juan Pérez')
+            ->set('genero', 'Hombre')
+            ->set('edad', '25 a 34 años')
+            ->set('actividad_trabajo', 'Administrativas')
+            ->set('tiempo_trabajando', 'De 6 meses a 1 año')
+            ->set('step', 'cuestionario')
             ->call('submit')
             ->assertHasErrors([
                 'ansiedad_1' => 'required',
@@ -66,11 +123,12 @@ class ResponderTamizajeTest extends TestCase
     public function test_tamizaje_calculates_leve_risk_correctly(): void
     {
         Livewire::test(ResponderTamizaje::class, ['token' => $this->empresa->token_tamizaje])
+            ->set('consentimiento_otorgado', 'si')
             ->set('nombre_completo', 'Juan Pérez')
-            ->set('genero', 'Masculino')
-            ->set('edad', '30')
-            ->set('actividad_trabajo', 'Administrativo')
-            ->set('tiempo_trabajando', '2 años')
+            ->set('genero', 'Hombre')
+            ->set('edad', '25 a 34 años')
+            ->set('actividad_trabajo', 'Administrativas')
+            ->set('tiempo_trabajando', 'De 6 meses a 1 año')
             ->set('ansiedad_1', '0')
             ->set('ansiedad_2', '1')
             ->set('ansiedad_3', '0')
@@ -95,9 +153,14 @@ class ResponderTamizajeTest extends TestCase
             ->assertHasNoErrors()
             ->assertSet('success', true);
 
-        // Sum = 0+1+0+1+0+0+0+0+0 = 2. Under 6 means Leve.
         $this->assertDatabaseHas('tamizajes', [
             'empresa_id' => $this->empresa->id,
+            'consentimiento_otorgado' => true,
+            'nombre_completo' => 'Juan Pérez',
+            'genero' => 'Hombre',
+            'edad' => '25 a 34 años',
+            'actividad_trabajo' => 'Administrativas',
+            'tiempo_trabajando' => 'De 6 meses a 1 año',
             'riesgo_ansiedad' => 1,
             'riesgo_depresion' => 1,
             'riesgo_conducta_suicida' => 0,
@@ -108,11 +171,12 @@ class ResponderTamizajeTest extends TestCase
     public function test_tamizaje_calculates_urgente_risk_due_to_suicidal_score(): void
     {
         Livewire::test(ResponderTamizaje::class, ['token' => $this->empresa->token_tamizaje])
+            ->set('consentimiento_otorgado', 'si')
             ->set('nombre_completo', 'Juan Pérez')
-            ->set('genero', 'Masculino')
-            ->set('edad', '30')
-            ->set('actividad_trabajo', 'Administrativo')
-            ->set('tiempo_trabajando', '2 años')
+            ->set('genero', 'Hombre')
+            ->set('edad', '25 a 34 años')
+            ->set('actividad_trabajo', 'Administrativas')
+            ->set('tiempo_trabajando', 'De 6 meses a 1 año')
             ->set('ansiedad_1', '0')
             ->set('ansiedad_2', '0')
             ->set('ansiedad_3', '0')
@@ -129,7 +193,7 @@ class ResponderTamizajeTest extends TestCase
             ->set('depresion_7', '0')
             ->set('depresion_8', '0')
             ->set('depresion_9', '0')
-            ->set('suicidio_1', '1') // 1 point (valid in:0,1)
+            ->set('suicidio_1', '1')
             ->set('suicidio_2', '0')
             ->set('suicidio_3', '0')
             ->set('suicidio_4', '0')
@@ -137,13 +201,27 @@ class ResponderTamizajeTest extends TestCase
             ->assertHasNoErrors()
             ->assertSet('success', true);
 
-        // Sum = 1. But suicide score is >= 1, which triggers Urgente.
         $this->assertDatabaseHas('tamizajes', [
             'empresa_id' => $this->empresa->id,
+            'consentimiento_otorgado' => true,
             'riesgo_ansiedad' => 0,
             'riesgo_depresion' => 0,
             'riesgo_conducta_suicida' => 1,
             'nivel_riesgo_general' => 'Urgente',
         ]);
+    }
+
+    public function test_declined_consent_logs_message(): void
+    {
+        \Illuminate\Support\Facades\Log::shouldReceive('info')
+            ->once()
+            ->with(\Mockery::on(function ($message) {
+                return str_contains($message, 'Colaborador declinó participar') 
+                    && str_contains($message, (string)$this->empresa->id)
+                    && str_contains($message, $this->empresa->nombre_empresa);
+            }));
+
+        Livewire::test(ResponderTamizaje::class, ['token' => $this->empresa->token_tamizaje])
+            ->set('consentimiento_otorgado', 'no');
     }
 }

@@ -2,10 +2,10 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>Acuse de Autoevaluación - +Feliz</title>
+    <title>Reporte Preliminar de Autoevaluación - +Feliz</title>
     <style>
         @page {
-            margin: 110px 50px 70px 50px;
+            margin: 150px 50px 70px 50px;
         }
         
         body {
@@ -18,10 +18,10 @@
         /* Fixed header and footer */
         .header {
             position: fixed;
-            top: -90px;
+            top: -130px;
             left: 0;
             right: 0;
-            height: 60px;
+            height: 100px;
             border-bottom: 2px solid #0f766e;
             padding-bottom: 10px;
         }
@@ -226,43 +226,115 @@
 <body>
 
     @php
+        $respuestas = $autoevaluacion->respuestas ?? [];
         $sum = 0;
-        for ($i = 1; $i <= 25; $i++) {
-            $val = $autoevaluacion->{"criterio_{$i}"};
-            if (is_numeric($val)) {
-                $sum += (int) $val;
+        if (is_array($respuestas)) {
+            foreach ($respuestas as $criterioKey => $criterio) {
+                if (is_array($criterio)) {
+                    foreach ($criterio as $key => $elemento) {
+                        if ($key === 'status' || $key === 'feedback') {
+                            continue;
+                        }
+                        if (is_array($elemento) && isset($elemento['score']) && is_numeric($elemento['score'])) {
+                            $sum += (int) $elemento['score'];
+                        }
+                    }
+                }
             }
         }
-        
-        if ($sum >= 200) {
-            $level = 'Nivel 3: Sobresaliente';
-            $levelDesc = 'La organización demuestra un alto compromiso y una gestión madura y proactiva de la salud mental y bienestar de sus colaboradores.';
-            $maturityColor = '#065f46';
-            $maturityBg = '#d1fae5';
-        } elseif ($sum >= 100) {
-            $level = 'Nivel 2: En proceso';
-            $levelDesc = 'La organización cuenta con bases de prevención y salud, y se encuentra en camino a consolidar un entorno organizacional favorable.';
-            $maturityColor = '#92400e';
-            $maturityBg = '#fef3c7';
+
+        // Check Indispensable criteria
+        $indispensableIds = [4, 9, 10, 15, 16];
+        $indispensablesCount = 0;
+        $criterioElementsCount = [
+            4 => 3,
+            9 => 5,
+            10 => 5,
+            15 => 3,
+            16 => 5,
+        ];
+
+        foreach ($indispensableIds as $id) {
+            $met = true;
+            $numElements = $criterioElementsCount[$id];
+            for ($e = 1; $e <= $numElements; $e++) {
+                $score = $respuestas["criterio_{$id}"]["elemento_{$e}"]['score'] ?? null;
+                if ($score !== '10' && $score !== 'NA') {
+                    $met = false;
+                    break;
+                }
+            }
+            if ($met) {
+                $indispensablesCount++;
+            }
+        }
+        $cumpleIndispensables = ($indispensablesCount === 5);
+
+        if ($cumpleIndispensables) {
+            if ($sum >= 180) {
+                $level = 'Nivel 3: Excelencia';
+                $levelDesc = 'La organización demuestra un alto compromiso y una gestión madura y proactiva de la salud mental y bienestar de sus colaboradores.';
+                $maturityColor = '#059669'; // Green
+                $maturityBg = '#ecfdf5';
+            } elseif ($sum >= 100) {
+                $level = 'Nivel 2: Avanzado';
+                $levelDesc = 'La organización cuenta con bases de prevención y salud, y se encuentra en camino a consolidar un entorno organizacional favorable.';
+                $maturityColor = '#d97706'; // Warning
+                $maturityBg = '#fffbeb';
+            } else {
+                $level = 'Nivel 1: Inicial';
+                $levelDesc = 'La organización cuenta con oportunidades significativas para diseñar e integrar políticas de prevención y cuidado emocional.';
+                $maturityColor = '#dc2626'; // Danger
+                $maturityBg = '#fef2f2';
+            }
         } else {
             $level = 'Nivel 1: Inicial';
-            $levelDesc = 'La organización cuenta con oportunidades significativas para diseñar e integrar políticas de prevención y cuidado emocional.';
-            $maturityColor = '#991b1b';
-            $maturityBg = '#fee2e2';
+            $levelDesc = 'La organización cuenta con oportunidades significativas para diseñar e integrar políticas de prevención y cuidado emocional (requiere cumplir todos los indispensables).';
+            $maturityColor = '#dc2626'; // Danger
+            $maturityBg = '#fef2f2';
         }
 
+        // Define criteria titles & Ejes
+        $criteriosData = [
+            // Eje 1: Fortalecimiento
+            1 => ['title' => 'Criterio 1', 'desc' => 'Existencia de una política/declaración interna para promover la Salud Mental en la organización', 'eje' => 'Fortalecimiento'],
+            2 => ['title' => 'Criterio 2', 'desc' => 'La organización conforma un Comité de Salud Mental', 'eje' => 'Fortalecimiento'],
+            4 => ['title' => 'Criterio 4', 'desc' => 'Programa de salud mental basado en el diagnóstico de riesgos', 'eje' => 'Fortalecimiento'],
+            9 => ['title' => 'Criterio 9', 'desc' => 'Estrategia de promoción de la salud mental', 'eje' => 'Fortalecimiento'],
+            10 => ['title' => 'Criterio 10', 'desc' => 'Capacitación a directivos y líderes en señales de alerta', 'eje' => 'Fortalecimiento'],
+            11 => ['title' => 'Criterio 11', 'desc' => 'Acciones de capacitación en alfabetización y concientización', 'eje' => 'Fortalecimiento'],
+            13 => ['title' => 'Criterio 13', 'desc' => 'Espacios y actividades orientadas al desarrollo de habilidades socioemocionales', 'eje' => 'Fortalecimiento'],
+            16 => ['title' => 'Criterio 16', 'desc' => 'Protocolo integral de actuación ante crisis de salud mental', 'eje' => 'Fortalecimiento'],
+            20 => ['title' => 'Criterio 20', 'desc' => 'Sistema de gestión de la salud mental integrado', 'eje' => 'Fortalecimiento'],
+
+            // Eje 2: Prevención
+            3 => ['title' => 'Criterio 3', 'desc' => 'Plan de prevención, cuidado y fortalecimiento de la Salud Mental', 'eje' => 'Prevención'],
+            5 => ['title' => 'Criterio 5', 'desc' => 'Programa de atención de los riesgos psicosociales', 'eje' => 'Prevención'],
+            8 => ['title' => 'Criterio 8', 'desc' => 'Estrategia para promover entornos saludables', 'eje' => 'Prevención'],
+            17 => ['title' => 'Criterio 17', 'desc' => 'Prueba anual del Protocolo integral ante crisis', 'eje' => 'Prevención'],
+            18 => ['title' => 'Criterio 18', 'desc' => 'Estrategia formal de reconocimiento a los trabajadores', 'eje' => 'Prevención'],
+
+            // Eje 3: Cuidado y Atención
+            6 => ['title' => 'Criterio 6', 'desc' => 'Evaluación anual del clima laboral y la cultura organizacional', 'eje' => 'Cuidado y Atención'],
+            7 => ['title' => 'Criterio 7', 'desc' => 'Estrategias para promover condiciones básicas del ambiente físico', 'eje' => 'Cuidado y Atención'],
+            12 => ['title' => 'Criterio 12', 'desc' => 'Capacitación a “gatekeepers” o líderes entrenados ante crisis', 'eje' => 'Cuidado y Atención'],
+            14 => ['title' => 'Criterio 14', 'desc' => 'Mecanismos permanentes de difusión sobre servicios de apoyo', 'eje' => 'Cuidado y Atención'],
+            15 => ['title' => 'Criterio 15', 'desc' => 'Acceso oportuno y confidencial a servicios de apoyo psicológico', 'eje' => 'Cuidado y Atención'],
+            19 => ['title' => 'Criterio 19', 'desc' => 'Acciones de fortalecimiento de competencias parentales y apoyo familiar', 'eje' => 'Cuidado y Atención'],
+        ];
+
         $optionsText = [
-            '10' => 'Sí',
-            '5' => 'En proceso',
-            '0' => 'No',
-            'NA' => 'No aplica',
+            'Cumple' => 'Cumple',
+            'En proceso' => 'En proceso',
+            'No cumple' => 'No cumple',
+            'No aplica' => 'No aplica',
         ];
 
         $optionsBadgeClass = [
-            '10' => 'badge-si',
-            '5' => 'badge-proceso',
-            '0' => 'badge-no',
-            'NA' => 'badge-na',
+            'Cumple' => 'badge-si',
+            'En proceso' => 'badge-proceso',
+            'No cumple' => 'badge-no',
+            'No aplica' => 'badge-na',
         ];
     @endphp
 
@@ -270,25 +342,25 @@
     <div class="header">
         <table class="logo-table">
             <tr>
-                <td style="text-align: left; width: 33%;">
-                    @if(file_exists(public_path('assets/branding/logo-gobierno.svg')))
-                        <img src="{{ public_path('assets/branding/logo-gobierno.svg') }}" style="height: 38px;" alt="Logo Gobierno" />
+                <td style="text-align: left; width: 33%; vertical-align: middle;">
+                    @if(file_exists(public_path('images/coahuila.png')))
+                        <img src="{{ public_path('images/coahuila.png') }}" style="height: 90px; vertical-align: middle; display: inline-block;" alt="Logo Coahuila" />
                     @else
-                        <span style="font-weight: bold; color: #1e293b;">GOBIERNO</span>
+                        <span style="font-weight: bold; color: #1e293b; vertical-align: middle;">COAHUILA</span>
                     @endif
                 </td>
-                <td style="text-align: center; width: 34%;">
-                    @if(file_exists(public_path('assets/branding/logo-mas-feliz.svg')))
-                        <img src="{{ public_path('assets/branding/logo-mas-feliz.svg') }}" style="height: 38px;" alt="Logo Más Feliz" />
+                <td style="text-align: center; width: 34%; vertical-align: middle;">
+                    @if(file_exists(public_path('images/+FELIZ-LOGO.png')))
+                        <img src="{{ public_path('images/+FELIZ-LOGO.png') }}" style="height: 90px; vertical-align: middle; display: inline-block;" alt="Logo +Feliz" />
                     @else
-                        <span style="font-weight: bold; color: #0f766e; font-size: 16px;">+Feliz</span>
+                        <span style="font-weight: bold; color: #0f766e; font-size: 16px; vertical-align: middle;">+Feliz</span>
                     @endif
                 </td>
-                <td style="text-align: right; width: 33%;">
-                    @if(file_exists(public_path('assets/branding/logo-inspira.svg')))
-                        <img src="{{ public_path('assets/branding/logo-inspira.svg') }}" style="height: 38px;" alt="Logo Inspira" />
+                <td style="text-align: right; width: 33%; vertical-align: middle;">
+                    @if(file_exists(public_path('images/inspira.png')))
+                        <img src="{{ public_path('images/inspira.png') }}" style="height: 90px; vertical-align: middle; display: inline-block;" alt="Logo Inspira" />
                     @else
-                        <span style="font-weight: bold; color: #4f46e5;">Inspira</span>
+                        <span style="font-weight: bold; color: #4f46e5; vertical-align: middle;">Inspira</span>
                     @endif
                 </td>
             </tr>
@@ -297,14 +369,13 @@
 
     <!-- Fixed Footer -->
     <div class="footer">
-        Programa Estatal de Salud Mental y Entorno Psicosocial +Feliz &copy; 2026. Todos los derechos reservados.<br>
+        Distintivo +FELIZ &copy; 2026. Todos los derechos reservados.<br>
         Documento oficial digital generado de manera automática en el Portal de Autoevaluación.
     </div>
 
     <!-- Document Title -->
     <div class="title-container">
-        <h1>ACUSE OFICIAL DE AUTOEVALUACIÓN</h1>
-        <p>Distintivo de Salud Mental y Bienestar Organizacional</p>
+        <h1>REPORTE PRELIMINAR DE AUTOEVALUACIÓN</h1>
     </div>
 
     <!-- Company Details -->
@@ -347,80 +418,197 @@
                 </tr>
             </thead>
             <tbody>
-                <!-- Enfoque 1 -->
+                <!-- Eje 1. Fortalecimiento -->
                 <tr>
-                    <td colspan="4" class="enfoque-header">Enfoque 1. Liderazgo, Política y Prevención de Riesgos (+Prevención)</td>
+                    <td colspan="4" class="enfoque-header">Eje 1. Fortalecimiento (+Fortalecimiento)</td>
                 </tr>
-                @for ($i = 1; $i <= 6; $i++)
-                    @php $val = $autoevaluacion->{"criterio_{$i}"}; @endphp
-                    <tr>
-                        <td>Criterio {{ $i }}</td>
-                        <td>Evaluación de políticas y medidas preventivas del ámbito organizacional.</td>
-                        <td style="text-align: center;">
-                            <span class="badge {{ $optionsBadgeClass[$val] ?? 'badge-na' }}">
-                                {{ $optionsText[$val] ?? $val }}
-                            </span>
-                        </td>
-                        <td style="text-align: center; font-weight: bold;">{{ is_numeric($val) ? $val : '-' }}</td>
-                    </tr>
-                @endfor
+                @foreach([1, 2, 4, 9, 10, 11, 13, 16, 20] as $i)
+                    @php
+                        $data = $criteriosData[$i];
+                        $criterioScore = 0;
+                        $hasAnsweredAny = false;
+                        $allNA = true;
+                        $elements = $respuestas["criterio_{$i}"] ?? [];
+                        if (is_array($elements)) {
+                            foreach ($elements as $key => $elemento) {
+                                if (str_starts_with($key, 'elemento_') && is_array($elemento) && isset($elemento['score'])) {
+                                    $hasAnsweredAny = true;
+                                    if ($elemento['score'] !== 'NA') {
+                                        $allNA = false;
+                                        $criterioScore += (int)$elemento['score'];
+                                    }
+                                }
+                            }
+                        }
 
-                <!-- Enfoque 2 -->
-                <tr>
-                    <td colspan="4" class="enfoque-header">Enfoque 2. Cuidado, Salud Emocional y Promoción del Bienestar (+Salud)</td>
-                </tr>
-                @for ($i = 7; $i <= 12; $i++)
-                    @php $val = $autoevaluacion->{"criterio_{$i}"}; @endphp
+                        if (!$hasAnsweredAny) {
+                            $status = 'No cumple';
+                        } elseif ($allNA) {
+                            $status = 'No aplica';
+                        } else {
+                            $totalElements = 0;
+                            $metElements = 0;
+                            foreach ($elements as $key => $elemento) {
+                                if (str_starts_with($key, 'elemento_') && is_array($elemento) && isset($elemento['score'])) {
+                                    if ($elemento['score'] !== 'NA') {
+                                        $totalElements++;
+                                        if ($elemento['score'] === '10') {
+                                            $metElements++;
+                                        }
+                                    }
+                                }
+                            }
+                            if ($totalElements === 0) {
+                                $status = 'No aplica';
+                            } elseif ($metElements === $totalElements) {
+                                $status = 'Cumple';
+                            } elseif ($metElements === 0) {
+                                $status = 'No cumple';
+                            } else {
+                                $status = 'En proceso';
+                            }
+                        }
+                    @endphp
                     <tr>
-                        <td>Criterio {{ $i }}</td>
-                        <td>Acciones de contención y fomento a la salud mental dentro de la organización.</td>
+                        <td>{{ $data['title'] }}</td>
+                        <td>{{ $data['desc'] }}</td>
                         <td style="text-align: center;">
-                            <span class="badge {{ $optionsBadgeClass[$val] ?? 'badge-na' }}">
-                                {{ $optionsText[$val] ?? $val }}
+                            <span class="badge {{ $optionsBadgeClass[$status] ?? 'badge-na' }}">
+                                {{ $optionsText[$status] ?? $status }}
                             </span>
                         </td>
-                        <td style="text-align: center; font-weight: bold;">{{ is_numeric($val) ? $val : '-' }}</td>
+                        <td style="text-align: center; font-weight: bold;">{{ $criterioScore }}</td>
                     </tr>
-                @endfor
+                @endforeach
 
                 <!-- Page break to keep the PDF structured nicely -->
                 <tr style="border: none;"><td colspan="4" style="border: none; padding: 0;"><div class="page-break"></div></td></tr>
 
-                <!-- Enfoque 3 -->
+                <!-- Eje 2. Prevención -->
                 <tr>
-                    <td colspan="4" class="enfoque-header" style="border-top: none;">Enfoque 3. Desarrollo Humano, Formación y Comunicación (+Desarrollo)</td>
+                    <td colspan="4" class="enfoque-header" style="border-top: none;">Eje 2. Prevención (+Prevención)</td>
                 </tr>
-                @for ($i = 13; $i <= 18; $i++)
-                    @php $val = $autoevaluacion->{"criterio_{$i}"}; @endphp
-                    <tr>
-                        <td>Criterio {{ $i }}</td>
-                        <td>Capacitaciones y canales de retroalimentación para el desarrollo del personal.</td>
-                        <td style="text-align: center;">
-                            <span class="badge {{ $optionsBadgeClass[$val] ?? 'badge-na' }}">
-                                {{ $optionsText[$val] ?? $val }}
-                            </span>
-                        </td>
-                        <td style="text-align: center; font-weight: bold;">{{ is_numeric($val) ? $val : '-' }}</td>
-                    </tr>
-                @endfor
+                @foreach([3, 5, 8, 17, 18] as $i)
+                    @php
+                        $data = $criteriosData[$i];
+                        $criterioScore = 0;
+                        $hasAnsweredAny = false;
+                        $allNA = true;
+                        $elements = $respuestas["criterio_{$i}"] ?? [];
+                        if (is_array($elements)) {
+                            foreach ($elements as $key => $elemento) {
+                                if (str_starts_with($key, 'elemento_') && is_array($elemento) && isset($elemento['score'])) {
+                                    $hasAnsweredAny = true;
+                                    if ($elemento['score'] !== 'NA') {
+                                        $allNA = false;
+                                        $criterioScore += (int)$elemento['score'];
+                                    }
+                                }
+                            }
+                        }
 
-                <!-- Enfoque 4 -->
-                <tr>
-                    <td colspan="4" class="enfoque-header">Enfoque 4. Condiciones de trabajo, bienestar y entorno psicosocial (+Bienestar)</td>
-                </tr>
-                @for ($i = 19; $i <= 25; $i++)
-                    @php $val = $autoevaluacion->{"criterio_{$i}"}; @endphp
+                        if (!$hasAnsweredAny) {
+                            $status = 'No cumple';
+                        } elseif ($allNA) {
+                            $status = 'No aplica';
+                        } else {
+                            $totalElements = 0;
+                            $metElements = 0;
+                            foreach ($elements as $key => $elemento) {
+                                if (str_starts_with($key, 'elemento_') && is_array($elemento) && isset($elemento['score'])) {
+                                    if ($elemento['score'] !== 'NA') {
+                                        $totalElements++;
+                                        if ($elemento['score'] === '10') {
+                                            $metElements++;
+                                        }
+                                    }
+                                }
+                            }
+                            if ($totalElements === 0) {
+                                $status = 'No aplica';
+                            } elseif ($metElements === $totalElements) {
+                                $status = 'Cumple';
+                            } elseif ($metElements === 0) {
+                                $status = 'No cumple';
+                            } else {
+                                $status = 'En proceso';
+                            }
+                        }
+                    @endphp
                     <tr>
-                        <td>Criterio {{ $i }}</td>
-                        <td>Entorno organizacional favorable y balance entre vida laboral y familiar.</td>
+                        <td>{{ $data['title'] }}</td>
+                        <td>{{ $data['desc'] }}</td>
                         <td style="text-align: center;">
-                            <span class="badge {{ $optionsBadgeClass[$val] ?? 'badge-na' }}">
-                                {{ $optionsText[$val] ?? $val }}
+                            <span class="badge {{ $optionsBadgeClass[$status] ?? 'badge-na' }}">
+                                {{ $optionsText[$status] ?? $status }}
                             </span>
                         </td>
-                        <td style="text-align: center; font-weight: bold;">{{ is_numeric($val) ? $val : '-' }}</td>
+                        <td style="text-align: center; font-weight: bold;">{{ $criterioScore }}</td>
                     </tr>
-                @endfor
+                @endforeach
+
+                <!-- Eje 3. Cuidado y Atención -->
+                <tr>
+                    <td colspan="4" class="enfoque-header">Eje 3. Cuidado y Atención (+Cuidado)</td>
+                </tr>
+                @foreach([6, 7, 12, 14, 15, 19] as $i)
+                    @php
+                        $data = $criteriosData[$i];
+                        $criterioScore = 0;
+                        $hasAnsweredAny = false;
+                        $allNA = true;
+                        $elements = $respuestas["criterio_{$i}"] ?? [];
+                        if (is_array($elements)) {
+                            foreach ($elements as $key => $elemento) {
+                                if (str_starts_with($key, 'elemento_') && is_array($elemento) && isset($elemento['score'])) {
+                                    $hasAnsweredAny = true;
+                                    if ($elemento['score'] !== 'NA') {
+                                        $allNA = false;
+                                        $criterioScore += (int)$elemento['score'];
+                                    }
+                                }
+                            }
+                        }
+
+                        if (!$hasAnsweredAny) {
+                            $status = 'No cumple';
+                        } elseif ($allNA) {
+                            $status = 'No aplica';
+                        } else {
+                            $totalElements = 0;
+                            $metElements = 0;
+                            foreach ($elements as $key => $elemento) {
+                                if (str_starts_with($key, 'elemento_') && is_array($elemento) && isset($elemento['score'])) {
+                                    if ($elemento['score'] !== 'NA') {
+                                        $totalElements++;
+                                        if ($elemento['score'] === '10') {
+                                            $metElements++;
+                                        }
+                                    }
+                                }
+                            }
+                            if ($totalElements === 0) {
+                                $status = 'No aplica';
+                            } elseif ($metElements === $totalElements) {
+                                $status = 'Cumple';
+                            } elseif ($metElements === 0) {
+                                $status = 'No cumple';
+                            } else {
+                                $status = 'En proceso';
+                            }
+                        }
+                    @endphp
+                    <tr>
+                        <td>{{ $data['title'] }}</td>
+                        <td>{{ $data['desc'] }}</td>
+                        <td style="text-align: center;">
+                            <span class="badge {{ $optionsBadgeClass[$status] ?? 'badge-na' }}">
+                                {{ $optionsText[$status] ?? $status }}
+                            </span>
+                        </td>
+                        <td style="text-align: center; font-weight: bold;">{{ $criterioScore }}</td>
+                    </tr>
+                @endforeach
             </tbody>
         </table>
     </div>
@@ -436,6 +624,16 @@
             <p style="text-align: center; margin: 15px 20px 0 20px; font-size: 10px; color: #475569; line-height: 1.4;">
                 {{ $levelDesc }}
             </p>
+        </div>
+    </div>
+
+    <!-- Aviso Importante -->
+    <div style="margin-top: 20px; padding: 12px 15px; border: 1px solid #cbd5e1; border-radius: 6px; background-color: #f8fafc; page-break-inside: avoid;">
+        <div style="font-weight: bold; font-size: 11px; color: #0f172a; margin-bottom: 6px;">Aviso importante</div>
+        <div style="font-size: 9px; color: #475569; line-height: 1.4;">
+            <p style="margin: 0 0 6px 0;">El puntaje y el nivel de madurez que se muestran en este apartado tienen carácter informativo y corresponden a un ejercicio de referencia calculado a partir de la revisión documental presentada por la organización, así como de la información proporcionada en su proceso de autoevaluación y autopercepción.</p>
+            <p style="margin: 0 0 6px 0;">El resultado definitivo será determinado por el equipo evaluador durante la visita de evaluación presencial, en la cual se verificará la evidencia documental, la implementación de las acciones reportadas y su aplicación en la práctica.</p>
+            <p style="margin: 0;">Por lo anterior, el puntaje y el nivel de madurez visualizados en esta etapa no constituyen el resultado final ni garantizan la obtención de un nivel específico. La organización deberá esperar la conclusión del proceso de evaluación y dictaminación para conocer oficialmente el nivel de madurez alcanzado.</p>
         </div>
     </div>
 

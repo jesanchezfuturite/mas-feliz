@@ -51,13 +51,13 @@ class AutoevaluacionStatsWidget extends StatsOverviewWidget
         }
 
         // 2. Check Indispensable criteria
-        $indispensableIds = [1, 4, 9, 15, 16];
+        $indispensableIds = [4, 9, 10, 15, 16];
         $indispensablesCount = 0;
         $criterioElementsCount = [
-            1 => 7,
-            4 => 7,
-            9 => 7,
-            15 => 6,
+            4 => 3,
+            9 => 5,
+            10 => 5,
+            15 => 3,
             16 => 5,
         ];
 
@@ -94,6 +94,18 @@ class AutoevaluacionStatsWidget extends StatsOverviewWidget
             }
         } else {
             $madurezDesc = 'Requiere cumplir todos los indispensables';
+        }
+
+        $isAdmin = filament()->getCurrentPanel()?->getId() === 'admin';
+
+        if (! $isAdmin) {
+            return [
+                Stat::make('Criterios Indispensables', "{$indispensablesCount} de 5")
+                    ->description($cumpleIndispensables ? '¡Todos los obligatorios cumplidos!' : 'Faltan indispensables por cumplir')
+                    ->descriptionIcon($cumpleIndispensables ? 'heroicon-m-check-badge' : 'heroicon-m-exclamation-circle')
+                    ->color($cumpleIndispensables ? 'success' : 'danger')
+                    ->view('filament.widgets.custom-stat'),
+            ];
         }
 
         return [

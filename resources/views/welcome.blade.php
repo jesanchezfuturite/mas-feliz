@@ -73,9 +73,9 @@
                         Registrar mi Organización
                     </a>
                     
-                    <a href="#ambitos" class="w-full sm:w-auto px-8 py-4 bg-white border border-slate-200 text-slate-700 hover:bg-slate-50:bg-slate-800/50 font-semibold rounded-xl transition-all duration-150 text-center">
+                    <button type="button" class="w-full sm:w-auto px-8 py-4 bg-white border border-slate-200 text-slate-700 hover:bg-slate-50 font-semibold rounded-xl transition-all duration-150 text-center shadow-sm hover:shadow cursor-pointer">
                         Conoce +
-                    </a>
+                    </button>
 
                 </div>
             </div>

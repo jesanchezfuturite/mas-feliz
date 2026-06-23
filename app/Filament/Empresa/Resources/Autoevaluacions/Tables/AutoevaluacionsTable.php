@@ -43,6 +43,7 @@ class AutoevaluacionsTable
                 TextColumn::make('puntaje_total')
                     ->label('Puntaje Total')
                     ->badge()
+                    ->visible(fn () => filament()->getCurrentPanel()?->getId() === 'admin')
                     ->getStateUsing(function ($record): int {
                         $sum = 0;
                         $respuestas = $record->respuestas ?? [];

@@ -44,9 +44,13 @@ class EmpresaPanelProvider extends PanelProvider
             ->darkMode(false)
             ->pages([
                 \App\Filament\Empresa\Pages\Dashboard::class,
+                \App\Filament\Empresa\Pages\PrevencionPromocion::class,
+                \App\Filament\Empresa\Pages\Crisis::class,
+                \App\Filament\Empresa\Pages\Capacitacion::class,
             ])
             ->discoverWidgets(in: app_path('Filament/Empresa/Widgets'), for: 'App\Filament\Empresa\Widgets')
             ->widgets([
+                \App\Filament\Empresa\Widgets\RutaProgresoWidget::class,
                 \App\Filament\Empresa\Widgets\DashboardStatsOverview::class,
                 \App\Filament\Empresa\Widgets\RiesgosGeneralesChart::class,
                 AccountWidget::class,
@@ -72,12 +76,18 @@ class EmpresaPanelProvider extends PanelProvider
             ->renderHook(
                 \Filament\View\PanelsRenderHook::HEAD_END,
                 fn (): string => \Illuminate\Support\Facades\Blade::render('<style>
+                    .fi-sidebar-item-label {
+                        font-size: 0.825rem !important;
+                        line-height: 1.25 !important;
+                        white-space: normal !important;
+                        word-break: break-word !important;
+                    }
                     .fi-sidebar { background-color: #2a3042 !important; }
                     .fi-sidebar .fi-sidebar-header { background-color: #2a3042 !important; }
                     .fi-sidebar, .fi-sidebar * { color: #a6b0cf !important; }
                     .fi-sidebar .fi-active > .fi-sidebar-item-btn { background-color: rgba(255, 255, 255, 0.1) !important; }
                     .fi-sidebar .fi-active > .fi-sidebar-item-btn, .fi-sidebar .fi-active > .fi-sidebar-item-btn * { color: #ffffff !important; font-weight: 600; }
-                    .fi-sidebar .fi-sidebar-item-btn { color: #888ea8 !important; font-weight: 500 !important; padding: 0.75rem 1.25rem !important; margin: 0.25rem 0 !important; }
+                    .fi-sidebar .fi-sidebar-item-btn { color: #888ea8 !important; font-weight: 500 !important; padding: 0.5rem 1rem !important; margin: 0.25rem 0 !important; }
                     .fi-sidebar .fi-sidebar-item-btn:hover { background-color: rgba(255, 255, 255, 0.1) !important; }
                     .fi-sidebar .fi-sidebar-item-btn:hover, .fi-sidebar .fi-sidebar-item-btn:hover * { color: #ffffff !important; font-weight: 600; }
                     .fi-btn.fi-color-custom, .fi-btn.fi-color-primary { background-color: #556ee6 !important; padding: 0.75rem 2rem !important; height: auto !important; border-radius: 0.5rem !important; border: none !important; color: #ffffff !important; }

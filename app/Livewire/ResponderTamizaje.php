@@ -11,6 +11,17 @@ class ResponderTamizaje extends Component
     public $token;
     public $empresa;
 
+    // Flow control fields
+    public $step = 'consentimiento';
+    public $consentimiento_otorgado = null;
+
+    // Declarations checklist
+    public bool $declaracion_1 = false;
+    public bool $declaracion_2 = false;
+    public bool $declaracion_3 = false;
+    public bool $declaracion_4 = false;
+    public bool $declaracion_5 = false;
+
     // Sociodemographic fields
     public $nombre_completo = null;
     public $genero = null;
@@ -46,6 +57,7 @@ class ResponderTamizaje extends Component
     public bool $success = false;
 
     protected $rules = [
+        'consentimiento_otorgado' => 'required|in:si',
         'nombre_completo' => 'required|string|max:255',
         'genero' => 'required|string',
         'edad' => 'required|string',
@@ -79,6 +91,8 @@ class ResponderTamizaje extends Component
         'required' => 'Esta pregunta es obligatoria.',
         'required_if' => 'Por favor, especifica tu actividad.',
         'in' => 'Por favor, selecciona una opción válida.',
+        'consentimiento_otorgado.in' => 'Debes otorgar tu consentimiento para participar.',
+        'consentimiento_otorgado.required' => 'Esta pregunta es obligatoria.',
     ];
 
     public function mount($token)
@@ -89,6 +103,48 @@ class ResponderTamizaje extends Component
         if (!$this->empresa) {
             abort(404);
         }
+    }
+
+    public function updatedConsentimientoOtorgado($value)
+    {
+        if ($value === 'no') {
+            \Log::info("Colaborador declinó participar en el tamizaje de la empresa ID: {$this->empresa->id} ({$this->empresa->nombre_empresa})");
+            $this->declaracion_1 = false;
+            $this->declaracion_2 = false;
+            $this->declaracion_3 = false;
+            $this->declaracion_4 = false;
+            $this->declaracion_5 = false;
+        }
+    }
+
+    public function irADemograficos()
+    {
+        $this->validate([
+            'consentimiento_otorgado' => 'required|in:si',
+            'declaracion_1' => 'accepted',
+            'declaracion_2' => 'accepted',
+            'declaracion_3' => 'accepted',
+            'declaracion_4' => 'accepted',
+            'declaracion_5' => 'accepted',
+        ], [
+            'accepted' => 'Debes confirmar y aceptar este punto para continuar.',
+        ]);
+
+        $this->step = 'demograficos';
+    }
+
+    public function irACuestionario()
+    {
+        $this->validate([
+            'nombre_completo' => 'required|string|max:255',
+            'genero' => 'required|string',
+            'edad' => 'required|string',
+            'actividad_trabajo' => 'required|string',
+            'actividad_trabajo_otra' => 'required_if:actividad_trabajo,Otra',
+            'tiempo_trabajando' => 'required|string',
+        ]);
+
+        $this->step = 'cuestionario';
     }
 
     public function submit()
@@ -150,6 +206,7 @@ class ResponderTamizaje extends Component
 
         Tamizaje::create([
             'empresa_id' => $this->empresa->id,
+            'consentimiento_otorgado' => $this->consentimiento_otorgado === 'si',
             'nombre_completo' => $this->nombre_completo,
             'genero' => $this->genero,
             'edad' => $this->edad,

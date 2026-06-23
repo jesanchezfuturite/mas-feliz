@@ -37,10 +37,12 @@ class AutoevaluacionStatsWidgetTest extends TestCase
         // So indispensablesCount = 3. cumplesIndispensables = false.
         // Madurez = Inicial.
         $respuestas = [];
-        for ($i = 1; $i <= 7; $i++) {
-            $respuestas['criterio_1']["elemento_{$i}"] = ['score' => '10'];
+        for ($i = 1; $i <= 3; $i++) {
             $respuestas['criterio_4']["elemento_{$i}"] = ['score' => '10'];
+        }
+        for ($i = 1; $i <= 5; $i++) {
             $respuestas['criterio_9']["elemento_{$i}"] = ['score' => '10'];
+            $respuestas['criterio_10']["elemento_{$i}"] = ['score' => '10'];
         }
 
         $autoevaluacion = Autoevaluacion::create([
@@ -49,12 +51,23 @@ class AutoevaluacionStatsWidgetTest extends TestCase
             'respuestas' => $respuestas,
         ]);
 
+        // 1. Test Admin Panel (shows all three stats)
+        \Filament\Facades\Filament::setCurrentPanel(\Filament\Facades\Filament::getPanel('admin'));
         Livewire::test(AutoevaluacionStatsWidget::class, ['record' => $autoevaluacion])
             ->assertSet('record', $autoevaluacion)
             ->assertSet('respuestasState', $respuestas)
-            ->assertSee('210 pts')
+            ->assertSee('130 pts')
             ->assertSee('3 de 5')
             ->assertSee('Inicial');
+
+        // 2. Test Empresa Panel (only shows Criterios Indispensables stat)
+        \Filament\Facades\Filament::setCurrentPanel(\Filament\Facades\Filament::getPanel('empresa'));
+        Livewire::test(AutoevaluacionStatsWidget::class, ['record' => $autoevaluacion])
+            ->assertSet('record', $autoevaluacion)
+            ->assertSet('respuestasState', $respuestas)
+            ->assertDontSee('130 pts')
+            ->assertSee('3 de 5')
+            ->assertDontSee('Inicial');
     }
 
     public function test_widget_updates_reactively_on_form_updated_event(): void
@@ -78,33 +91,38 @@ class AutoevaluacionStatsWidgetTest extends TestCase
             'respuestas' => [],
         ]);
 
-        // Start with empty answers (0 pts, 0 de 5, Inicial)
-        $component = Livewire::test(AutoevaluacionStatsWidget::class, ['record' => $autoevaluacion])
-            ->assertSee('0 pts')
-            ->assertSee('0 de 5')
-            ->assertSee('Inicial');
-
-        // Now dispatch formUpdated with answers that meet all requirements
-        // We need 1, 4, 9, 15, 16 met:
-        // Criterio 1: 7 elements
-        // Criterio 4: 7 elements
-        // Criterio 9: 7 elements
-        // Criterio 15: 6 elements
-        // Criterio 16: 5 elements
-        // Total elements = 32 elements. If all are 10, sum = 320.
-        // Meets all indispensables, sum >= 180 => Excelencia.
         $newRespuestas = [];
-        foreach ([1 => 7, 4 => 7, 9 => 7, 15 => 6, 16 => 5] as $criterioId => $elementsCount) {
+        foreach ([4 => 3, 9 => 5, 10 => 5, 15 => 3, 16 => 5] as $criterioId => $elementsCount) {
             for ($e = 1; $e <= $elementsCount; $e++) {
                 $newRespuestas["criterio_{$criterioId}"]["elemento_{$e}"] = ['score' => '10'];
             }
         }
 
-        $component->dispatch('formUpdated', respuestas: $newRespuestas)
+        // 1. Test Admin Panel
+        \Filament\Facades\Filament::setCurrentPanel(\Filament\Facades\Filament::getPanel('admin'));
+        $componentAdmin = Livewire::test(AutoevaluacionStatsWidget::class, ['record' => $autoevaluacion])
+            ->assertSee('0 pts')
+            ->assertSee('0 de 5')
+            ->assertSee('Inicial');
+
+        $componentAdmin->dispatch('formUpdated', respuestas: $newRespuestas)
             ->assertSet('respuestasState', $newRespuestas)
-            ->assertSee('320 pts')
+            ->assertSee('210 pts')
             ->assertSee('5 de 5')
             ->assertSee('Excelencia');
+
+        // 2. Test Empresa Panel
+        \Filament\Facades\Filament::setCurrentPanel(\Filament\Facades\Filament::getPanel('empresa'));
+        $componentEmpresa = Livewire::test(AutoevaluacionStatsWidget::class, ['record' => $autoevaluacion])
+            ->assertDontSee('0 pts')
+            ->assertSee('0 de 5')
+            ->assertDontSee('Inicial');
+
+        $componentEmpresa->dispatch('formUpdated', respuestas: $newRespuestas)
+            ->assertSet('respuestasState', $newRespuestas)
+            ->assertDontSee('210 pts')
+            ->assertSee('5 de 5')
+            ->assertDontSee('Excelencia');
     }
 
     public function test_edit_page_renders_successfully(): void
@@ -325,9 +343,9 @@ class AutoevaluacionStatsWidgetTest extends TestCase
         ])
             ->assertActionHidden('validar');
 
-        // 2. Validate some but not all indispensables (only criteria 1, 4, 9)
+        // 2. Validate some but not all indispensables (only criteria 4, 9, 10)
         $respuestas = [];
-        foreach ([1, 4, 9] as $id) {
+        foreach ([4, 9, 10] as $id) {
             $respuestas["criterio_{$id}"] = ['status' => 'Aprobado'];
         }
         $autoevaluacion->update(['respuestas' => $respuestas]);
@@ -337,7 +355,7 @@ class AutoevaluacionStatsWidgetTest extends TestCase
         ])
             ->assertActionHidden('validar');
 
-        // 3. Validate all indispensables (1, 4, 9, 15, 16)
+        // 3. Validate all indispensables (4, 9, 10, 15, 16)
         foreach ([15, 16] as $id) {
             $respuestas["criterio_{$id}"] = ['status' => 'Aprobado'];
         }
@@ -490,8 +508,8 @@ class AutoevaluacionStatsWidgetTest extends TestCase
 
         // Prepopulate responses with Aprobado status for indispensables so the button is visible
         $respuestas = [];
-        $criterioElementsCount = [1 => 7, 4 => 7, 9 => 7, 15 => 6, 16 => 5];
-        foreach ([1, 4, 9, 15, 16] as $id) {
+        $criterioElementsCount = [4 => 3, 9 => 5, 10 => 5, 15 => 3, 16 => 5];
+        foreach ([4, 9, 10, 15, 16] as $id) {
             $respuestas["criterio_{$id}"] = ['status' => 'Aprobado'];
             for ($e = 1; $e <= $criterioElementsCount[$id]; $e++) {
                 $respuestas["criterio_{$id}"]["elemento_{$e}"] = ['score' => '10'];

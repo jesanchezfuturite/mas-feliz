@@ -6,6 +6,19 @@ use Filament\Widgets\ChartWidget;
 
 class RiesgosGeneralesChart extends ChartWidget
 {
+    public function getView(): string
+    {
+        $empresa = auth()->user();
+        $autoevaluacion = $empresa->autoevaluaciones()->first();
+        $hasSubmitted = $autoevaluacion && in_array($autoevaluacion->estatus, ['En revisión', 'Validado']);
+
+        if (!$hasSubmitted) {
+            return 'filament.empresa.widgets.chart-locked';
+        }
+
+        return parent::getView();
+    }
+
     protected ?string $heading = 'Distribución de Niveles de Riesgo';
 
     protected int | string | array $columnSpan = 'full';

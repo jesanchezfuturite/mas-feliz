@@ -55,6 +55,18 @@ class HerramientasEmpresaAccesoTest extends TestCase
         // Try to visit Tamizajes (should get 403)
         $responseTamizajes = $this->get('/tablero/tamizajes');
         $responseTamizajes->assertStatus(403);
+
+        // Try to visit Prevencion (should get 403)
+        $responsePrevencion = $this->get('/tablero/prevencion-promocion');
+        $responsePrevencion->assertStatus(403);
+
+        // Try to visit Crisis (should get 403)
+        $responseCrisis = $this->get('/tablero/crisis');
+        $responseCrisis->assertStatus(403);
+
+        // Try to visit Capacitacion (should get 403)
+        $responseCapacitacion = $this->get('/tablero/capacitacion');
+        $responseCapacitacion->assertStatus(403);
     }
 
     public function test_when_tools_are_enabled_company_dashboard_does_not_show_waiting_message_and_tools_are_accessible(): void
@@ -80,5 +92,20 @@ class HerramientasEmpresaAccesoTest extends TestCase
         // Visit Tamizajes (should be 200)
         $responseTamizajes = $this->get('/tablero/tamizajes');
         $responseTamizajes->assertStatus(200);
+
+        // Visit Prevencion/Promocion (should be 200)
+        $responsePrevencion = $this->get('/tablero/prevencion-promocion');
+        $responsePrevencion->assertStatus(200);
+        $responsePrevencion->assertSee('Prevención y Promoción');
+
+        // Visit Crisis (should be 200)
+        $responseCrisis = $this->get('/tablero/crisis');
+        $responseCrisis->assertStatus(200);
+        $responseCrisis->assertSee('Crisis');
+
+        // Visit Capacitacion (should be 200)
+        $responseCapacitacion = $this->get('/tablero/capacitacion');
+        $responseCapacitacion->assertStatus(200);
+        $responseCapacitacion->assertSee('Capacitación');
     }
 }
