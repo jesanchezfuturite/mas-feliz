@@ -4,6 +4,7 @@
     <meta charset="utf-8">
     <link rel="icon" type="image/png" href="{{ asset('images/favicon.png') }}">
     <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="Distintivo +Feliz: Reconocimiento del Gobierno del Estado de Coahuila para organizaciones que promueven el cuidado y prevención de la salud mental laboral.">
     <title>+Feliz | Distintivo de Salud Mental</title>
     
     <!-- Fonts -->
@@ -53,10 +54,12 @@
     <main class="flex-grow">
         
         <!-- Hero Section -->
-        <section class="relative bg-gradient-to-b from-blue-50/50 via-white to-slate-50 pt-20 pb-16 sm:pt-28 sm:pb-20 overflow-hidden">
+        <section class="relative bg-gradient-to-b from-blue-50/50 via-white to-slate-50 pt-20 pb-16 sm:pt-28 sm:pb-20">
             <!-- Decorative Background Gradients -->
-            <div class="absolute -top-40 -right-40 w-96 h-96 bg-blue-400/20 rounded-full blur-3xl"></div>
-            <div class="absolute top-60 -left-20 w-80 h-80 bg-indigo-400/20 rounded-full blur-3xl"></div>
+            <div class="absolute inset-0 overflow-hidden pointer-events-none">
+                <div class="absolute -top-40 -right-40 w-96 h-96 bg-blue-400/20 rounded-full blur-3xl"></div>
+                <div class="absolute top-60 -left-20 w-80 h-80 bg-indigo-400/20 rounded-full blur-3xl"></div>
+            </div>
             
             <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 text-center space-y-8 relative z-10">
 
@@ -73,16 +76,83 @@
                         Registrar mi Organización
                     </a>
                     
-                    <button type="button" class="w-full sm:w-auto px-8 py-4 bg-white border border-slate-200 text-slate-700 hover:bg-slate-50 font-semibold rounded-xl transition-all duration-150 text-center shadow-sm hover:shadow cursor-pointer">
-                        Conoce +
-                    </button>
+                    <!-- Split Button "Conoce +" con Dropdown de Descargas -->
+                    <div x-data="{ abierto: false }" @click.outside="abierto = false" class="relative inline-flex w-full sm:w-auto rounded-xl shadow-sm">
+                        <!-- Lado Izquierdo (Acción Principal) -->
+                        <a href="#bento-grid-section" class="w-full sm:w-auto flex-grow sm:flex-grow-0 px-8 py-4 bg-white border border-slate-200 border-r-0 text-slate-700 hover:bg-slate-50 font-semibold rounded-l-xl transition-all duration-150 text-center cursor-pointer flex items-center justify-center">
+                            Conoce +
+                        </a>
+                        <!-- Lado Derecho (Chevron Dropdown Toggle) -->
+                        <button type="button" @click="abierto = !abierto" class="px-4 py-4 bg-white border border-slate-200 border-l border-l-slate-200 text-slate-700 hover:bg-slate-50 font-semibold rounded-r-xl transition-all duration-150 flex items-center justify-center cursor-pointer" id="download-dropdown-toggle" aria-expanded="false" :aria-expanded="abierto.toString()">
+                            <svg class="w-4 h-4 transform transition-transform duration-200" :class="abierto ? 'rotate-180' : ''" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" />
+                            </svg>
+                        </button>
+                        <!-- Menú Desplegable (Dropdown) -->
+                        <div x-show="abierto" 
+                             x-transition:enter="transition ease-out duration-200"
+                             x-transition:enter-start="opacity-0 translate-y-1 scale-95"
+                             x-transition:enter-end="opacity-100 translate-y-0 scale-100"
+                             x-transition:leave="transition ease-in duration-150"
+                             x-transition:leave-start="opacity-100 translate-y-0 scale-100"
+                             x-transition:leave-end="opacity-0 translate-y-1 scale-95"
+                             class="absolute left-0 right-0 sm:left-auto sm:right-0 top-full mt-2 w-full sm:w-72 bg-white border border-slate-200 rounded-xl shadow-xl z-50 overflow-hidden"
+                             style="display: none;">
+                            <div class="py-1">
+                                <a href="{{ asset('docs/Convocatoria + Feliz.pdf') }}" download class="flex items-center px-4 py-3 text-sm text-slate-700 hover:bg-slate-50 transition-colors duration-150">
+                                    <div class="h-8 w-8 rounded-lg bg-red-50 text-red-500 flex items-center justify-center mr-3 flex-shrink-0">
+                                        <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
+                                        </svg>
+                                    </div>
+                                    <div class="text-left flex-1 min-w-0">
+                                        <p class="font-semibold text-slate-800 truncate text-sm">Convocatoria Oficial</p>
+                                        <p class="text-xs text-slate-400">Descargar PDF</p>
+                                    </div>
+                                    <svg class="w-4 h-4 text-slate-400 ml-2" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                                    </svg>
+                                </a>
+                                <div class="border-t border-slate-100"></div>
+                                <a href="{{ asset('docs/Guía de Criterios + Feliz.pdf') }}" download class="flex items-center px-4 py-3 text-sm text-slate-700 hover:bg-slate-50 transition-colors duration-150">
+                                    <div class="h-8 w-8 rounded-lg bg-red-50 text-red-500 flex items-center justify-center mr-3 flex-shrink-0">
+                                        <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
+                                        </svg>
+                                    </div>
+                                    <div class="text-left flex-1 min-w-0">
+                                        <p class="font-semibold text-slate-800 truncate text-sm">Guía de Criterios</p>
+                                        <p class="text-xs text-slate-400">Descargar PDF</p>
+                                    </div>
+                                    <svg class="w-4 h-4 text-slate-400 ml-2" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                                    </svg>
+                                </a>
+                                <div class="border-t border-slate-100"></div>
+                                <a href="{{ asset('docs/Inconcert — Inconnect API Definition.pdf') }}" download class="flex items-center px-4 py-3 text-sm text-slate-700 hover:bg-slate-50 transition-colors duration-150">
+                                    <div class="h-8 w-8 rounded-lg bg-red-50 text-red-500 flex items-center justify-center mr-3 flex-shrink-0">
+                                        <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
+                                        </svg>
+                                    </div>
+                                    <div class="text-left flex-1 min-w-0">
+                                        <p class="font-semibold text-slate-800 truncate text-sm">API Inconcert — Inconnect</p>
+                                        <p class="text-xs text-slate-400">Descargar PDF</p>
+                                    </div>
+                                    <svg class="w-4 h-4 text-slate-400 ml-2" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                                    </svg>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
 
                 </div>
             </div>
         </section>
 
         <!-- What is it & Objectives Section -->
-        <section id="informacion" class="py-20 bg-white border-b border-slate-100 transition-colors duration-300">
+        <section id="bento-grid-section" class="py-20 bg-white border-b border-slate-100 transition-colors duration-300">
             <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 space-y-16">
                 
                 <!-- What is it -->
