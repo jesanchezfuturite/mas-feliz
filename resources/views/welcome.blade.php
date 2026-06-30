@@ -99,7 +99,7 @@
                              class="absolute left-0 right-0 sm:left-auto sm:right-0 top-full mt-2 w-full sm:w-72 bg-white border border-slate-200 rounded-xl shadow-xl z-50 overflow-hidden"
                              style="display: none;">
                             <div class="py-1">
-                                <a href="{{ asset('docs/Convocatoria + Feliz.pdf') }}" download class="flex items-center px-4 py-3 text-sm text-slate-700 hover:bg-slate-50 transition-colors duration-150">
+                                <a href="{{ asset('docs/Convocatoria+Feliz.pdf') }}" download class="flex items-center px-4 py-3 text-sm text-slate-700 hover:bg-slate-50 transition-colors duration-150">
                                     <div class="h-8 w-8 rounded-lg bg-red-50 text-red-500 flex items-center justify-center mr-3 flex-shrink-0">
                                         <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                                             <path stroke-linecap="round" stroke-linejoin="round" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
@@ -114,7 +114,7 @@
                                     </svg>
                                 </a>
                                 <div class="border-t border-slate-100"></div>
-                                <a href="{{ asset('docs/Guía de Criterios + Feliz.pdf') }}" download class="flex items-center px-4 py-3 text-sm text-slate-700 hover:bg-slate-50 transition-colors duration-150">
+                                <a href="{{ asset('docs/Guia-de-Criterios+Feliz.pdf') }}" download class="flex items-center px-4 py-3 text-sm text-slate-700 hover:bg-slate-50 transition-colors duration-150">
                                     <div class="h-8 w-8 rounded-lg bg-red-50 text-red-500 flex items-center justify-center mr-3 flex-shrink-0">
                                         <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                                             <path stroke-linecap="round" stroke-linejoin="round" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
@@ -122,21 +122,6 @@
                                     </div>
                                     <div class="text-left flex-1 min-w-0">
                                         <p class="font-semibold text-slate-800 truncate text-sm">Guía de Criterios</p>
-                                        <p class="text-xs text-slate-400">Descargar PDF</p>
-                                    </div>
-                                    <svg class="w-4 h-4 text-slate-400 ml-2" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                                        <path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
-                                    </svg>
-                                </a>
-                                <div class="border-t border-slate-100"></div>
-                                <a href="{{ asset('docs/Inconcert — Inconnect API Definition.pdf') }}" download class="flex items-center px-4 py-3 text-sm text-slate-700 hover:bg-slate-50 transition-colors duration-150">
-                                    <div class="h-8 w-8 rounded-lg bg-red-50 text-red-500 flex items-center justify-center mr-3 flex-shrink-0">
-                                        <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                                            <path stroke-linecap="round" stroke-linejoin="round" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
-                                        </svg>
-                                    </div>
-                                    <div class="text-left flex-1 min-w-0">
-                                        <p class="font-semibold text-slate-800 truncate text-sm">API Inconcert — Inconnect</p>
                                         <p class="text-xs text-slate-400">Descargar PDF</p>
                                     </div>
                                     <svg class="w-4 h-4 text-slate-400 ml-2" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
