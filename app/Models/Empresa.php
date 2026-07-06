@@ -38,11 +38,17 @@ class Empresa extends Model implements Authenticatable, HasName, CanResetPasswor
         'retroalimentacion_gobierno',
         'fecha_dictamen',
         'paso_certificacion',
+        'fecha_visita_presencial',
     ];
 
     protected $hidden = [
         'password',
         'remember_token',
+    ];
+
+    protected $casts = [
+        'fecha_visita_presencial' => 'datetime',
+        'fecha_dictamen' => 'datetime',
     ];
 
     /**

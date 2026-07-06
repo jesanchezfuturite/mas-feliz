@@ -99,6 +99,41 @@ class EmpresasTable
                     })
                     ->iconButton()
                     ->tooltip('Actualizar Fase Oficial'),
+                \Filament\Actions\Action::make('agendarVisita')
+                    ->label('Agendar Visita')
+                    ->icon('heroicon-o-calendar-days')
+                    ->color('info')
+                    ->form([
+                        \Filament\Forms\Components\DateTimePicker::make('fecha_visita_presencial')
+                            ->label('Fecha y Hora de la Visita')
+                            ->required()
+                            ->seconds(false)
+                            ->displayFormat('d/m/Y h:i A')
+                            ->default(fn ($record) => $record->fecha_visita_presencial),
+                    ])
+                    ->action(function (Empresa $record, array $data): void {
+                        $record->update([
+                            'fecha_visita_presencial' => $data['fecha_visita_presencial'],
+                        ]);
+
+                        try {
+                            \Illuminate\Support\Facades\Mail::to($record->correo)
+                                ->send(new \App\Mail\VisitaAgendadaMail($record));
+
+                            \Filament\Notifications\Notification::make()
+                                ->title('Visita agendada y correo enviado')
+                                ->success()
+                                ->send();
+                        } catch (\Exception $e) {
+                            \Filament\Notifications\Notification::make()
+                                ->title('Visita agendada pero el correo falló')
+                                ->warning()
+                                ->body('Error: ' . $e->getMessage())
+                                ->send();
+                        }
+                    })
+                    ->iconButton()
+                    ->tooltip('Agendar Visita Presencial'),
                 ViewAction::make()
                     ->iconButton()
                     ->color('gray')
