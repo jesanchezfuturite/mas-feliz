@@ -7,6 +7,7 @@ use Database\Factories\UserFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\Hidden;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 
@@ -36,6 +37,19 @@ class User extends Authenticatable implements FilamentUser
 
     public function canAccessPanel(Panel $panel): bool
     {
+        if ($panel->getId() === 'admin') {
+            return $this->role === 'admin' && $this->estatus === true;
+        }
+
+        if ($panel->getId() === 'evaluador') {
+            return $this->role === 'evaluador' && $this->estatus === true;
+        }
+
         return $this->estatus === true;
+    }
+
+    public function empresas(): BelongsToMany
+    {
+        return $this->belongsToMany(Empresa::class);
     }
 }

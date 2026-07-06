@@ -171,4 +171,9 @@ class Empresa extends Model implements Authenticatable, HasName, CanResetPasswor
     {
         return $panel->getId() === 'empresa';
     }
+
+    public function evaluadores(): \Illuminate\Database\Eloquent\Relations\BelongsToMany
+    {
+        return $this->belongsToMany(User::class);
+    }
 }

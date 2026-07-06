@@ -668,7 +668,8 @@ class AutoevaluacionForm
                             ->columnSpan([
                                 'default' => 12,
                                 'md' => 4,
-                            ]),
+                            ])
+                            ->visible(fn() => filament()->getCurrentPanel()?->getId() === 'empresa'),
 
                         Placeholder::make('aviso_importante')
                             ->hiddenLabel()
@@ -687,12 +688,9 @@ class AutoevaluacionForm
                                     </div>
                                 </div>
                             '))
-                            ->columnSpan([
-                                'default' => 12,
-                                'md' => 8,
-                            ]),
+                            ->columnSpan('full'),
                     ])
-                    ->visible(! $isAdmin)
+
                     ->columnSpan('full')
                     ->extraAttributes(['style' => 'margin-bottom: 1.5rem;']),
 

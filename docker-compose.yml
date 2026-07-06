@@ -16,6 +16,8 @@ services:
   db:
     image: mariadb:10.11
     container_name: mas_feliz_db
+    ports:
+      - "3306:3306"
     restart: always
     environment:
       MYSQL_DATABASE: inspira_mas_feliz
