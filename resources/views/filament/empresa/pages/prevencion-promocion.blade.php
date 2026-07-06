@@ -40,7 +40,7 @@
                 </ul>
             </div>
 
-            <!-- Tarjeta 2: Recursos y Enlaces -->
+            <!-- Tarjeta 2: Recursos y Enlaces DINÁMICOS -->
             <div style="background-color: #ffffff; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1); border-radius: 1rem; padding: 1.75rem; display: flex; flex-direction: column; gap: 1rem;">
                 <div style="display: flex; align-items: center; gap: 0.75rem;">
                     <div style="background-color: #eff6ff; color: #3b82f6; padding: 0.5rem; border-radius: 0.5rem;">
@@ -54,14 +54,38 @@
                     Descarga recursos para estructurar tu programa de promoción:
                 </p>
                 <div style="display: flex; flex-direction: column; gap: 0.75rem; margin-top: 0.5rem;">
-                    <a href="#" style="display: flex; align-items: center; justify-content: space-between; padding: 0.75rem 1rem; background-color: #f8fafc; border: 1px solid #e2e8f0; border-radius: 0.5rem; text-decoration: none; color: #475569; font-weight: 500; font-size: 0.9rem; transition: background-color 0.2s;" onmouseover="this.style.backgroundColor='#f1f5f9'" onmouseout="this.style.backgroundColor='#f8fafc'">
-                        <span>📋 Plantilla del Programa de Promoción</span>
-                        <span style="color: #3b82f6;">Descargar PDF</span>
-                    </a>
-                    <a href="#" style="display: flex; align-items: center; justify-content: space-between; padding: 0.75rem 1rem; background-color: #f8fafc; border: 1px solid #e2e8f0; border-radius: 0.5rem; text-decoration: none; color: #475569; font-weight: 500; font-size: 0.9rem; transition: background-color 0.2s;" onmouseover="this.style.backgroundColor='#f1f5f9'" onmouseout="this.style.backgroundColor='#f8fafc'">
-                        <span>🏛️ Guía del Gran Programa Estatal</span>
-                        <span style="color: #3b82f6;">Ver Guía</span>
-                    </a>
+                    @forelse($materiales as $material)
+                        @php
+                            $url = $material->tipo === 'enlace' || $material->tipo === 'video' 
+                                ? $material->enlace_url 
+                                : asset('storage/' . $material->archivo_path);
+                            
+                            $icon = match($material->tipo) {
+                                'pdf' => '📋',
+                                'imagen' => '🖼️',
+                                'video' => '🎥',
+                                'enlace' => '🌐',
+                                default => '📄',
+                            };
+
+                            $btnLabel = match($material->tipo) {
+                                'pdf' => 'Descargar PDF',
+                                'imagen' => 'Ver Imagen',
+                                'video' => 'Ver Video',
+                                'enlace' => 'Abrir Enlace',
+                                default => 'Abrir',
+                            };
+                        @endphp
+                        
+                        <a href="{{ $url }}" target="_blank" style="display: flex; align-items: center; justify-content: space-between; padding: 0.75rem 1rem; background-color: #f8fafc; border: 1px solid #e2e8f0; border-radius: 0.5rem; text-decoration: none; color: #475569; font-weight: 500; font-size: 0.9rem; transition: background-color 0.2s;" onmouseover="this.style.backgroundColor='#f1f5f9'" onmouseout="this.style.backgroundColor='#f8fafc'">
+                            <span>{{ $icon }} {{ $material->titulo }}</span>
+                            <span style="color: #3b82f6;">{{ $btnLabel }}</span>
+                        </a>
+                    @empty
+                        <div style="text-align: center; padding: 1.5rem; background-color: #f8fafc; border: 1px dashed #e2e8f0; border-radius: 0.5rem; color: #94a3b8; font-size: 0.9rem;">
+                            No hay materiales de apoyo disponibles por el momento.
+                        </div>
+                    @endforelse
                 </div>
             </div>
         </div>
