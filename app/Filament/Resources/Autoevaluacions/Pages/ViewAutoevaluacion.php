@@ -18,7 +18,10 @@ class ViewAutoevaluacion extends ViewRecord
             if (is_array($elementos)) {
                 foreach ($elementos as $elemento => $data) {
                     if (isset($data['score']) && is_numeric($data['score'])) {
-                        $sum += (int) $data['score'];
+                        $calif = $data['calificacion_politica'] ?? null;
+                        if (in_array($calif, ['validado', 'Aprobado'])) {
+                            $sum += (int) $data['score'];
+                        }
                     }
                 }
             }
@@ -62,7 +65,7 @@ class ViewAutoevaluacion extends ViewRecord
 
                     foreach ($indispensableIds as $id) {
                         $status = $respuestas["criterio_{$id}"]['status'] ?? null;
-                        if ($status !== 'Aprobado') {
+                        if (!in_array($status, ['validado', 'Aprobado'])) {
                             return false;
                         }
                     }
@@ -177,7 +180,10 @@ class ViewAutoevaluacion extends ViewRecord
                             continue;
                         }
                         if (is_array($elemento) && isset($elemento['score']) && is_numeric($elemento['score'])) {
-                            $sum += (int) $elemento['score'];
+                            $calif = $elemento['calificacion_politica'] ?? null;
+                            if (in_array($calif, ['validado', 'Aprobado'])) {
+                                $sum += (int) $elemento['score'];
+                            }
                         }
                     }
                 }

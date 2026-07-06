@@ -50,10 +50,8 @@ class EmpresaPanelProvider extends PanelProvider
             ])
             ->discoverWidgets(in: app_path('Filament/Empresa/Widgets'), for: 'App\Filament\Empresa\Widgets')
             ->widgets([
-                \App\Filament\Empresa\Widgets\RutaProgresoWidget::class,
-                \App\Filament\Empresa\Widgets\DashboardStatsOverview::class,
-                \App\Filament\Empresa\Widgets\RiesgosGeneralesChart::class,
-                AccountWidget::class,
+                \App\Filament\Empresa\Widgets\EmpresaInfoWidget::class,
+                \App\Filament\Empresa\Widgets\CertificationTimelineWidget::class,
             ])
             ->middleware([
                 EncryptCookies::class,

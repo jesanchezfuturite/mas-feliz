@@ -3,6 +3,7 @@
 namespace App\Filament\Empresa\Resources\Autoevaluacions\Schemas;
 
 use Filament\Forms\Components\Select;
+use Filament\Forms\Components\ToggleButtons;
 use Filament\Schemas\Components\Tabs;
 use Filament\Schemas\Components\Tabs\Tab;
 use Filament\Forms\Components\Placeholder;
@@ -20,7 +21,7 @@ class AutoevaluacionForm
     public static function configure(Schema $schema): Schema
     {
         $tabs = [];
-        $isAdmin = filament()->getCurrentPanel()?->getId() === 'admin';
+        $isAdmin = in_array(filament()->getCurrentPanel()?->getId(), ['admin', 'evaluador']);
 
         $categorias = [
             1 => '+FORTALECIMIENTO',
@@ -298,10 +299,12 @@ class AutoevaluacionForm
                                     $url = \Illuminate\Support\Facades\Storage::url($archivo);
                                     $badges[] = "<a href=\"{$url}\" target=\"_blank\" style=\"background-color: #f0fdf4; color: #15803d; font-size: 0.75rem; padding: 0.125rem 0.5rem; border-radius: 9999px; font-weight: 500; border: 1px solid #bbf7d0; text-decoration: none; cursor: pointer; display: inline-block;\">📎 Evidencia</a>";
                                 }
-                                if ($calificacion === 'Aprobado') {
-                                    $badges[] = "<span{$tooltipAttr} style=\"background-color: #f0fdf4; color: #166534; font-size: 0.75rem; padding: 0.125rem 0.5rem; border-radius: 9999px; font-weight: 600; border: 1px solid #bbf7d0; cursor: help;\">✅ Aprobado</span>";
-                                } elseif ($calificacion === 'Rechazado') {
-                                    $badges[] = "<span{$tooltipAttr} style=\"background-color: #fef2f2; color: #991b1b; font-size: 0.75rem; padding: 0.125rem 0.5rem; border-radius: 9999px; font-weight: 600; border: 1px solid #fecaca; cursor: help;\">❌ Rechazado</span>";
+                                if ($calificacion === 'validado' || $calificacion === 'Aprobado') {
+                                    $badges[] = "<span{$tooltipAttr} style=\"background-color: #f0fdf4; color: #166534; font-size: 0.75rem; padding: 0.125rem 0.5rem; border-radius: 9999px; font-weight: 600; border: 1px solid #bbf7d0; cursor: help;\">✅ Validado</span>";
+                                } elseif ($calificacion === 'revisado') {
+                                    $badges[] = "<span{$tooltipAttr} style=\"background-color: #fffbeb; color: #92400e; font-size: 0.75rem; padding: 0.125rem 0.5rem; border-radius: 9999px; font-weight: 600; border: 1px solid #fde68a; cursor: help;\">⚠️ Revisado</span>";
+                                } elseif ($calificacion === 'no_cumple' || $calificacion === 'Rechazado') {
+                                    $badges[] = "<span{$tooltipAttr} style=\"background-color: #fef2f2; color: #991b1b; font-size: 0.75rem; padding: 0.125rem 0.5rem; border-radius: 9999px; font-weight: 600; border: 1px solid #fecaca; cursor: help;\">❌ No cumple</span>";
                                 }
                                 if ($feedback) {
                                     $badges[] = "<span{$tooltipAttr} style=\"background-color: #fdf4ff; color: #a21caf; font-size: 0.75rem; padding: 0.125rem 0.5rem; border-radius: 9999px; font-weight: 500; border: 1px solid #fbcfe8; cursor: help;\">💬 Retroalimentación</span>";
@@ -392,17 +395,22 @@ class AutoevaluacionForm
                                             })
                                             ->visible(fn ($record) => $isAdmin || ($record && in_array($record->estatus, ['En revisión', 'Validado']))),
                                             
-                                        FileUpload::make('archivo')
-                                            ->label('Subir Evidencia')
-                                            ->disk('public')
-                                            ->directory('autoevaluaciones_evidencia')
-                                            ->visible(fn ($record) => ! ($isAdmin || ($record && in_array($record->estatus, ['En revisión', 'Validado'])))),
-
-                                        Select::make('calificacion_politica')
-                                            ->label('Calificación de la política')
+                                        \Filament\Forms\Components\ToggleButtons::make('calificacion_politica')
+                                            ->label('Dictamen del Evaluador')
                                             ->options([
-                                                'Aprobado' => 'Aprobar',
-                                                'Rechazado' => 'Rechazar',
+                                                'validado' => 'Validado',
+                                                'revisado' => 'Revisado',
+                                                'no_cumple' => 'No cumple',
+                                            ])
+                                            ->colors([
+                                                'validado' => 'success',
+                                                'revisado' => 'warning',
+                                                'no_cumple' => 'danger',
+                                            ])
+                                            ->icons([
+                                                'validado' => 'heroicon-m-check-circle',
+                                                'revisado' => 'heroicon-m-exclamation-circle',
+                                                'no_cumple' => 'heroicon-m-x-circle',
                                             ])
                                             ->required(fn () => $isAdmin)
                                             ->live()
@@ -411,7 +419,7 @@ class AutoevaluacionForm
                                         Textarea::make('feedback')
                                             ->label('Retroalimentación del evaluador')
                                             ->rows(2)
-                                            ->required(fn ($get) => $get('calificacion_politica') === 'Rechazado')
+                                            ->required(fn ($get) => in_array($get('calificacion_politica'), ['revisado', 'no_cumple']))
                                             ->disabled(fn ($record) => ! $isAdmin || ($record && $record->estatus === 'Validado')),
                                     ];
                                 })
@@ -499,9 +507,9 @@ class AutoevaluacionForm
                             $tooltipAttr = $evaluadorEmail ? " title=\"Evaluado por: {$evaluadorEmail}\"" : "";
 
                             $statusBadge = match($status) {
-                                'Aprobado', 'Validado' => "<span{$tooltipAttr} style=\"background-color: #ecfdf5; color: #065f46; font-size: 0.875rem; padding: 0.25rem 0.75rem; border-radius: 9999px; font-weight: 700; border: 1px solid #a7f3d0; cursor: help;\">Aprobado</span>",
-                                'En Revisión' => "<span{$tooltipAttr} style=\"background-color: #fffbeb; color: #92400e; font-size: 0.875rem; padding: 0.25rem 0.75rem; border-radius: 9999px; font-weight: 700; border: 1px solid #fde68a; cursor: help;\">En Revisión</span>",
-                                'Rechazado' => "<span{$tooltipAttr} style=\"background-color: #fef2f2; color: #991b1b; font-size: 0.875rem; padding: 0.25rem 0.75rem; border-radius: 9999px; font-weight: 700; border: 1px solid #fecaca; cursor: help;\">Rechazado</span>",
+                                'validado', 'Aprobado' => "<span{$tooltipAttr} style=\"background-color: #ecfdf5; color: #065f46; font-size: 0.875rem; padding: 0.25rem 0.75rem; border-radius: 9999px; font-weight: 700; border: 1px solid #a7f3d0; cursor: help;\">Validado</span>",
+                                'revisado', 'Revisado' => "<span{$tooltipAttr} style=\"background-color: #fffbeb; color: #92400e; font-size: 0.875rem; padding: 0.25rem 0.75rem; border-radius: 9999px; font-weight: 700; border: 1px solid #fde68a; cursor: help;\">Revisado</span>",
+                                'no_cumple', 'Rechazado' => "<span{$tooltipAttr} style=\"background-color: #fef2f2; color: #991b1b; font-size: 0.875rem; padding: 0.25rem 0.75rem; border-radius: 9999px; font-weight: 700; border: 1px solid #fecaca; cursor: help;\">No cumple</span>",
                                 default => '<span style="background-color: #f3f4f6; color: #374151; font-size: 0.875rem; padding: 0.25rem 0.75rem; border-radius: 9999px; font-weight: 700; border: 1px solid #e5e7eb;">Pendiente de Evaluar</span>',
                             };
 
@@ -525,8 +533,8 @@ class AutoevaluacionForm
                             ->label('Evaluar Criterio')
                             ->icon('heroicon-m-check-badge')
                             ->color('primary')
-                            ->visible(fn () => filament()->getCurrentPanel()->getId() === 'admin')
-                            ->disabled(fn ($record) => $record && ($record->respuestas["criterio_{$i}"]['status'] ?? null) === 'Aprobado')
+                            ->visible(fn () => in_array(filament()->getCurrentPanel()->getId(), ['admin', 'evaluador']))
+                            ->disabled(fn ($record) => $record && in_array($record->respuestas["criterio_{$i}"]['status'] ?? null, ['validado', 'Aprobado']))
                             ->modalHeading("Evaluar Criterio {$i}")
                             ->modalSubmitActionLabel('Guardar Evaluación')
                             ->form(fn ($record) => [
@@ -544,13 +552,13 @@ class AutoevaluacionForm
 
                                 for ($e = 1; $e <= $numElements; $e++) {
                                     $calif = $respuestas["criterio_{$i}"]["elemento_{$e}"]['calificacion_politica'] ?? null;
-                                    if ($calif !== 'Aprobado') {
+                                    if (!in_array($calif, ['validado', 'Aprobado'])) {
                                         $allApproved = false;
                                         break;
                                     }
                                 }
 
-                                $status = $allApproved ? 'Aprobado' : 'Rechazado';
+                                $status = $allApproved ? 'validado' : 'no_cumple';
 
                                 $set("respuestas.criterio_{$i}.status", $status);
                                 $set("respuestas.criterio_{$i}.feedback", $data['retroalimentacion_general']);

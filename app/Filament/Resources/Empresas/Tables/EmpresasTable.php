@@ -69,6 +69,36 @@ class EmpresasTable
                     ->visible(fn ($record) => !empty($record?->ruta_pdf) && $record?->estatus === 'Dictaminado')
                     ->url(fn ($record) => !empty($record?->ruta_pdf) ? '/storage/' . $record->ruta_pdf : null)
                     ->openUrlInNewTab(),
+                \Filament\Actions\Action::make('certificarFase')
+                    ->label('Certificar Fase')
+                    ->icon('heroicon-o-check-badge')
+                    ->color('success')
+                    ->form([
+                        \Filament\Forms\Components\Select::make('paso_certificacion')
+                            ->label('Fase Actual de Certificación')
+                            ->options([
+                                1 => '1. Registro',
+                                2 => '2. Diagnóstico inicial/Autoevaluación',
+                                3 => '3. Retroalimentación y Acompañamiento',
+                                4 => '4. Plan de acción/Implementación',
+                                5 => '5. Evaluación y Dictaminación',
+                                6 => '6. Reconocimiento acorde al nivel de Madurez',
+                            ])
+                            ->required()
+                            ->default(fn ($record) => $record->paso_certificacion),
+                    ])
+                    ->action(function (Empresa $record, array $data): void {
+                        $record->update([
+                            'paso_certificacion' => $data['paso_certificacion'],
+                        ]);
+
+                        \Filament\Notifications\Notification::make()
+                            ->title('Fase actualizada correctamente')
+                            ->success()
+                            ->send();
+                    })
+                    ->iconButton()
+                    ->tooltip('Actualizar Fase Oficial'),
                 ViewAction::make()
                     ->iconButton()
                     ->color('gray')

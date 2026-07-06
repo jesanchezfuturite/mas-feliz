@@ -37,6 +37,7 @@ class Empresa extends Model implements Authenticatable, HasName, CanResetPasswor
         'nivel_madurez_asignado',
         'retroalimentacion_gobierno',
         'fecha_dictamen',
+        'paso_certificacion',
     ];
 
     protected $hidden = [

@@ -31,6 +31,9 @@ class Dashboard extends BaseDashboard
             return [];
         }
 
-        return parent::getWidgets();
+        return [
+            \App\Filament\Empresa\Widgets\EmpresaInfoWidget::class,
+            \App\Filament\Empresa\Widgets\CertificationTimelineWidget::class,
+        ];
     }
 }
