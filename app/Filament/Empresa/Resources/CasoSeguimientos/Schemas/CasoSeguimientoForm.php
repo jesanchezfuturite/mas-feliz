@@ -23,7 +23,7 @@ class CasoSeguimientoForm
                     ->disabled(fn ($record) => $record && \App\Models\Tamizaje::where('empresa_id', $record->empresa_id)->where('nombre_completo', $record->identificador_empleado)->exists()),
 
                 Select::make('genero')
-                    ->label('Género')
+                    ->label('Sexo')
                     ->options([
                         'Hombre' => 'Hombre',
                         'Mujer' => 'Mujer',

@@ -150,8 +150,23 @@
                 </div>
                 <h3 class="text-lg font-bold text-amber-900 dark:text-amber-300">Agradecemos tu honestidad</h3>
                 <p class="text-sm text-amber-700 dark:text-amber-400 max-w-md mx-auto leading-relaxed">
-                    Has decidido no participar. Tus respuestas y datos no serán recopilados. Puedes cerrar esta pestaña de forma segura.
+                    Has decidido no participar. No se recopilarán tus datos personales ni respuestas. Presiona <strong>Enviar</strong> para registrar tu decisión y finalizar.
                 </p>
+
+                <div class="pt-2">
+                    <button type="button"
+                            wire:click="enviarNoParticipacion"
+                            wire:loading.attr="disabled"
+                            wire:target="enviarNoParticipacion"
+                            style="background: linear-gradient(to right, #f59e0b, #d97706); color: #ffffff;"
+                            class="w-full sm:w-auto sm:mx-auto py-3 px-8 text-white font-semibold rounded-lg shadow-md hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-amber-500 focus:ring-offset-2 transition-all duration-150 disabled:opacity-50 inline-flex items-center justify-center space-x-2 text-base">
+                        <span wire:loading.remove wire:target="enviarNoParticipacion">Enviar</span>
+                        <span wire:loading wire:target="enviarNoParticipacion">Enviando...</span>
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor" wire:loading.remove wire:target="enviarNoParticipacion">
+                            <path fill-rule="evenodd" d="M10.293 3.293a1 1 0 011.414 0l6 6a1 1 0 010 1.414l-6 6a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-4.293-4.293a1 1 0 010-1.414z" clip-rule="evenodd" />
+                        </svg>
+                    </button>
+                </div>
             </div>
 
             <div x-show="consentimiento !== 'no'" class="pt-4">
@@ -186,10 +201,10 @@
                         @error('nombre_completo') <span class="text-xs text-red-500 block font-medium mt-1">{{ $message }}</span> @enderror
                     </div>
 
-                    <!-- Género -->
+                    <!-- Sexo -->
                     <div class="space-y-3">
                         <label class="block text-sm font-semibold text-slate-800 dark:text-slate-200">
-                            2. Género <span class="text-red-500">*</span>
+                            2. Sexo <span class="text-red-500">*</span>
                         </label>
                         <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
                             @foreach(['Hombre', 'Mujer'] as $val)

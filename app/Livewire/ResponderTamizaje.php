@@ -117,6 +117,28 @@ class ResponderTamizaje extends Component
         }
     }
 
+    public function enviarNoParticipacion()
+    {
+        // Solo aplica cuando la persona declinó explícitamente participar.
+        if ($this->consentimiento_otorgado !== 'no') {
+            return;
+        }
+
+        // Se registra la no-participación para que cuente dentro del total de
+        // trabajadores (porcentaje de avance del tablero), sin datos personales
+        // ni evaluación de riesgo. 'No participó' queda fuera del gráfico de riesgos.
+        Tamizaje::create([
+            'empresa_id' => $this->empresa->id,
+            'consentimiento_otorgado' => false,
+            'riesgo_ansiedad' => 0,
+            'riesgo_depresion' => 0,
+            'riesgo_conducta_suicida' => 0,
+            'nivel_riesgo_general' => 'No participó',
+        ]);
+
+        $this->success = true;
+    }
+
     public function irADemograficos()
     {
         $this->validate([
