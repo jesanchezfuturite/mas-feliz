@@ -50,6 +50,9 @@ class User extends Authenticatable implements FilamentUser
 
     public function empresas(): BelongsToMany
     {
-        return $this->belongsToMany(Empresa::class);
+        // Pivote fijado explícitamente para que la relación funcione igual
+        // desde User y desde la subclase Evaluador (que de lo contrario
+        // infiere 'empresa_evaluador'/'evaluador_id' en vez de 'empresa_user'/'user_id').
+        return $this->belongsToMany(Empresa::class, 'empresa_user', 'user_id', 'empresa_id');
     }
 }

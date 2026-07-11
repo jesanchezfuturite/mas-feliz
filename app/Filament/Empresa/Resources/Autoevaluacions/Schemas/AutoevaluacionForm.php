@@ -381,7 +381,23 @@ class AutoevaluacionForm
                                             ->label('Comentario')
                                             ->rows(3)
                                             ->disabled(fn ($record) => $isAdmin || ($record && in_array($record->estatus, ['En revisión', 'Validado']))),
-                                        
+
+                                        FileUpload::make('archivo')
+                                            ->label('Evidencia (documento o imagen)')
+                                            ->helperText('Adjunta un documento (PDF o Word) o una imagen que respalde el cumplimiento de este elemento. Tamaño máximo 50 MB.')
+                                            ->disk('public')
+                                            ->directory('autoevaluacion-evidencias')
+                                            ->downloadable()
+                                            ->openable()
+                                            ->maxSize(51200)
+                                            ->acceptedFileTypes([
+                                                'application/pdf',
+                                                'image/*',
+                                                'application/msword',
+                                                'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+                                            ])
+                                            ->visible(fn ($record) => ! $isAdmin && ! ($record && in_array($record->estatus, ['En revisión', 'Validado']))),
+
                                         Placeholder::make('archivo_link')
                                             ->label('Ver Evidencia')
                                             ->content(function ($get) {
@@ -434,7 +450,11 @@ class AutoevaluacionForm
                                         $set("respuestas.criterio_{$i}.elemento_{$elemId}.comentario", $data['comentario']);
                                     }
                                     if (array_key_exists('archivo', $data)) {
-                                        $set("respuestas.criterio_{$i}.elemento_{$elemId}.archivo", $data['archivo']);
+                                        $archivo = $data['archivo'];
+                                        if (is_array($archivo)) {
+                                            $archivo = array_values($archivo)[0] ?? null;
+                                        }
+                                        $set("respuestas.criterio_{$i}.elemento_{$elemId}.archivo", $archivo);
                                     }
                                     if (array_key_exists('calificacion_politica', $data)) {
                                         $set("respuestas.criterio_{$i}.elemento_{$elemId}.calificacion_politica", $data['calificacion_politica']);
@@ -706,7 +726,37 @@ class AutoevaluacionForm
                     ->tabs([
                         Tab::make('Criterios Indispensables')
                             ->icon('heroicon-o-shield-check')
-                            ->schema($indispensablesComponents),
+                            ->schema([
+                                Placeholder::make('nota_indispensables')
+                                    ->hiddenLabel()
+                                    ->content(new HtmlString('
+                                        <div style="background-color: #eff6ff; border: 1px solid #bfdbfe; border-left: 4px solid #3b82f6; border-radius: 0.5rem; padding: 1rem 1.25rem; margin-bottom: 1.25rem;">
+                                            <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.5rem;">
+                                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="#2563eb" style="width: 1.15rem; height: 1.15rem; display: inline-block;">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" d="M11.25 11.25l.041-.02a.75.75 0 111.063.852l-.708 2.836a.75.75 0 001.063.852l.041-.028M12 18.75h.007v.008H12v-.008zM12 3a9 9 0 110 18 9 9 0 010-18z" />
+                                                </svg>
+                                                <h3 style="font-size: 0.8rem; font-weight: 700; color: #1e3a8a; margin: 0; text-transform: uppercase; letter-spacing: 0.05em;">Nota</h3>
+                                            </div>
+                                            <ul style="margin: 0 0 0.85rem; padding-left: 1.1rem; font-size: 0.85rem; color: #1e40af; line-height: 1.55; list-style: disc;">
+                                                <li style="margin-bottom: 0.35rem;">Para el cumplimiento de los 5 criterios indispensables, es importante realizarlos con los recursos de apoyo proporcionados a través de la plataforma.</li>
+                                                <li>Para el desarrollo de todos los criterios es importante consultar el Lineamiento y la Guía de Criterios que puede descargar a continuación.</li>
+                                            </ul>
+                                            <div style="display: flex; flex-wrap: wrap; gap: 0.5rem;">
+                                                <a href="' . asset('docs/lineamiento-operativo.pdf') . '" target="_blank" style="display: inline-flex; align-items: center; gap: 0.4rem; background-color: #2563eb; color: #ffffff; font-size: 0.8rem; font-weight: 600; padding: 0.45rem 0.9rem; border-radius: 0.5rem; text-decoration: none;">
+                                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" style="width: 1rem; height: 1rem;"><path fill-rule="evenodd" d="M10 3a.75.75 0 01.75.75v6.638l1.96-2.158a.75.75 0 111.08 1.04l-3.25 3.5a.75.75 0 01-1.08 0l-3.25-3.5a.75.75 0 111.08-1.04l1.96 2.158V3.75A.75.75 0 0110 3zM3.5 13a.75.75 0 01.75.75v1.5c0 .414.336.75.75.75h10a.75.75 0 00.75-.75v-1.5a.75.75 0 011.5 0v1.5A2.25 2.25 0 0115 17.5H5A2.25 2.25 0 012.75 15.25v-1.5A.75.75 0 013.5 13z" clip-rule="evenodd"/></svg>
+                                                    Lineamiento Operativo
+                                                </a>
+                                                <a href="' . asset('docs/guia-de-criterios-mas-feliz.pdf') . '" target="_blank" style="display: inline-flex; align-items: center; gap: 0.4rem; background-color: #ffffff; color: #1d4ed8; border: 1px solid #93c5fd; font-size: 0.8rem; font-weight: 600; padding: 0.45rem 0.9rem; border-radius: 0.5rem; text-decoration: none;">
+                                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" style="width: 1rem; height: 1rem;"><path fill-rule="evenodd" d="M10 3a.75.75 0 01.75.75v6.638l1.96-2.158a.75.75 0 111.08 1.04l-3.25 3.5a.75.75 0 01-1.08 0l-3.25-3.5a.75.75 0 111.08-1.04l1.96 2.158V3.75A.75.75 0 0110 3zM3.5 13a.75.75 0 01.75.75v1.5c0 .414.336.75.75.75h10a.75.75 0 00.75-.75v-1.5a.75.75 0 011.5 0v1.5A2.25 2.25 0 0115 17.5H5A2.25 2.25 0 012.75 15.25v-1.5A.75.75 0 013.5 13z" clip-rule="evenodd"/></svg>
+                                                    Guía de Criterios
+                                                </a>
+                                            </div>
+                                        </div>
+                                    '))
+                                    ->columnSpanFull(),
+
+                                ...$indispensablesComponents,
+                            ]),
                         
                         Tab::make('Criterios Necesarios')
                             ->icon('heroicon-o-document-duplicate')

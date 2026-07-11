@@ -613,29 +613,6 @@
         </table>
     </div>
 
-    <!-- Summary Box -->
-    <div class="summary-box">
-        <div class="summary-card">
-            <div class="summary-title">RESULTADO DE EVALUACIÓN</div>
-            <div class="score-display" style="color: {{ $maturityColor }};">{{ $sum }} Puntos</div>
-            <div class="maturity-badge" style="background-color: {{ $maturityBg }}; color: {{ $maturityColor }};">
-                {{ $level }}
-            </div>
-            <p style="text-align: center; margin: 15px 20px 0 20px; font-size: 10px; color: #475569; line-height: 1.4;">
-                {{ $levelDesc }}
-            </p>
-        </div>
-    </div>
-
-    <!-- Aviso Importante -->
-    <div style="margin-top: 20px; padding: 12px 15px; border: 1px solid #cbd5e1; border-radius: 6px; background-color: #f8fafc; page-break-inside: avoid;">
-        <div style="font-weight: bold; font-size: 11px; color: #0f172a; margin-bottom: 6px;">Aviso importante</div>
-        <div style="font-size: 9px; color: #475569; line-height: 1.4;">
-            <p style="margin: 0 0 6px 0;">El puntaje y el nivel de madurez que se muestran en este apartado tienen carácter informativo y corresponden a un ejercicio de referencia calculado a partir de la revisión documental presentada por la organización, así como de la información proporcionada en su proceso de autoevaluación y autopercepción.</p>
-            <p style="margin: 0 0 6px 0;">El resultado definitivo será determinado por el equipo evaluador durante la visita de evaluación presencial, en la cual se verificará la evidencia documental, la implementación de las acciones reportadas y su aplicación en la práctica.</p>
-            <p style="margin: 0;">Por lo anterior, el puntaje y el nivel de madurez visualizados en esta etapa no constituyen el resultado final ni garantizan la obtención de un nivel específico. La organización deberá esperar la conclusión del proceso de evaluación y dictaminación para conocer oficialmente el nivel de madurez alcanzado.</p>
-        </div>
-    </div>
 
 </body>
 </html>

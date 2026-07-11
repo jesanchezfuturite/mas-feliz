@@ -35,6 +35,13 @@
                 Por favor, responde con honestidad. Este tamizaje recopila información demográfica básica y evalúa aspectos de salud emocional de manera estrictamente confidencial.
             </p>
 
+            <!-- Mensaje inicial -->
+            <div class="text-left max-w-2xl mx-auto space-y-3 pt-5 mt-5 border-t border-slate-100 dark:border-slate-800 text-sm text-slate-600 dark:text-slate-300 leading-relaxed">
+                <p>El objetivo del presente tamizaje es implementar un programa de detección y atención temprana de la salud mental de nuestros colaboradores.</p>
+                <p>Te invitamos a participar contestando el cuestionario. En caso de que encontremos riesgo de acuerdo a algunas de tus respuestas, te podremos compartir alternativas de atención.</p>
+                <p>Si requieres información adicional o tienes duda, puedes dirigirte con el área de Recursos Humanos y/o enlace de +Feliz en tu organización.</p>
+            </div>
+
         <!-- Paso 1: Consentimiento -->
         <div x-show="step === 'consentimiento'" class="space-y-6">
             <div class="bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 shadow-xl rounded-3xl p-8 sm:p-10 space-y-6">
@@ -78,7 +85,7 @@
                         <label class="flex items-center p-4 border rounded-2xl cursor-pointer transition-all duration-200"
                                :class="consentimiento === 'si' ? 'border-blue-600 bg-blue-50/50 dark:bg-blue-950/20 text-blue-700 dark:text-blue-300 ring-2 ring-blue-500/20 font-semibold' : 'border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800/40 text-slate-600 dark:text-slate-400'">
                             <input type="radio" wire:model.live="consentimiento_otorgado" value="si" class="sr-only" x-model="consentimiento" />
-                            <span class="text-sm font-medium">Sí, deseo participar y otorgar mi consentimiento.</span>
+                            <span class="text-sm font-medium">Sí, otorgo mi consentimiento para participar.</span>
                         </label>
 
                         <label class="flex items-center p-4 border rounded-2xl cursor-pointer transition-all duration-200"

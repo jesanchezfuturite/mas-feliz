@@ -669,7 +669,7 @@ A través de estas acciones, las organizaciones fortalecen su capacidad para sos
                         <span>&copy; 2026. Todos los derechos reservados.</span>
                     </div>
                     <p class="max-w-2xl leading-relaxed">
-                        Esta es una iniciativa impulsada por el Gobierno del Estado de Coahuila de Zaragoza para el cuidado, fomento y prevención de la salud mental de los trabajadores.
+                        Esta es una iniciativa impulsada por el Gobierno del Estado de Coahuila de Zaragoza para la prevención, cuidado y fortalecimiento de la salud mental de los trabajadores.
                     </p>
                 </div>
                 

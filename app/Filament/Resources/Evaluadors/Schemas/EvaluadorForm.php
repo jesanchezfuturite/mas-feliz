@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\Evaluadors\Schemas;
 
+use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Schemas\Schema;
 
@@ -30,6 +31,14 @@ class EvaluadorForm
                     ->tel()
                     ->required()
                     ->maxLength(255),
+                Select::make('empresas')
+                    ->label('Empresas asignadas')
+                    ->relationship('empresas', 'nombre_empresa')
+                    ->multiple()
+                    ->preload()
+                    ->searchable()
+                    ->helperText('El evaluador solo podrá ver y auditar las empresas seleccionadas.')
+                    ->columnSpanFull(),
             ]);
     }
 }
