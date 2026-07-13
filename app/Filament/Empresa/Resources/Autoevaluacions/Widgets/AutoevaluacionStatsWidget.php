@@ -33,6 +33,8 @@ class AutoevaluacionStatsWidget extends StatsOverviewWidget
         $respuestas = $this->respuestasState ?? ($this->record ? ($this->record->respuestas ?? []) : []);
         $estatus = $this->record ? ($this->record->estatus ?? 'Borrador') : 'Borrador';
 
+        $isStaff = in_array(filament()->getCurrentPanel()?->getId(), ['admin', 'evaluador']);
+
         // 1. Calculate sum
         $sum = 0;
         if (is_array($respuestas)) {
@@ -43,7 +45,14 @@ class AutoevaluacionStatsWidget extends StatsOverviewWidget
                             continue;
                         }
                         if (is_array($elemento) && isset($elemento['score']) && is_numeric($elemento['score'])) {
-                            $sum += (int) $elemento['score'];
+                            if ($isStaff) {
+                                $calif = $elemento['calificacion_politica'] ?? null;
+                                if (in_array($calif, ['validado', 'Aprobado'])) {
+                                    $sum += (int) $elemento['score'];
+                                }
+                            } else {
+                                $sum += (int) $elemento['score'];
+                            }
                         }
                     }
                 }
@@ -96,7 +105,7 @@ class AutoevaluacionStatsWidget extends StatsOverviewWidget
             $madurezDesc = 'Requiere cumplir todos los indispensables';
         }
 
-        $isAdmin = filament()->getCurrentPanel()?->getId() === 'admin';
+        $isAdmin = in_array(filament()->getCurrentPanel()?->getId(), ['admin', 'evaluador']);
 
         if (! $isAdmin) {
             return [

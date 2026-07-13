@@ -128,6 +128,21 @@
                                         <path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
                                     </svg>
                                 </a>
+                                <div class="border-t border-slate-100"></div>
+                                <a href="{{ asset('docs/lineamiento-operativo.pdf') }}" download class="flex items-center px-4 py-3 text-sm text-slate-700 hover:bg-slate-50 transition-colors duration-150">
+                                    <div class="h-8 w-8 rounded-lg bg-red-50 text-red-500 flex items-center justify-center mr-3 flex-shrink-0">
+                                        <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
+                                        </svg>
+                                    </div>
+                                    <div class="text-left flex-1 min-w-0">
+                                        <p class="font-semibold text-slate-800 truncate text-sm">Lineamiento Operativo</p>
+                                        <p class="text-xs text-slate-400">Descargar PDF</p>
+                                    </div>
+                                    <svg class="w-4 h-4 text-slate-400 ml-2" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                                    </svg>
+                                </a>
                             </div>
                         </div>
                     </div>
@@ -669,7 +684,7 @@ A través de estas acciones, las organizaciones fortalecen su capacidad para sos
                         <span>&copy; 2026. Todos los derechos reservados.</span>
                     </div>
                     <p class="max-w-2xl leading-relaxed">
-                        Esta es una iniciativa impulsada por el Gobierno del Estado de Coahuila de Zaragoza para el cuidado, fomento y prevención de la salud mental de los trabajadores.
+                        Esta es una iniciativa impulsada por el Gobierno del Estado de Coahuila de Zaragoza para la prevención, cuidado y fortalecimiento de la salud mental de los trabajadores.
                     </p>
                 </div>
                 

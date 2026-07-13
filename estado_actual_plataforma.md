@@ -20,7 +20,12 @@ El sistema cuenta con tres actores principales que interactúan mediante rutas d
   * **Login:** `/tablero/login` (Mapeado mediante una página de Login personalizada en `App\Filament\Pages\Auth\Login` que sustituye el campo nativo de email de Filament por `correo` para coincidir con el campo de la base de datos).
 * **Seguridad:** Aislamiento estricto de datos (Tenant Scoping). Las empresas no pueden visualizar los datos de otras organizaciones. Se autentican mediante el guard `empresa` (proveedor Eloquent sobre el modelo `App\Models\Empresa`).
 
-### C. Empleados / Colaboradores (Público)
+### C. Evaluadores (Auditores Externos)
+* **Acceso:** Panel dedicado de Filament.
+* **URL:** `/evaluador`
+* **Seguridad:** Aislamiento de datos mediante asignación explícita. Los evaluadores solo pueden visualizar y gestionar las empresas que el administrador les ha asignado a través de la tabla pivot `empresa_user`. Se autentican mediante el guard `web` con el middleware `CheckRole:evaluador`.
+
+### D. Empleados / Colaboradores (Público)
 * **Acceso:** Interfaz móvil responsiva de diagnóstico.
 * **URL:** `/diagnostico/{token}`
 * **Seguridad:** Acceso de lectura y escritura anónimo regulado por un token único alfanumérico (`token_tamizaje`). No se solicita ningún dato personal (nombre, nómina o correo) en esta ruta pública para asegurar el anonimato clínico inicial.
@@ -76,6 +81,15 @@ El sistema cuenta con tres actores principales que interactúan mediante rutas d
   * **Riesgo Detectado:** Verde (Leve), Amarillo (Moderado), Rojo (Urgente).
   * **Estatus de la Atención:** Azul (En seguimiento), Amarillo (Canalizado), Verde (Cerrado satisfactorio), Gris (Abandonó).
 * **Tenant Isolation:** Cada empresa solo visualiza los casos que ha dado de alta. Al crear un registro, el `empresa_id` se asigna automáticamente en segundo plano.
+
+### E. Gestión de Usuarios y Evaluadores
+* **Recurso (`UserResource`):** Disponible exclusivamente en el panel de Administración (`/admin`). Permite la gestión centralizada de usuarios con roles diferenciados (`admin`, `evaluador`).
+* **Asignación Dinámica:** Los usuarios con rol `evaluador` disponen de un campo de relación múltiple para asignar empresas. Esta asignación persiste en la tabla `empresa_user`.
+* **Panel de Evaluador:** Los evaluadores acceden a `/evaluador` donde visualizan un listado filtrado de empresas asignadas. Tienen permisos para:
+    * Consultar los datos generales de la empresa.
+    * Gestionar el **Dictamen y Auditoría** de la empresa (Estatus del distintivo y Nivel de Madurez).
+    * Emitir retroalimentación oficial.
+    * **Dictaminar Autoevaluaciones:** Mediante el recurso `AutoevaluacionResource`, el evaluador puede revisar, validar o devolver para corrección las autoevaluaciones de sus empresas asignadas. Este recurso hereda la lógica de validación, cálculo de madurez y generación de PDF del panel de Administración para asegurar la consistencia.
 
 ---
 

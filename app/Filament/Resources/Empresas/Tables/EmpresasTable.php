@@ -69,6 +69,71 @@ class EmpresasTable
                     ->visible(fn ($record) => !empty($record?->ruta_pdf) && $record?->estatus === 'Dictaminado')
                     ->url(fn ($record) => !empty($record?->ruta_pdf) ? '/storage/' . $record->ruta_pdf : null)
                     ->openUrlInNewTab(),
+                \Filament\Actions\Action::make('certificarFase')
+                    ->label('Certificar Fase')
+                    ->icon('heroicon-o-check-badge')
+                    ->color('success')
+                    ->form([
+                        \Filament\Forms\Components\Select::make('paso_certificacion')
+                            ->label('Fase Actual de Certificación')
+                            ->options([
+                                1 => '1. Registro',
+                                2 => '2. Diagnóstico inicial/Autoevaluación',
+                                3 => '3. Retroalimentación y Acompañamiento',
+                                4 => '4. Plan de acción/Implementación',
+                                5 => '5. Evaluación y Dictaminación',
+                                6 => '6. Reconocimiento acorde al nivel de Madurez',
+                            ])
+                            ->required()
+                            ->default(fn ($record) => $record->paso_certificacion),
+                    ])
+                    ->action(function (Empresa $record, array $data): void {
+                        $record->update([
+                            'paso_certificacion' => $data['paso_certificacion'],
+                        ]);
+
+                        \Filament\Notifications\Notification::make()
+                            ->title('Fase actualizada correctamente')
+                            ->success()
+                            ->send();
+                    })
+                    ->iconButton()
+                    ->tooltip('Actualizar Fase Oficial'),
+                \Filament\Actions\Action::make('agendarVisita')
+                    ->label('Agendar Visita')
+                    ->icon('heroicon-o-calendar-days')
+                    ->color('info')
+                    ->form([
+                        \Filament\Forms\Components\DateTimePicker::make('fecha_visita_presencial')
+                            ->label('Fecha y Hora de la Visita')
+                            ->required()
+                            ->seconds(false)
+                            ->displayFormat('d/m/Y h:i A')
+                            ->default(fn ($record) => $record->fecha_visita_presencial),
+                    ])
+                    ->action(function (Empresa $record, array $data): void {
+                        $record->update([
+                            'fecha_visita_presencial' => $data['fecha_visita_presencial'],
+                        ]);
+
+                        try {
+                            \Illuminate\Support\Facades\Mail::to($record->correo)
+                                ->send(new \App\Mail\VisitaAgendadaMail($record));
+
+                            \Filament\Notifications\Notification::make()
+                                ->title('Visita agendada y correo enviado')
+                                ->success()
+                                ->send();
+                        } catch (\Exception $e) {
+                            \Filament\Notifications\Notification::make()
+                                ->title('Visita agendada pero el correo falló')
+                                ->warning()
+                                ->body('Error: ' . $e->getMessage())
+                                ->send();
+                        }
+                    })
+                    ->iconButton()
+                    ->tooltip('Agendar Visita Presencial'),
                 ViewAction::make()
                     ->iconButton()
                     ->color('gray')

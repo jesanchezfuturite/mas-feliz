@@ -4,6 +4,7 @@ namespace App\Filament\Empresa\Pages;
 
 use Filament\Pages\Page;
 use App\Models\Setting;
+use App\Models\MaterialApoyo;
 
 class PrevencionPromocion extends Page
 {
@@ -20,5 +21,14 @@ class PrevencionPromocion extends Page
     public static function canAccess(): bool
     {
         return Setting::where('key', 'global_config')->first()?->herramientas_empresa_activas ?? false;
+    }
+
+    protected function getViewData(): array
+    {
+        return [
+            'materiales' => MaterialApoyo::where('activo', true)
+                ->where('seccion', 'prevencion_promocion')
+                ->get(),
+        ];
     }
 }

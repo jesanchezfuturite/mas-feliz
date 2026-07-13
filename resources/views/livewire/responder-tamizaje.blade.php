@@ -35,6 +35,13 @@
                 Por favor, responde con honestidad. Este tamizaje recopila información demográfica básica y evalúa aspectos de salud emocional de manera estrictamente confidencial.
             </p>
 
+            <!-- Mensaje inicial -->
+            <div class="text-left max-w-2xl mx-auto space-y-3 pt-5 mt-5 border-t border-slate-100 dark:border-slate-800 text-sm text-slate-600 dark:text-slate-300 leading-relaxed">
+                <p>El objetivo del presente tamizaje es implementar un programa de detección y atención temprana de la salud mental de nuestros colaboradores.</p>
+                <p>Te invitamos a participar contestando el cuestionario. En caso de que encontremos riesgo de acuerdo a algunas de tus respuestas, te podremos compartir alternativas de atención.</p>
+                <p>Si requieres información adicional o tienes duda, puedes dirigirte con el área de Recursos Humanos y/o enlace de +Feliz en tu organización.</p>
+            </div>
+
         <!-- Paso 1: Consentimiento -->
         <div x-show="step === 'consentimiento'" class="space-y-6">
             <div class="bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 shadow-xl rounded-3xl p-8 sm:p-10 space-y-6">
@@ -78,7 +85,7 @@
                         <label class="flex items-center p-4 border rounded-2xl cursor-pointer transition-all duration-200"
                                :class="consentimiento === 'si' ? 'border-blue-600 bg-blue-50/50 dark:bg-blue-950/20 text-blue-700 dark:text-blue-300 ring-2 ring-blue-500/20 font-semibold' : 'border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800/40 text-slate-600 dark:text-slate-400'">
                             <input type="radio" wire:model.live="consentimiento_otorgado" value="si" class="sr-only" x-model="consentimiento" />
-                            <span class="text-sm font-medium">Sí, deseo participar y otorgar mi consentimiento.</span>
+                            <span class="text-sm font-medium">Sí, otorgo mi consentimiento para participar.</span>
                         </label>
 
                         <label class="flex items-center p-4 border rounded-2xl cursor-pointer transition-all duration-200"
@@ -143,8 +150,23 @@
                 </div>
                 <h3 class="text-lg font-bold text-amber-900 dark:text-amber-300">Agradecemos tu honestidad</h3>
                 <p class="text-sm text-amber-700 dark:text-amber-400 max-w-md mx-auto leading-relaxed">
-                    Has decidido no participar. Tus respuestas y datos no serán recopilados. Puedes cerrar esta pestaña de forma segura.
+                    Has decidido no participar. No se recopilarán tus datos personales ni respuestas. Presiona <strong>Enviar</strong> para registrar tu decisión y finalizar.
                 </p>
+
+                <div class="pt-2">
+                    <button type="button"
+                            wire:click="enviarNoParticipacion"
+                            wire:loading.attr="disabled"
+                            wire:target="enviarNoParticipacion"
+                            style="background: linear-gradient(to right, #f59e0b, #d97706); color: #ffffff;"
+                            class="w-full sm:w-auto sm:mx-auto py-3 px-8 text-white font-semibold rounded-lg shadow-md hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-amber-500 focus:ring-offset-2 transition-all duration-150 disabled:opacity-50 inline-flex items-center justify-center space-x-2 text-base">
+                        <span wire:loading.remove wire:target="enviarNoParticipacion">Enviar</span>
+                        <span wire:loading wire:target="enviarNoParticipacion">Enviando...</span>
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor" wire:loading.remove wire:target="enviarNoParticipacion">
+                            <path fill-rule="evenodd" d="M10.293 3.293a1 1 0 011.414 0l6 6a1 1 0 010 1.414l-6 6a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-4.293-4.293a1 1 0 010-1.414z" clip-rule="evenodd" />
+                        </svg>
+                    </button>
+                </div>
             </div>
 
             <div x-show="consentimiento !== 'no'" class="pt-4">
@@ -179,10 +201,10 @@
                         @error('nombre_completo') <span class="text-xs text-red-500 block font-medium mt-1">{{ $message }}</span> @enderror
                     </div>
 
-                    <!-- Género -->
+                    <!-- Sexo -->
                     <div class="space-y-3">
                         <label class="block text-sm font-semibold text-slate-800 dark:text-slate-200">
-                            2. Género <span class="text-red-500">*</span>
+                            2. Sexo <span class="text-red-500">*</span>
                         </label>
                         <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
                             @foreach(['Hombre', 'Mujer'] as $val)

@@ -37,11 +37,18 @@ class Empresa extends Model implements Authenticatable, HasName, CanResetPasswor
         'nivel_madurez_asignado',
         'retroalimentacion_gobierno',
         'fecha_dictamen',
+        'paso_certificacion',
+        'fecha_visita_presencial',
     ];
 
     protected $hidden = [
         'password',
         'remember_token',
+    ];
+
+    protected $casts = [
+        'fecha_visita_presencial' => 'datetime',
+        'fecha_dictamen' => 'datetime',
     ];
 
     /**
@@ -170,5 +177,10 @@ class Empresa extends Model implements Authenticatable, HasName, CanResetPasswor
     public function canAccessPanel(Panel $panel): bool
     {
         return $panel->getId() === 'empresa';
+    }
+
+    public function evaluadores(): \Illuminate\Database\Eloquent\Relations\BelongsToMany
+    {
+        return $this->belongsToMany(User::class);
     }
 }

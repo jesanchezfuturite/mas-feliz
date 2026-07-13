@@ -84,7 +84,7 @@ class TamizajeResource extends Resource
                 \Filament\Schemas\Components\Grid::make(2)
                     ->schema([
                         $makeText('nombre_completo', 'Nombre Completo'),
-                        $makeText('genero', 'Género'),
+                        $makeText('genero', 'Sexo'),
                         $makeText('edad', 'Grupo de Edad'),
                         $makeText('tiempo_trabajando', 'Tiempo trabajando'),
                         $makeText('actividad_trabajo', 'Departamento / Actividad'),

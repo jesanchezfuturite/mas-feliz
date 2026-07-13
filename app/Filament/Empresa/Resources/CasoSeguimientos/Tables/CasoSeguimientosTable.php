@@ -169,7 +169,7 @@ class CasoSeguimientosTable
                                         return new \Illuminate\Support\HtmlString("<div style=\"color: #6b7280; font-size: 0.95rem;\">{$val}</div>");
                                     }),
                                 \Filament\Forms\Components\Placeholder::make('genero')
-                                    ->label('Género')
+                                    ->label('Sexo')
                                     ->content(function ($record) {
                                         if (!empty($record->genero)) return new \Illuminate\Support\HtmlString("<div style=\"color: #6b7280; font-size: 0.95rem;\">{$record->genero}</div>");
                                         $tamizaje = \App\Models\Tamizaje::where('empresa_id', $record->empresa_id)->where('nombre_completo', $record->identificador_empleado)->first();
