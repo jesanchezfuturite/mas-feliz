@@ -54,7 +54,7 @@
                                 </tr>
                                 <tr>
                                     <td style="font-size: 16px; font-weight: 700;">Liga de acceso:</td>
-                                    <td style="font-size: 16px;"><a href="{{ url('/admin') }}" style="color: #000000; text-decoration: underline; font-weight: 700;">{{ url('/admin') }}</a></td>
+                                    <td style="font-size: 16px;"><a href="{{ url('/evaluador') }}" style="color: #000000; text-decoration: underline; font-weight: 700;">{{ url('/evaluador') }}</a></td>
                                 </tr>
                             </table>
                             
