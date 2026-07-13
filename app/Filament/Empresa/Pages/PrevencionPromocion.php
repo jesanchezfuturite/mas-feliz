@@ -10,7 +10,7 @@ class PrevencionPromocion extends Page
 {
     protected static string|\BackedEnum|null $navigationIcon = 'heroicon-o-megaphone';
 
-    protected static ?string $navigationLabel = 'Prevención/ Promoción: (Apoyo al criterio indispensable)';
+    protected static ?string $navigationLabel = 'Prevención/ Promoción: (Apoyo al criterio indispensable 9)';
 
     protected static ?string $title = 'Prevención y Promoción';
 

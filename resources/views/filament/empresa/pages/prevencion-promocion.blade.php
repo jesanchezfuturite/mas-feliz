@@ -8,37 +8,8 @@
             </p>
         </div>
 
-        <!-- Bento Grid de Contenido -->
-        <style>
-            @media (min-width: 768px) {
-                .bento-grid-criterio9 {
-                    grid-template-columns: repeat(2, 1fr) !important;
-                }
-            }
-        </style>
-        <div class="bento-grid-criterio9" style="display: grid; grid-template-columns: 1fr; gap: 1.5rem; width: 100%;">
-            
-            <!-- Tarjeta 1: Componentes Requeridos -->
-            <div style="background-color: #ffffff; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1); border-radius: 1rem; padding: 1.75rem; display: flex; flex-direction: column; gap: 1rem;">
-                <div style="display: flex; align-items: center; gap: 0.75rem;">
-                    <div style="background-color: #ecfdf5; color: #10b981; padding: 0.5rem; border-radius: 0.5rem;">
-                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" style="width: 1.5rem; height: 1.5rem;">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                        </svg>
-                    </div>
-                    <h3 style="font-size: 1.25rem; font-weight: 600; color: #1e293b; margin: 0;">Componentes del Programa</h3>
-                </div>
-                <p style="color: #64748b; font-size: 0.95rem; line-height: 1.5; margin: 0;">
-                    Para cumplir el Criterio 9, tu programa debe incluir formalmente al menos las siguientes áreas:
-                </p>
-                <ul style="color: #475569; font-size: 0.95rem; line-height: 1.6; margin: 0; padding-left: 1.25rem; display: flex; flex-direction: column; gap: 0.5rem;">
-                    <li><strong>A.</strong> Difusión de información y concientización sobre salud emocional.</li>
-                    <li><strong>B.</strong> Fomento de estilos de vida saludables y autocuidado.</li>
-                    <li><strong>C.</strong> Acciones de prevención y detección oportuna de adicciones.</li>
-                    <li><strong>D.</strong> Actividades deportivas, culturales o de integración social.</li>
-                    <li><strong>E.</strong> Espacios físicos adecuados para el descanso y la relajación.</li>
-                </ul>
-            </div>
+        <!-- Materiales de Apoyo -->
+        <div style="display: grid; grid-template-columns: 1fr; gap: 1.5rem; width: 100%;">
 
             <!-- Tarjeta 2: Recursos y Enlaces DINÁMICOS -->
             <div style="background-color: #ffffff; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1); border-radius: 1rem; padding: 1.75rem; display: flex; flex-direction: column; gap: 1rem;">

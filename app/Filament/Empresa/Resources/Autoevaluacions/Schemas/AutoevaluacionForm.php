@@ -296,7 +296,7 @@ class AutoevaluacionForm
                                     $badges[] = '<span style="background-color: #eff6ff; color: #1d4ed8; font-size: 0.75rem; padding: 0.125rem 0.5rem; border-radius: 9999px; font-weight: 500; border: 1px solid #bfdbfe;">📝 Comentario</span>';
                                 }
                                 if ($archivo) {
-                                    $url = \Illuminate\Support\Facades\Storage::url($archivo);
+                                    $url = \Illuminate\Support\Facades\Storage::disk('public')->url($archivo);
                                     $badges[] = "<a href=\"{$url}\" target=\"_blank\" style=\"background-color: #f0fdf4; color: #15803d; font-size: 0.75rem; padding: 0.125rem 0.5rem; border-radius: 9999px; font-weight: 500; border: 1px solid #bbf7d0; text-decoration: none; cursor: pointer; display: inline-block;\">📎 Evidencia</a>";
                                 }
                                 if ($calificacion === 'validado' || $calificacion === 'Aprobado') {
@@ -406,7 +406,7 @@ class AutoevaluacionForm
                                                     $archivo = array_values($archivo)[0] ?? null;
                                                 }
                                                 if (! $archivo) return 'No hay evidencia subida.';
-                                                $url = \Illuminate\Support\Facades\Storage::url($archivo);
+                                                $url = \Illuminate\Support\Facades\Storage::disk('public')->url($archivo);
                                                 return new \Illuminate\Support\HtmlString("<a href=\"{$url}\" target=\"_blank\" style=\"color: #2563eb; text-decoration: underline; font-weight: 500;\">Ver/Descargar Archivo</a>");
                                             })
                                             ->visible(fn ($record) => $isAdmin || ($record && in_array($record->estatus, ['En revisión', 'Validado']))),
