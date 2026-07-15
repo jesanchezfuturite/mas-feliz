@@ -303,7 +303,6 @@
                 <div class="bg-white dark:bg-slate-900 shadow-xl shadow-slate-200/40 dark:shadow-none border border-slate-100 dark:border-slate-800 rounded-3xl overflow-hidden">
                     <div class="bg-[#8CC63F] px-8 py-5 text-white">
                         <h2 class="text-lg font-bold">Módulo 1: Ansiedad</h2>
-                        <p class="text-white/80 text-xs mt-0.5">Evalúa el nivel de tensión y preocupación.</p>
                     </div>
                     <div class="p-8 space-y-8">
                         @foreach([
@@ -337,7 +336,6 @@
                 <div class="bg-white dark:bg-slate-900 shadow-xl shadow-slate-200/40 dark:shadow-none border border-slate-100 dark:border-slate-800 rounded-3xl overflow-hidden">
                     <div class="bg-[#2AB288] px-8 py-5 text-white">
                         <h2 class="text-lg font-bold">Módulo 2: Depresión</h2>
-                        <p class="text-white/80 text-xs mt-0.5">Evalúa el estado de ánimo y la energía vital.</p>
                     </div>
                     <div class="p-8 space-y-8">
                         @foreach([
@@ -373,7 +371,6 @@
                 <div class="bg-white dark:bg-slate-900 shadow-xl shadow-slate-200/40 dark:shadow-none border border-slate-100 dark:border-slate-800 rounded-3xl overflow-hidden">
                     <div class="bg-[#29BFE0] px-8 py-5 text-white">
                         <h2 class="text-lg font-bold">Módulo 3: Ideación y Riesgo Suicida</h2>
-                        <p class="text-white/80 text-xs mt-0.5">Evalúa pensamientos relacionados con el deseo de vivir.</p>
                     </div>
                     <div class="p-8 space-y-8">
                         @foreach([

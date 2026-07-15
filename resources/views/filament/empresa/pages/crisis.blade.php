@@ -60,6 +60,55 @@
                     </p>
                 </div>
             </div>
+
+            <!-- Materiales de Apoyo -->
+            <div style="background-color: #ffffff; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1); border-radius: 1rem; padding: 1.75rem; display: flex; flex-direction: column; gap: 1rem;">
+                <div style="display: flex; align-items: center; gap: 0.75rem;">
+                    <div style="background-color: #fef2f2; color: #ef4444; padding: 0.5rem; border-radius: 0.5rem;">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" style="width: 1.5rem; height: 1.5rem;">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 7.5h1.5m-1.5 3h1.5m-7.5 3h7.5m-7.5 3h7.5m3-9h3.375c.621 0 1.125.504 1.125 1.125V18a2.25 2.25 0 01-2.25 2.25H5.25A2.25 2.25 0 013 18V6a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 6v3.75m-9.75-3h.008v.008H12V6.75z" />
+                        </svg>
+                    </div>
+                    <h3 style="font-size: 1.25rem; font-weight: 600; color: #1e293b; margin: 0;">Materiales de Apoyo</h3>
+                </div>
+                <p style="color: #64748b; font-size: 0.95rem; line-height: 1.5; margin: 0;">
+                    Descarga recursos para la atención de crisis de salud mental:
+                </p>
+                <div style="display: flex; flex-direction: column; gap: 0.75rem; margin-top: 0.5rem;">
+                    @forelse($materiales as $material)
+                        @php
+                            $url = $material->tipo === 'enlace' || $material->tipo === 'video'
+                                ? $material->enlace_url
+                                : asset('storage/' . $material->archivo_path);
+
+                            $icon = match($material->tipo) {
+                                'pdf' => '📋',
+                                'imagen' => '🖼️',
+                                'video' => '🎥',
+                                'enlace' => '🌐',
+                                default => '📄',
+                            };
+
+                            $btnLabel = match($material->tipo) {
+                                'pdf' => 'Descargar PDF',
+                                'imagen' => 'Ver Imagen',
+                                'video' => 'Ver Video',
+                                'enlace' => 'Abrir Enlace',
+                                default => 'Abrir',
+                            };
+                        @endphp
+
+                        <a href="{{ $url }}" target="_blank" style="display: flex; align-items: center; justify-content: space-between; padding: 0.75rem 1rem; background-color: #f8fafc; border: 1px solid #e2e8f0; border-radius: 0.5rem; text-decoration: none; color: #475569; font-weight: 500; font-size: 0.9rem; transition: background-color 0.2s;" onmouseover="this.style.backgroundColor='#f1f5f9'" onmouseout="this.style.backgroundColor='#f8fafc'">
+                            <span>{{ $icon }} {{ $material->titulo }}</span>
+                            <span style="color: #ef4444;">{{ $btnLabel }}</span>
+                        </a>
+                    @empty
+                        <div style="text-align: center; padding: 1.5rem; background-color: #f8fafc; border: 1px dashed #e2e8f0; border-radius: 0.5rem; color: #94a3b8; font-size: 0.9rem;">
+                            No hay materiales de apoyo disponibles por el momento.
+                        </div>
+                    @endforelse
+                </div>
+            </div>
         </div>
     @endif
 </x-filament-panels::page>

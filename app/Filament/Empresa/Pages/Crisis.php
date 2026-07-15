@@ -4,6 +4,7 @@ namespace App\Filament\Empresa\Pages;
 
 use Filament\Pages\Page;
 use App\Models\Setting;
+use App\Models\MaterialApoyo;
 use Illuminate\Support\Carbon;
 
 class Crisis extends Page
@@ -30,6 +31,9 @@ class Crisis extends Page
 
         return [
             'isHabilitado' => $isHabilitado,
+            'materiales' => MaterialApoyo::where('activo', true)
+                ->where('seccion', 'crisis')
+                ->get(),
         ];
     }
 }

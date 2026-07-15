@@ -54,6 +54,7 @@ class MaterialApoyoResource extends Resource
                             ->label('Sección del Tablero')
                             ->options([
                                 'prevencion_promocion' => 'Prevención y Promoción',
+                                'crisis' => 'Crisis',
                             ])
                             ->default('prevencion_promocion')
                             ->required(),
