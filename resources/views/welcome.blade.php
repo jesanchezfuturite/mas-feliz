@@ -623,18 +623,31 @@ A través de estas acciones, las organizaciones fortalecen su capacidad para sos
         <section id="registro" class="py-20 bg-slate-50 transition-colors duration-300">
             <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 
-                <div class="text-center max-w-2xl mx-auto space-y-4 mb-12">
-                    <h2 class="text-3xl sm:text-4xl font-bold tracking-tight text-slate-900">
-                        Registra tu Organización
-                    </h2>
-                    <p class="text-slate-500 text-sm">
-                        Completa el formulario oficial para inscribir tu Organización y postularte al distintivo estatal.
-                    </p>
-                </div>
+                <!-- Registro cerrado: la convocatoria de esta edición concluyó -->
+                <div class="max-w-2xl mx-auto">
+                    <div class="bg-white border border-slate-200 rounded-3xl shadow-xl shadow-slate-200/50 p-8 sm:p-12 text-center space-y-6">
+                        <div class="h-16 w-16 mx-auto rounded-full bg-[#92c644]/10 text-[#84b33d] flex items-center justify-center">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                        </div>
 
-                <!-- Embed the Livewire/Volt Component -->
-                <div class="relative z-10">
-                    <livewire:registro-empresa-form />
+                        <h2 class="text-2xl sm:text-3xl font-bold tracking-tight text-slate-900">
+                            ¡Gracias por tu interés en el Distintivo +Feliz!
+                        </h2>
+
+                        <div class="space-y-4 text-slate-600 text-sm sm:text-base leading-relaxed">
+                            <p>
+                                La convocatoria para esta edición ha concluido y el periodo de registro se encuentra oficialmente cerrado.
+                            </p>
+                            <p>
+                                Agradecemos el interés de todas las organizaciones que decidieron participar en esta iniciativa para fortalecer la salud mental en los entornos laborales.
+                            </p>
+                            <p>
+                                Te invitamos a mantenerte al pendiente de nuestros canales oficiales para conocer próximas convocatorias y novedades del Distintivo +Feliz.
+                            </p>
+                        </div>
+                    </div>
                 </div>
 
             </div>
