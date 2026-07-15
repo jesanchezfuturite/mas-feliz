@@ -42,8 +42,18 @@ new class extends Component
         'numero_trabajadores' => 'required|integer|min:1',
     ];
 
+    // La convocatoria de esta edición concluyó: el registro está CERRADO.
+    // Bloqueo de seguridad del lado del servidor para impedir la creación de
+    // registros aunque el formulario se invoque desde una página cacheada o
+    // mediante una llamada directa a Livewire.
+    public bool $registroCerrado = true;
+
     public function save(): void
     {
+        if ($this->registroCerrado) {
+            abort(403, 'El registro se encuentra cerrado. La convocatoria del Distintivo +Feliz ha concluido.');
+        }
+
         $this->validate();
 
         // Generar contraseña temporal
