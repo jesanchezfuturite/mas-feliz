@@ -21,13 +21,13 @@
             <div class="h-px bg-slate-100 dark:bg-slate-800 my-4"></div>
 
             <p class="text-xs text-slate-400 dark:text-slate-500 max-w-xs mx-auto">
-                Este diagnóstico nos ayuda a evaluar y mejorar el clima de bienestar y salud emocional dentro de <strong class="font-semibold text-slate-600 dark:text-slate-300">{{ $empresa->nombre_empresa }}</strong>.
+                Este cuestionario nos ayuda a evaluar y mejorar el clima de bienestar y salud emocional dentro de <strong class="font-semibold text-slate-600 dark:text-slate-300">{{ $empresa->nombre_empresa }}</strong>.
             </p>
         </div>
     @else
         <!-- Header Info Card -->
         <div class="bg-white dark:bg-slate-900 shadow-xl shadow-slate-200/40 dark:shadow-none border border-slate-100 dark:border-slate-800 rounded-3xl p-8 sm:p-10 mb-10 text-center space-y-4">
-            <div class="inline-block"><span class="text-[11px] font-bold text-[#7aab36] dark:text-[#92c644] uppercase tracking-widest bg-[#92c644]/10 dark:bg-[#92c644]/20 px-4 py-1.5 rounded-full">Cuestionario de Diagnóstico</span></div>
+            <div class="inline-block"><span class="text-[11px] font-bold text-[#7aab36] dark:text-[#92c644] uppercase tracking-widest bg-[#92c644]/10 dark:bg-[#92c644]/20 px-4 py-1.5 rounded-full">Cuestionario Socioemocional</span></div>
             <h1 class="text-2xl sm:text-3xl font-black text-slate-900 dark:text-white tracking-tight leading-tight font-heading">
                 {{ $empresa->nombre_empresa }}
             </h1>
@@ -278,6 +278,24 @@
                         </select>
                         @error('tiempo_trabajando') <span class="text-xs text-red-500 block font-medium mt-1">{{ $message }}</span> @enderror
                     </div>
+
+                    <!-- Teléfono -->
+                    <div class="space-y-3">
+                        <label class="block text-sm font-semibold text-slate-800 dark:text-slate-200">
+                            6. Teléfono <span class="text-red-500">*</span>
+                        </label>
+                        <input type="tel" wire:model="telefono" class="w-full rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white px-4 py-3 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-colors" placeholder="Ej. 844 123 4567">
+                        @error('telefono') <span class="text-xs text-red-500 block font-medium mt-1">{{ $message }}</span> @enderror
+                    </div>
+
+                    <!-- Correo (opcional) -->
+                    <div class="space-y-3">
+                        <label class="block text-sm font-semibold text-slate-800 dark:text-slate-200">
+                            7. Correo electrónico <span class="text-xs font-normal text-slate-400">(opcional)</span>
+                        </label>
+                        <input type="email" wire:model="correo" class="w-full rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white px-4 py-3 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-colors" placeholder="Ej. nombre@correo.com">
+                        @error('correo') <span class="text-xs text-red-500 block font-medium mt-1">{{ $message }}</span> @enderror
+                    </div>
                 </div>
             </div>
 
@@ -303,7 +321,6 @@
                 <div class="bg-white dark:bg-slate-900 shadow-xl shadow-slate-200/40 dark:shadow-none border border-slate-100 dark:border-slate-800 rounded-3xl overflow-hidden">
                     <div class="bg-[#8CC63F] px-8 py-5 text-white">
                         <h2 class="text-lg font-bold">Módulo 1: Ansiedad</h2>
-                        <p class="text-white/80 text-xs mt-0.5">Evalúa el nivel de tensión y preocupación.</p>
                     </div>
                     <div class="p-8 space-y-8">
                         @foreach([
@@ -337,7 +354,6 @@
                 <div class="bg-white dark:bg-slate-900 shadow-xl shadow-slate-200/40 dark:shadow-none border border-slate-100 dark:border-slate-800 rounded-3xl overflow-hidden">
                     <div class="bg-[#2AB288] px-8 py-5 text-white">
                         <h2 class="text-lg font-bold">Módulo 2: Depresión</h2>
-                        <p class="text-white/80 text-xs mt-0.5">Evalúa el estado de ánimo y la energía vital.</p>
                     </div>
                     <div class="p-8 space-y-8">
                         @foreach([
@@ -373,7 +389,6 @@
                 <div class="bg-white dark:bg-slate-900 shadow-xl shadow-slate-200/40 dark:shadow-none border border-slate-100 dark:border-slate-800 rounded-3xl overflow-hidden">
                     <div class="bg-[#29BFE0] px-8 py-5 text-white">
                         <h2 class="text-lg font-bold">Módulo 3: Ideación y Riesgo Suicida</h2>
-                        <p class="text-white/80 text-xs mt-0.5">Evalúa pensamientos relacionados con el deseo de vivir.</p>
                     </div>
                     <div class="p-8 space-y-8">
                         @foreach([

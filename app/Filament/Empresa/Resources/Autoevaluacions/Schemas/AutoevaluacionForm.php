@@ -607,7 +607,7 @@ class AutoevaluacionForm
                             })
                     ])
                     ->key("evaluar_criterio_actions_{$i}")
-                    ->visible(fn () => filament()->getCurrentPanel()->getId() === 'admin')
+                    ->visible(fn () => in_array(filament()->getCurrentPanel()->getId(), ['admin', 'evaluador']))
                     ->columnSpan('full')
                     ->extraAttributes(['style' => 'margin-bottom: 1.5rem;']),
 

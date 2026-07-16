@@ -5,6 +5,7 @@ namespace App\Filament\Empresa\Pages;
 use Filament\Pages\Page;
 use App\Filament\Empresa\Widgets\DashboardStatsOverview;
 use App\Filament\Empresa\Widgets\RiesgosGeneralesChart;
+use App\Filament\Empresa\Widgets\EstadisticaTamizajeWidget;
 
 class DiagnosticoTamizaje extends Page
 {
@@ -25,6 +26,7 @@ class DiagnosticoTamizaje extends Page
         return [
             DashboardStatsOverview::class,
             RiesgosGeneralesChart::class,
+            EstadisticaTamizajeWidget::class,
         ];
     }
 }

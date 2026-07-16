@@ -98,7 +98,21 @@ class CasoSeguimientosTable
                     ->alignCenter(),
             ])
             ->filters([
-                //
+                \Filament\Tables\Filters\SelectFilter::make('nivel_riesgo_detectado')
+                    ->label('Nivel de Riesgo')
+                    ->options([
+                        'Leve' => 'Leve',
+                        'Moderado' => 'Moderado',
+                        'Urgente' => 'Urgente',
+                    ]),
+                \Filament\Tables\Filters\SelectFilter::make('estatus_atencion')
+                    ->label('Estatus de Atención')
+                    ->options([
+                        'En seguimiento' => 'En seguimiento',
+                        'Canalizado' => 'Canalizado',
+                        'Cerrado satisfactorio' => 'Cerrado satisfactorio',
+                        'Abandonó' => 'Abandonó',
+                    ]),
             ])
             ->recordActions([
                 \Filament\Actions\Action::make('VerDetalle')
