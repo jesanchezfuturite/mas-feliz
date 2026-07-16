@@ -278,6 +278,24 @@
                         </select>
                         @error('tiempo_trabajando') <span class="text-xs text-red-500 block font-medium mt-1">{{ $message }}</span> @enderror
                     </div>
+
+                    <!-- Teléfono -->
+                    <div class="space-y-3">
+                        <label class="block text-sm font-semibold text-slate-800 dark:text-slate-200">
+                            6. Teléfono <span class="text-red-500">*</span>
+                        </label>
+                        <input type="tel" wire:model="telefono" class="w-full rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white px-4 py-3 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-colors" placeholder="Ej. 844 123 4567">
+                        @error('telefono') <span class="text-xs text-red-500 block font-medium mt-1">{{ $message }}</span> @enderror
+                    </div>
+
+                    <!-- Correo (opcional) -->
+                    <div class="space-y-3">
+                        <label class="block text-sm font-semibold text-slate-800 dark:text-slate-200">
+                            7. Correo electrónico <span class="text-xs font-normal text-slate-400">(opcional)</span>
+                        </label>
+                        <input type="email" wire:model="correo" class="w-full rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white px-4 py-3 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-colors" placeholder="Ej. nombre@correo.com">
+                        @error('correo') <span class="text-xs text-red-500 block font-medium mt-1">{{ $message }}</span> @enderror
+                    </div>
                 </div>
             </div>
 

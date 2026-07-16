@@ -29,6 +29,8 @@ class ResponderTamizaje extends Component
     public $actividad_trabajo = null;
     public $actividad_trabajo_otra = null;
     public $tiempo_trabajando = null;
+    public $telefono = null;
+    public $correo = null;
 
     // Form fields
     public $ansiedad_1 = null;
@@ -64,7 +66,9 @@ class ResponderTamizaje extends Component
         'actividad_trabajo' => 'required|string',
         'actividad_trabajo_otra' => 'required_if:actividad_trabajo,Otra',
         'tiempo_trabajando' => 'required|string',
-        
+        'telefono' => 'required|string|max:20',
+        'correo' => 'nullable|email|max:255',
+
         'ansiedad_1' => 'required|in:0,1,2,3',
         'ansiedad_2' => 'required|in:0,1,2,3',
         'ansiedad_3' => 'required|in:0,1,2,3',
@@ -164,6 +168,8 @@ class ResponderTamizaje extends Component
             'actividad_trabajo' => 'required|string',
             'actividad_trabajo_otra' => 'required_if:actividad_trabajo,Otra',
             'tiempo_trabajando' => 'required|string',
+            'telefono' => 'required|string|max:20',
+            'correo' => 'nullable|email|max:255',
         ]);
 
         $this->step = 'cuestionario';
@@ -235,6 +241,8 @@ class ResponderTamizaje extends Component
             'actividad_trabajo' => $this->actividad_trabajo,
             'actividad_trabajo_otra' => $this->actividad_trabajo === 'Otra' ? $this->actividad_trabajo_otra : null,
             'tiempo_trabajando' => $this->tiempo_trabajando,
+            'telefono' => $this->telefono,
+            'correo' => $this->correo,
             'riesgo_ansiedad' => $scoreAnsiedad,
             'nivel_ansiedad' => $nivelAnsiedad,
             'riesgo_depresion' => $scoreDepresion,

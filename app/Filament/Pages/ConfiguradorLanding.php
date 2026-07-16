@@ -33,6 +33,7 @@ class ConfiguradorLanding extends Page implements HasForms
 
         $this->form->fill([
             'landing_partner_logo' => Setting::where('key', 'landing_partner_logo')->first()?->value,
+            'flujograma_crisis' => Setting::where('key', 'flujograma_crisis')->first()?->value,
             'herramientas_empresa_activas' => (bool) $globalConfig->herramientas_empresa_activas,
         ]);
     }
@@ -51,6 +52,20 @@ class ConfiguradorLanding extends Page implements HasForms
                             ->maxSize(300)
                             ->directory('logos')
                             ->helperText('Formato imagen. Tamaño máximo 300kb. Se mostrará antes del logo de +Feliz en la plataforma.'),
+                    ]),
+
+                \Filament\Schemas\Components\Section::make('Sección de Crisis')
+                    ->description('Sube el flujograma de actuación ante crisis en salud mental. En cuanto lo cargues, se mostrará automáticamente en el tablero de las empresas.')
+                    ->schema([
+                        FileUpload::make('flujograma_crisis')
+                            ->label('Flujograma de actuación ante crisis')
+                            ->disk('public')
+                            ->directory('crisis')
+                            ->downloadable()
+                            ->openable()
+                            ->maxSize(51200)
+                            ->acceptedFileTypes(['application/pdf', 'image/*'])
+                            ->helperText('Formato PDF o imagen. Tamaño máximo 50 MB. Mientras no haya archivo, la empresa verá un mensaje provisional.'),
                     ]),
 
                 \Filament\Schemas\Components\Section::make('Control de Acceso')
@@ -86,6 +101,11 @@ class ConfiguradorLanding extends Page implements HasForms
         Setting::updateOrCreate(
             ['key' => 'landing_partner_logo'],
             ['value' => $data['landing_partner_logo']]
+        );
+
+        Setting::updateOrCreate(
+            ['key' => 'flujograma_crisis'],
+            ['value' => $data['flujograma_crisis'] ?? null]
         );
 
         Setting::updateOrCreate(

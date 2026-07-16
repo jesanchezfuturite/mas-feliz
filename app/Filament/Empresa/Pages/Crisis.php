@@ -31,6 +31,7 @@ class Crisis extends Page
 
         return [
             'isHabilitado' => $isHabilitado,
+            'flujograma' => Setting::where('key', 'flujograma_crisis')->first()?->value,
             'materiales' => MaterialApoyo::where('activo', true)
                 ->where('seccion', 'crisis')
                 ->get(),
