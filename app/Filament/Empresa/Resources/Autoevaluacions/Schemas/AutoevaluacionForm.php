@@ -18,6 +18,53 @@ use Illuminate\Support\HtmlString;
 
 class AutoevaluacionForm
 {
+    /**
+     * Número de elementos evaluables de cada criterio, en el mismo orden en que
+     * se construyen abajo. Vive aquí, junto a las definiciones de $elementos,
+     * porque si se agrega o quita un elemento a un criterio hay que actualizarlo:
+     * es lo que usa la validación de "Solicitar revisión" para saber si la
+     * empresa ya contestó toda la autoevaluación.
+     */
+    public const ELEMENTOS_POR_CRITERIO = [
+        1 => 7,  2 => 5,  3 => 6,  4 => 3,  5 => 7,
+        6 => 6,  7 => 3,  8 => 4,  9 => 5,  10 => 5,
+        11 => 3, 12 => 5, 13 => 4, 14 => 6, 15 => 3,
+        16 => 5, 17 => 5, 18 => 4, 19 => 5, 20 => 5,
+    ];
+
+    /**
+     * Criterios que todavía tienen elementos sin calificar.
+     *
+     * Angélica pidió que la empresa no pueda solicitar revisión criterio por
+     * criterio: debe contestar la autoevaluación completa antes de enviarla.
+     *
+     * @return array<int, int> criterio => número de elementos pendientes
+     */
+    public static function criteriosIncompletos(?array $respuestas): array
+    {
+        $respuestas ??= [];
+        $pendientes = [];
+
+        foreach (self::ELEMENTOS_POR_CRITERIO as $criterio => $totalElementos) {
+            $faltantes = 0;
+
+            for ($elemento = 1; $elemento <= $totalElementos; $elemento++) {
+                $score = $respuestas["criterio_{$criterio}"]["elemento_{$elemento}"]['score'] ?? null;
+
+                // '0' y 'NA' son respuestas válidas; solo null y '' cuentan como sin contestar.
+                if ($score === null || $score === '') {
+                    $faltantes++;
+                }
+            }
+
+            if ($faltantes > 0) {
+                $pendientes[$criterio] = $faltantes;
+            }
+        }
+
+        return $pendientes;
+    }
+
     public static function configure(Schema $schema): Schema
     {
         $tabs = [];

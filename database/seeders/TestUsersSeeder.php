@@ -39,7 +39,18 @@ class TestUsersSeeder extends Seeder
             ]
         );
 
-        // 3. Panel /tablero  -> Empresa (login por 'correo', password NO se castea a hashed)
+        // 3. Panel /gestor  -> User (role gestor): trabajador social que asigna las citas
+        User::updateOrCreate(
+            ['email' => 'gestor.test@masfeliz.test'],
+            [
+                'name' => 'Gestor Prueba',
+                'password' => Hash::make($password),
+                'estatus' => true,
+                'role' => 'gestor',
+            ]
+        );
+
+        // 4. Panel /tablero  -> Empresa (login por 'correo', password NO se castea a hashed)
         Empresa::updateOrCreate(
             ['correo' => 'empresa.test@masfeliz.test'],
             [

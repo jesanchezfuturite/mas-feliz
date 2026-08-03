@@ -110,6 +110,56 @@ class CasoSeguimientoForm
                     ->disabled(fn ($record) => $record && \App\Models\Tamizaje::where('empresa_id', $record->empresa_id)->where('nombre_completo', $record->identificador_empleado)->exists())
                     ->required(fn ($record) => !($record && \App\Models\Tamizaje::where('empresa_id', $record->empresa_id)->where('nombre_completo', $record->identificador_empleado)->exists())),
 
+                // Datos de contacto: el tamizaje es anónimo en su origen, pero para
+                // canalizar a la persona Salud necesita cómo localizarla. Se
+                // prellenan desde el tamizaje y quedan editables por si cambiaron.
+                TextInput::make('correo')
+                    ->label('Correo electrónico')
+                    ->email()
+                    ->maxLength(255)
+                    ->formatStateUsing(function ($state, $record) {
+                        if ($state) return $state;
+                        if (!$record) return null;
+                        $tamizaje = \App\Models\Tamizaje::where('empresa_id', $record->empresa_id)->where('nombre_completo', $record->identificador_empleado)->first();
+                        return $tamizaje ? $tamizaje->correo : null;
+                    }),
+
+                TextInput::make('celular')
+                    ->label('Celular')
+                    ->tel()
+                    ->maxLength(20)
+                    ->formatStateUsing(function ($state, $record) {
+                        if ($state) return $state;
+                        if (!$record) return null;
+                        $tamizaje = \App\Models\Tamizaje::where('empresa_id', $record->empresa_id)->where('nombre_completo', $record->identificador_empleado)->first();
+                        return $tamizaje ? $tamizaje->telefono : null;
+                    }),
+
+                \Filament\Forms\Components\Radio::make('consentimiento')
+                    ->label('¿La persona otorgó su consentimiento para ser contactada y atendida?')
+                    ->boolean('Sí', 'No')
+                    ->inline()
+                    ->inlineLabel(false),
+
+                \Filament\Forms\Components\CheckboxList::make('servicios')
+                    ->label('Servicio que requiere')
+                    ->options([
+                        'Medicina' => 'Medicina',
+                        'Psicología' => 'Psicología',
+                        'Psiquiatría' => 'Psiquiatría',
+                        'Otro' => 'Otro',
+                    ])
+                    ->columns(4)
+                    ->live()
+                    ->columnSpanFull(),
+
+                TextInput::make('servicio_otro')
+                    ->label('Especifica el servicio')
+                    ->placeholder('¿Qué otro servicio requiere?')
+                    ->maxLength(255)
+                    ->visible(fn (Get $get): bool => in_array('Otro', $get('servicios') ?? []))
+                    ->required(fn (Get $get): bool => in_array('Otro', $get('servicios') ?? [])),
+
                 Select::make('nivel_riesgo_detectado')
                     ->label('Nivel de Riesgo Detectado')
                     ->options([
@@ -136,6 +186,11 @@ class CasoSeguimientoForm
                     ->visible(fn (Get $get): bool => $get('estatus_atencion') === 'Canalizado')
                     ->required(fn (Get $get): bool => $get('estatus_atencion') === 'Canalizado')
                     ->maxLength(255),
+
+                \Filament\Forms\Components\Checkbox::make('referencia_secretaria_salud')
+                    ->label('Requiere solicitud de referencia complementaria a Secretaría de Salud')
+                    ->helperText('Al marcarlo podrás llenar el formato de referencia desde el listado de casos, con la acción "Formato de referencia".')
+                    ->columnSpanFull(),
 
                 Textarea::make('notas_clinicas')
                     ->label('Notas Clínicas')

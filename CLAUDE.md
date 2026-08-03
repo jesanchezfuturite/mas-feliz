@@ -43,13 +43,14 @@ Los tests corren sobre **sqlite en memoria** (ver [phpunit.xml](phpunit.xml)) co
 
 ## Arquitectura
 
-### Cuatro superficies, tres paneles Filament
+### Cinco superficies, cuatro paneles Filament
 
 | Superficie | Ruta | Guard / modelo | Provider |
 |---|---|---|---|
 | Gobierno (admin) | `/admin` | `web` → `User` con `role='admin'` | [AdminPanelProvider.php](app/Providers/Filament/AdminPanelProvider.php) |
 | Empresas | `/tablero` | `empresa` → `Empresa` | [EmpresaPanelProvider.php](app/Providers/Filament/EmpresaPanelProvider.php) |
 | Evaluadores | `/evaluador` | `web` → `User` con `role='evaluador'` + `CheckRole:evaluador` | [EvaluadorPanelProvider.php](app/Providers/Filament/EvaluadorPanelProvider.php) |
+| Gestores (trabajo social) | `/gestor` | `web` → `User` con `role='gestor'` + `CheckRole:gestor` | [GestorPanelProvider.php](app/Providers/Filament/GestorPanelProvider.php) |
 | Colaboradores (público) | `/diagnostico/{token}` | ninguno (token) | [ResponderTamizaje.php](app/Livewire/ResponderTamizaje.php) |
 
 Cada panel descubre su propio namespace: `App\Filament\Resources` (admin), `App\Filament\Empresa\*`, `App\Filament\Evaluador\*`. Al agregar un recurso, ponerlo en la carpeta del panel correcto.
@@ -83,6 +84,19 @@ Todo el módulo de herramientas del panel empresa (Autoevaluación, Tamizajes, C
 
 Quien **declina** participar genera igualmente un `Tamizaje` con `consentimiento_otorgado=false`, scores 0 y `nivel_riesgo_general='No participó'`, para que cuente en el % de avance sin contaminar la gráfica de riesgos. Cualquier consulta de estadísticas debe excluir `'No participó'` de los gráficos de riesgo pero incluirlo en el denominador de participación.
 
+### Flujo de canalización a Secretaría de Salud
+
+Cuando una empresa marca un `CasoSeguimiento` como `estatus_atencion = 'Canalizado'` y activa `referencia_secretaria_salud`, puede llenar el **formato de referencia** desde el listado de casos. Eso crea una `SolicitudReferencia` (tabla `solicitudes_referencia`, folio correlativo `REF-2026-NNNN` generado en `booted()` igual que el de `Empresa`).
+
+El reparto de responsabilidades lo definió la contraparte de gobierno y no es negociable a la ligera:
+
+- **La empresa** captura la solicitud (datos de la persona, CURP, INE, domicilio, derechohabiencia, informe de valoración).
+- **El Gestor y el admin** son los únicos que asignan `fecha_cita`, `unidad_atencion` y `estatus_somos`; la empresa los ve en modo lectura desde su propio tablero.
+
+El formato vive en un solo lugar, [SolicitudReferenciaForm.php](app/Filament/Empresa/Resources/CasoSeguimientos/Schemas/SolicitudReferenciaForm.php), con dos banderas (`puedeAgendar`, `soloLectura`) porque lo consumen tres paneles. Ese esquema recibe indistintamente un `CasoSeguimiento` (desde la empresa) o una `SolicitudReferencia` (desde Gestor/admin), así que los datos de cabecera se resuelven de forma defensiva.
+
+Gestor y admin comparten además las tablas de [referencias](app/Filament/Gestor/Resources/SolicitudReferencias/Tables/SolicitudReferenciasTable.php) y [casos canalizados](app/Filament/Gestor/Resources/CasosCanalizados/Tables/CasosCanalizadosTable.php): los recursos del panel admin son cascarones que delegan en las clases del namespace `Gestor`.
+
 ### Flujo de dictamen y distintivo
 
 Autoevaluación (`autoevaluacions.estatus`): `Borrador` → `En revisión` (la empresa envía) → `Validado` (admin aprueba, se genera PDF) o vuelta a `Borrador` (devuelta, dispara `AutoevaluacionDevueltaMail`).
@@ -90,6 +104,8 @@ Autoevaluación (`autoevaluacions.estatus`): `Borrador` → `En revisión` (la e
 Al validar, [ViewAutoevaluacion.php](app/Filament/Resources/Autoevaluacions/Pages/ViewAutoevaluacion.php) renderiza `pdf.distintivo` con dompdf, guarda la ruta dentro del JSON `respuestas['pdf_distintivo']` (no en columna propia — `Empresa::getRutaPdfAttribute()` lo lee de la última autoevaluación) y pone `empresas.estatus_distintivo = 'Validado'`.
 
 `Empresa::getEstatusAttribute()` mapea `Validado`/`Aprobado` → `Dictaminado` para la UI. `paso_certificacion` (int) alimenta [CertificationTimelineWidget](app/Filament/Empresa/Widgets/CertificationTimelineWidget.php) y lo mueve el admin desde la tabla de empresas.
+
+Para poder enviar a revisión, la empresa debe haber contestado los **96 elementos** de los 20 criterios (`'0'` y `'NA'` cuentan como respuesta; `null` y `''` no). El conteo por criterio vive en `AutoevaluacionForm::ELEMENTOS_POR_CRITERIO`, junto a las definiciones que lo alimentan: **si se agrega o quita un elemento a un criterio hay que actualizar ese mapa**, porque es lo que valida `criteriosIncompletos()`.
 
 La autoevaluación es un formulario grande con tabs anidados (Criterios Indispensables / Necesarios → Fortalecimiento, Prevención, Cuidado y Atención / Deseables) construido programáticamente en [AutoevaluacionForm.php](app/Filament/Empresa/Resources/Autoevaluacions/Schemas/AutoevaluacionForm.php) (~800 líneas); las respuestas viven en la columna JSON `respuestas`.
 

@@ -81,6 +81,48 @@ class CasoSeguimientosTable
                     })
                     ->sortable(),
 
+                TextColumn::make('servicios')
+                    ->label('Servicio')
+                    ->getStateUsing(fn ($record) => $record->servicios_texto)
+                    ->wrap()
+                    ->alignCenter(),
+
+                TextColumn::make('consentimiento')
+                    ->label('Consentimiento')
+                    ->badge()
+                    ->getStateUsing(fn ($record) => match ($record->consentimiento) {
+                        true => 'Sí',
+                        false => 'No',
+                        default => 'Sin registrar',
+                    })
+                    ->color(fn (string $state): string => match ($state) {
+                        'Sí' => 'success',
+                        'No' => 'danger',
+                        default => 'gray',
+                    })
+                    ->alignCenter(),
+
+                // Refleja el avance de la gestión ante Salud sin tener que abrir el caso.
+                TextColumn::make('referencia')
+                    ->label('Referencia')
+                    ->badge()
+                    ->getStateUsing(function ($record) {
+                        $solicitud = $record->solicitudReferencia;
+                        if (! $solicitud) {
+                            return $record->referencia_secretaria_salud ? 'Pendiente de llenar' : '—';
+                        }
+                        return $solicitud->esta_agendada
+                            ? 'Cita: ' . $solicitud->fecha_cita->format('d/m/Y H:i')
+                            : 'Enviada (' . $solicitud->folio . ')';
+                    })
+                    ->color(fn (string $state): string => match (true) {
+                        str_starts_with($state, 'Cita:') => 'success',
+                        str_starts_with($state, 'Enviada') => 'info',
+                        $state === 'Pendiente de llenar' => 'warning',
+                        default => 'gray',
+                    })
+                    ->alignCenter(),
+
                 TextColumn::make('tipo')
                     ->label('Tipo')
                     ->getStateUsing(function ($record) {
@@ -238,13 +280,78 @@ class CasoSeguimientosTable
                                 \Filament\Forms\Components\Placeholder::make('institucion_canalizacion')
                                     ->label('Institución de Canalización')
                                     ->content(fn ($record) => new \Illuminate\Support\HtmlString("<div style=\"color: #6b7280; font-size: 0.95rem;\">" . ($record->institucion_canalizacion ?? 'N/A') . "</div>")),
+                                \Filament\Forms\Components\Placeholder::make('servicios')
+                                    ->label('Servicio que requiere')
+                                    ->content(fn ($record) => new \Illuminate\Support\HtmlString("<div style=\"color: #6b7280; font-size: 0.95rem;\">{$record->servicios_texto}</div>")),
+                                \Filament\Forms\Components\Placeholder::make('consentimiento')
+                                    ->label('Consentimiento')
+                                    ->content(fn ($record) => new \Illuminate\Support\HtmlString("<div style=\"color: #6b7280; font-size: 0.95rem;\">" . match ($record->consentimiento) {
+                                        true => 'Sí',
+                                        false => 'No',
+                                        default => 'Sin registrar',
+                                    } . "</div>")),
                                 \Filament\Forms\Components\Placeholder::make('comentarios')
                                     ->label('Comentarios')
                                     ->columnSpanFull()
                                     ->visible(fn ($record) => !empty($record->notas_clinicas))
                                     ->content(fn ($record) => new \Illuminate\Support\HtmlString("<div style=\"color: #6b7280; font-size: 0.95rem; white-space: pre-wrap;\">{$record->notas_clinicas}</div>")),
                             ]),
+
+                        // Bloque que llena Secretaría de Salud y que la empresa consulta aquí.
+                        \Filament\Forms\Components\Placeholder::make('referencia_title')
+                            ->hiddenLabel()
+                            ->visible(fn ($record) => $record->solicitudReferencia !== null)
+                            ->content(new \Illuminate\Support\HtmlString('<div style="display: flex; justify-content: space-between; align-items: center; padding-bottom: 0.75rem; border-bottom: 1px solid #e5e7eb; margin-top: 1.5rem;"><h3 style="font-size: 1.125rem; font-weight: 600; color: #111827;">Referencia a Secretaría de Salud</h3></div>')),
+
+                        \Filament\Schemas\Components\Grid::make(2)
+                            ->visible(fn ($record) => $record->solicitudReferencia !== null)
+                            ->schema([
+                                \Filament\Forms\Components\Placeholder::make('folio_referencia')
+                                    ->label('Folio')
+                                    ->content(fn ($record) => new \Illuminate\Support\HtmlString("<div style=\"color: #0f766e; font-size: 0.95rem; font-weight: 600;\">" . ($record->solicitudReferencia?->folio ?? 'N/A') . "</div>")),
+                                \Filament\Forms\Components\Placeholder::make('estatus_somos')
+                                    ->label('Estatus SOMOS+')
+                                    ->content(fn ($record) => new \Illuminate\Support\HtmlString("<div style=\"color: #6b7280; font-size: 0.95rem;\">" . ($record->solicitudReferencia?->estatus_somos ?: 'Sin registrar') . "</div>")),
+                                \Filament\Forms\Components\Placeholder::make('fecha_cita')
+                                    ->label('Fecha de la cita')
+                                    ->content(fn ($record) => new \Illuminate\Support\HtmlString("<div style=\"color: #6b7280; font-size: 0.95rem;\">" . ($record->solicitudReferencia?->fecha_cita?->format('d/m/Y H:i') ?: 'Pendiente de asignar') . "</div>")),
+                                \Filament\Forms\Components\Placeholder::make('unidad_atencion')
+                                    ->label('Unidad de atención')
+                                    ->content(fn ($record) => new \Illuminate\Support\HtmlString("<div style=\"color: #6b7280; font-size: 0.95rem;\">" . ($record->solicitudReferencia?->unidad_atencion_completa ?: 'Pendiente de asignar') . "</div>")),
+                            ]),
                     ]),
+                \Filament\Actions\Action::make('formatoReferencia')
+                    ->label('Formato de referencia')
+                    ->icon('heroicon-m-clipboard-document-list')
+                    ->iconButton()
+                    ->tooltip('Formato de referencia a Secretaría de Salud')
+                    ->color('warning')
+                    ->modalHeading('Solicitud de referencia complementaria')
+                    ->modalDescription('Secretaría de Salud usa estos datos para asignar la cita de la persona referida.')
+                    ->modalSubmitActionLabel('Guardar solicitud')
+                    ->modalWidth('5xl')
+                    // Solo aparece cuando la empresa marcó que el caso requiere referencia.
+                    ->visible(fn ($record) => (bool) $record->referencia_secretaria_salud)
+                    ->fillForm(fn ($record) => \App\Filament\Empresa\Resources\CasoSeguimientos\Schemas\SolicitudReferenciaForm::valoresIniciales($record))
+                    ->form(\App\Filament\Empresa\Resources\CasoSeguimientos\Schemas\SolicitudReferenciaForm::componentes(puedeAgendar: false))
+                    ->action(function (array $data, $record) {
+                        // La empresa nunca escribe el bloque de cita: son campos
+                        // deshabilitados y Filament no los envía, pero se descartan
+                        // de forma explícita para que no puedan colarse.
+                        unset($data['fecha_cita'], $data['unidad_atencion'], $data['unidad_atencion_otra'], $data['estatus_somos']);
+
+                        $record->solicitudReferencia()->updateOrCreate(
+                            ['caso_seguimiento_id' => $record->id],
+                            $data + ['empresa_id' => $record->empresa_id],
+                        );
+
+                        \Filament\Notifications\Notification::make()
+                            ->title('Solicitud de referencia guardada')
+                            ->body('Secretaría de Salud podrá asignar la cita. La verás en esta misma tabla.')
+                            ->success()
+                            ->send();
+                    }),
+
                 \Filament\Actions\EditAction::make()
                     ->iconButton()
                     ->tooltip('Editar'),
