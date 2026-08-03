@@ -463,19 +463,34 @@ class AutoevaluacionForm
                                         $set("respuestas.criterio_{$i}.elemento_{$elemId}.feedback", $data['feedback']);
                                     }
 
-                                    // If admin, save feedback directly since the form is read-only
-                                    if ($record && $isAdmin) {
+                                    // El $set() de arriba solo actualiza el estado del formulario: si la
+                                    // empresa cierra la autoevaluación sin guardar, el archivo queda en
+                                    // disco pero la ruta se pierde y el evaluador ve el criterio vacío.
+                                    // Por eso la modal persiste de inmediato sobre el registro existente.
+                                    if ($record) {
                                         $respuestas = $record->respuestas ?? [];
-                                        if (array_key_exists('calificacion_politica', $data)) {
-                                            $respuestas["criterio_{$i}"]["elemento_{$elemId}"]['calificacion_politica'] = $data['calificacion_politica'];
+
+                                        if ($isAdmin) {
+                                            // El formulario es de solo lectura para admin/evaluador, así que
+                                            // su dictamen solo puede guardarse desde aquí.
+                                            if (array_key_exists('calificacion_politica', $data)) {
+                                                $respuestas["criterio_{$i}"]["elemento_{$elemId}"]['calificacion_politica'] = $data['calificacion_politica'];
+                                            }
+                                            if (array_key_exists('feedback', $data)) {
+                                                $respuestas["criterio_{$i}"]["elemento_{$elemId}"]['feedback'] = $data['feedback'];
+                                            }
+
+                                            $evaluadorEmail = auth()->user()?->email;
+                                            $respuestas["criterio_{$i}"]["elemento_{$elemId}"]['evaluador_email'] = $evaluadorEmail;
+                                            $set("respuestas.criterio_{$i}.elemento_{$elemId}.evaluador_email", $evaluadorEmail);
+                                        } else {
+                                            if (array_key_exists('comentario', $data)) {
+                                                $respuestas["criterio_{$i}"]["elemento_{$elemId}"]['comentario'] = $data['comentario'];
+                                            }
+                                            if (array_key_exists('archivo', $data)) {
+                                                $respuestas["criterio_{$i}"]["elemento_{$elemId}"]['archivo'] = $archivo ?? null;
+                                            }
                                         }
-                                        if (array_key_exists('feedback', $data)) {
-                                            $respuestas["criterio_{$i}"]["elemento_{$elemId}"]['feedback'] = $data['feedback'];
-                                        }
-                                        
-                                        $evaluadorEmail = auth()->user()?->email;
-                                        $respuestas["criterio_{$i}"]["elemento_{$elemId}"]['evaluador_email'] = $evaluadorEmail;
-                                        $set("respuestas.criterio_{$i}.elemento_{$elemId}.evaluador_email", $evaluadorEmail);
 
                                         $record->update(['respuestas' => $respuestas]);
                                     }

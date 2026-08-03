@@ -30,6 +30,12 @@ class AutoevaluacionsTable
                     ->dateTime('d/m/Y H:i')
                     ->sortable(),
 
+                TextColumn::make('updated_at')
+                    ->label('Última Actualización')
+                    ->dateTime('d/m/Y H:i')
+                    ->description(fn ($record) => $record->updated_at?->diffForHumans())
+                    ->sortable(),
+
                 TextColumn::make('estatus')
                     ->label('Estatus')
                     ->badge()
@@ -85,7 +91,13 @@ class AutoevaluacionsTable
                     ->modalCancelActionLabel('No')
                     ->hidden(fn ($record) => $record->estatus !== 'Borrador')
                     ->action(function ($record) {
-                        $record->update(['estatus' => 'En revisión']);
+                        // La fecha de evaluación se sella al enviar a revisión: es la fecha
+                        // de la versión que el evaluador va a dictaminar, y la que se imprime
+                        // en el acuse. Antes solo se fijaba al crear y nunca se actualizaba.
+                        $record->update([
+                            'estatus' => 'En revisión',
+                            'fecha_evaluacion' => now(),
+                        ]);
                         \Filament\Notifications\Notification::make()
                             ->title('Revisión solicitada')
                             ->success()

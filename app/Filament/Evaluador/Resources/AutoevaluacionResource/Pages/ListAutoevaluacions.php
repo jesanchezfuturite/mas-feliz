@@ -29,11 +29,19 @@ class ListAutoevaluacions extends ListRecords
                         'Borrador' => 'gray',
                         default => 'gray',
                     }),
-                Tables\Columns\TextColumn::make('created_at')
+                Tables\Columns\TextColumn::make('fecha_evaluacion')
                     ->label('Fecha de Envío')
-                    ->dateTime()
+                    ->dateTime('d/m/Y H:i')
+                    ->sortable(),
+                // Permite al acompañante detectar cuándo la empresa movió su autoevaluación
+                // sin tener que entrar criterio por criterio.
+                Tables\Columns\TextColumn::make('updated_at')
+                    ->label('Última Actualización')
+                    ->dateTime('d/m/Y H:i')
+                    ->description(fn ($record) => $record->updated_at?->diffForHumans())
                     ->sortable(),
             ])
+            ->defaultSort('updated_at', 'desc')
             ->filters([
                 Tables\Filters\SelectFilter::make('estatus')
                     ->options([

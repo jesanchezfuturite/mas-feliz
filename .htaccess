@@ -17,7 +17,15 @@
 # 3. Seguridad: Denegar acceso a carpetas del sistema
 RedirectMatch 404 ^/\.(git|github|cursor|vscode|zed)/
 
-RedirectMatch 404 ^/(app|bootstrap|config|database|resources|routes|storage|tests|vendor)/
+# OJO: 'storage' NO va en esta lista. /storage/ es el enlace simbólico public/storage
+# que sirve las evidencias de autoevaluación, los logos de la landing, el flujograma
+# de crisis y los materiales de apoyo. Bloquearlo aquí provoca un 404 de Apache antes
+# de que la regla 1 pueda reescribir la petición hacia public/.
+RedirectMatch 404 ^/(app|bootstrap|config|database|resources|routes|tests|vendor)/
+
+# El storage interno del framework (logs, caché, sesiones) sí se bloquea de forma
+# explícita, por si mod_rewrite estuviera deshabilitado y la regla 1 no se aplicara.
+RedirectMatch 404 ^/storage/(framework|logs|app/private)/
 
 # php -- BEGIN cPanel-generated handler, do not edit
 # Set the “ea-php84” package as the default “PHP” programming language.
