@@ -3,6 +3,7 @@
 namespace App\Filament\Empresa\Pages;
 
 use Filament\Pages\Page;
+use App\Models\MaterialApoyo;
 use App\Models\Setting;
 use Illuminate\Support\Carbon;
 
@@ -28,8 +29,16 @@ class Capacitacion extends Page
         // Habilitar a partir del 10 de julio de 2026. force_active=true para testing
         $isHabilitado = request()->query('force_active') === 'true' || Carbon::now()->greaterThanOrEqualTo(Carbon::parse('2026-07-10 00:00:00'));
 
+        $contenidos = MaterialApoyo::where('activo', true)
+            ->where('seccion', 'capacitacion')
+            ->get();
+
         return [
             'isHabilitado' => $isHabilitado,
+            // Los avisos de fechas se listan primero y en orden cronológico;
+            // el material de consulta va después.
+            'avisos' => $contenidos->where('tipo', 'aviso')->sortBy('fecha_evento')->values(),
+            'materiales' => $contenidos->where('tipo', '!=', 'aviso')->values(),
         ];
     }
 }

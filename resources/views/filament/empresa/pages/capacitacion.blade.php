@@ -29,28 +29,72 @@
             <div style="background-color: #ffffff; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1); border-radius: 1rem; padding: 2rem; border-left: 4px solid #10b981;">
                 <h2 style="font-size: 1.5rem; font-weight: 700; color: #1e293b; margin-bottom: 0.5rem;">Capacitación en Salud Mental para Líderes</h2>
                 <p style="color: #475569; font-size: 1rem; line-height: 1.6; margin: 0;">
-                    Este recurso apoya al <strong>Criterio 10 (Necesario)</strong> para capacitar a directivos, líderes y gerentes en señales de alerta de salud mental y liderazgo positivo.
+                    Este recurso apoya al <strong>Criterio 10 (Indispensable)</strong> para capacitar a directivos, líderes y gerentes en señales de alerta de salud mental y liderazgo positivo.
                 </p>
             </div>
 
-            <!-- Listado de Cursos Disponibles -->
+            <!-- Avisos de fechas de capacitación (los publica la Oficina Inspira) -->
             <div style="background-color: #ffffff; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1); border-radius: 1rem; padding: 2rem; display: flex; flex-direction: column; gap: 1.5rem;">
-                <h3 style="font-size: 1.25rem; font-weight: 600; color: #1e293b; margin-bottom: 0.5rem; border-bottom: 1px solid #f1f5f9; padding-bottom: 0.75rem;">Talleres y Webinars Programados</h3>
-                
-                <div style="display: flex; flex-direction: column; gap: 1.25rem;">
-                    <div style="padding: 1rem; background-color: #f8fafc; border: 1px solid #e2e8f0; border-radius: 0.5rem; display: flex; flex-direction: column; gap: 0.5rem;">
-                        <span style="background-color: #eff6ff; color: #3b82f6; font-size: 0.75rem; font-weight: 700; padding: 0.25rem 0.5rem; border-radius: 0.25rem; align-self: flex-start; text-transform: uppercase;">Módulo 1</span>
-                        <h4 style="font-size: 1.05rem; font-weight: 600; color: #334155; margin: 0;">Liderazgo Positivo y Sensibilización en Salud Mental</h4>
-                        <p style="color: #64748b; font-size: 0.9rem; margin: 0;">Duración: 2 horas. Temas: Reducción del estigma, factores de riesgo y comunicación empática.</p>
-                    </div>
+                <h3 style="font-size: 1.25rem; font-weight: 600; color: #1e293b; margin: 0; border-bottom: 1px solid #f1f5f9; padding-bottom: 0.75rem;">Próximas capacitaciones</h3>
 
-                    <div style="padding: 1rem; background-color: #f8fafc; border: 1px solid #e2e8f0; border-radius: 0.5rem; display: flex; flex-direction: column; gap: 0.5rem;">
-                        <span style="background-color: #eff6ff; color: #3b82f6; font-size: 0.75rem; font-weight: 700; padding: 0.25rem 0.5rem; border-radius: 0.25rem; align-self: flex-start; text-transform: uppercase;">Módulo 2</span>
-                        <h4 style="font-size: 1.05rem; font-weight: 600; color: #334155; margin: 0;">Detección Oportuna de Señales de Alerta</h4>
-                        <p style="color: #64748b; font-size: 0.9rem; margin: 0;">Duración: 3 horas. Temas: Identificación de cambios de comportamiento, ideación suicida y ruta de canalización.</p>
-                    </div>
+                <div style="display: flex; flex-direction: column; gap: 1.25rem;">
+                    @forelse($avisos as $aviso)
+                        <div style="padding: 1rem; background-color: #f8fafc; border: 1px solid #e2e8f0; border-radius: 0.5rem; display: flex; flex-direction: column; gap: 0.5rem;">
+                            @if ($aviso->fecha_evento)
+                                <span style="background-color: #eff6ff; color: #3b82f6; font-size: 0.75rem; font-weight: 700; padding: 0.25rem 0.5rem; border-radius: 0.25rem; align-self: flex-start; text-transform: uppercase;">
+                                    {{ $aviso->fecha_evento->translatedFormat('d \d\e F Y · h:i A') }}
+                                </span>
+                            @endif
+                            <h4 style="font-size: 1.05rem; font-weight: 600; color: #334155; margin: 0;">{{ $aviso->titulo }}</h4>
+                            @if ($aviso->descripcion)
+                                <p style="color: #64748b; font-size: 0.9rem; margin: 0; white-space: pre-line;">{{ $aviso->descripcion }}</p>
+                            @endif
+                        </div>
+                    @empty
+                        <div style="text-align: center; padding: 1.5rem; background-color: #f8fafc; border: 1px dashed #e2e8f0; border-radius: 0.5rem; color: #94a3b8; font-size: 0.9rem;">
+                            Aún no hay fechas de capacitación publicadas. Te avisaremos por este medio.
+                        </div>
+                    @endforelse
                 </div>
             </div>
+
+            <!-- Material de apoyo de capacitación -->
+            @if ($materiales->isNotEmpty())
+                <div style="background-color: #ffffff; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1); border-radius: 1rem; padding: 2rem; display: flex; flex-direction: column; gap: 1.5rem;">
+                    <h3 style="font-size: 1.25rem; font-weight: 600; color: #1e293b; margin: 0; border-bottom: 1px solid #f1f5f9; padding-bottom: 0.75rem;">Material de apoyo</h3>
+
+                    <div style="display: flex; flex-direction: column; gap: 0.75rem;">
+                        @foreach($materiales as $material)
+                            @php
+                                $url = in_array($material->tipo, ['enlace', 'video'])
+                                    ? $material->enlace_url
+                                    : asset('storage/' . $material->archivo_path);
+
+                                $icon = match($material->tipo) {
+                                    'pdf' => '📄',
+                                    'imagen' => '🖼️',
+                                    'video' => '🎥',
+                                    'enlace' => '🌐',
+                                    default => '📎',
+                                };
+
+                                $btnLabel = match($material->tipo) {
+                                    'pdf' => 'Descargar PDF',
+                                    'imagen' => 'Ver Imagen',
+                                    'video' => 'Ver Video',
+                                    'enlace' => 'Abrir Enlace',
+                                    default => 'Abrir',
+                                };
+                            @endphp
+
+                            <a href="{{ $url }}" target="_blank" style="display: flex; align-items: center; justify-content: space-between; padding: 0.75rem 1rem; background-color: #f8fafc; border: 1px solid #e2e8f0; border-radius: 0.5rem; text-decoration: none; color: #475569; font-weight: 500; font-size: 0.9rem;">
+                                <span>{{ $icon }} {{ $material->titulo }}</span>
+                                <span style="color: #3b82f6;">{{ $btnLabel }}</span>
+                            </a>
+                        @endforeach
+                    </div>
+                </div>
+            @endif
         </div>
     @endif
 </x-filament-panels::page>
