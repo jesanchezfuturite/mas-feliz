@@ -343,8 +343,9 @@ class AutoevaluacionForm
                                     $badges[] = '<span style="background-color: #eff6ff; color: #1d4ed8; font-size: 0.75rem; padding: 0.125rem 0.5rem; border-radius: 9999px; font-weight: 500; border: 1px solid #bfdbfe;">📝 Comentario</span>';
                                 }
                                 if ($archivo) {
-                                    $url = \Illuminate\Support\Facades\Storage::disk('public')->url($archivo);
-                                    $badges[] = "<a href=\"{$url}\" target=\"_blank\" style=\"background-color: #f0fdf4; color: #15803d; font-size: 0.75rem; padding: 0.125rem 0.5rem; border-radius: 9999px; font-weight: 500; border: 1px solid #bbf7d0; text-decoration: none; cursor: pointer; display: inline-block;\">📎 Evidencia</a>";
+                                    // Relativo a la raíz para no depender de APP_URL.
+                                    $url = '/storage/' . ltrim(is_array($archivo) ? (array_values($archivo)[0] ?? '') : $archivo, '/');
+                                    $badges[] = "<a href=\"{$url}\" target=\"_blank\" rel=\"noopener\" style=\"background-color: #f0fdf4; color: #15803d; font-size: 0.75rem; padding: 0.125rem 0.5rem; border-radius: 9999px; font-weight: 500; border: 1px solid #bbf7d0; text-decoration: none; cursor: pointer; display: inline-block;\">📎 Evidencia</a>";
                                 }
                                 if ($calificacion === 'validado' || $calificacion === 'Aprobado') {
                                     $badges[] = "<span{$tooltipAttr} style=\"background-color: #f0fdf4; color: #166534; font-size: 0.75rem; padding: 0.125rem 0.5rem; border-radius: 9999px; font-weight: 600; border: 1px solid #bbf7d0; cursor: help;\">✅ Validado</span>";
@@ -445,18 +446,40 @@ class AutoevaluacionForm
                                             ])
                                             ->visible(fn ($record) => ! $isAdmin && ! ($record && in_array($record->estatus, ['En revisión', 'Validado']))),
 
+                                        // La evidencia se ve siempre y para todos: la empresa que la
+                                        // cargó y el acompañante, en cualquier estatus. Antes el enlace
+                                        // solo aparecía para el evaluador o con la autoevaluación ya
+                                        // enviada, y la empresa se quedaba sin forma de comprobar que
+                                        // su archivo había quedado bien.
                                         Placeholder::make('archivo_link')
-                                            ->label('Ver Evidencia')
-                                            ->content(function ($get) {
+                                            ->label('Evidencia cargada')
+                                            ->content(function ($get, $record) use ($i, $elemId) {
                                                 $archivo = $get('archivo');
+
                                                 if (is_array($archivo)) {
                                                     $archivo = array_values($archivo)[0] ?? null;
                                                 }
-                                                if (! $archivo) return 'No hay evidencia subida.';
-                                                $url = \Illuminate\Support\Facades\Storage::disk('public')->url($archivo);
-                                                return new \Illuminate\Support\HtmlString("<a href=\"{$url}\" target=\"_blank\" style=\"color: #2563eb; text-decoration: underline; font-weight: 500;\">Ver/Descargar Archivo</a>");
-                                            })
-                                            ->visible(fn ($record) => $isAdmin || ($record && in_array($record->estatus, ['En revisión', 'Validado']))),
+
+                                                // Si el estado del formulario viene vacío, se consulta el
+                                                // registro: es lo que ve el evaluador al abrir la modal.
+                                                if (! $archivo && $record) {
+                                                    $guardado = $record->respuestas["criterio_{$i}"]["elemento_{$elemId}"]['archivo'] ?? null;
+                                                    $archivo = is_array($guardado) ? (array_values($guardado)[0] ?? null) : $guardado;
+                                                }
+
+                                                if (! $archivo) {
+                                                    return 'Aún no se ha adjuntado evidencia para este elemento.';
+                                                }
+
+                                                // Enlace relativo a la raíz: no depende de APP_URL, que en
+                                                // los despliegues suele quedar apuntando a otro dominio.
+                                                $url = '/storage/' . ltrim($archivo, '/');
+                                                $nombre = basename($archivo);
+
+                                                return new \Illuminate\Support\HtmlString(
+                                                    "<a href=\"{$url}\" target=\"_blank\" rel=\"noopener\" style=\"color: #2563eb; text-decoration: underline; font-weight: 500;\">Ver/Descargar «" . e($nombre) . "»</a>"
+                                                );
+                                            }),
                                             
                                         \Filament\Forms\Components\ToggleButtons::make('calificacion_politica')
                                             ->label('Dictamen del Evaluador')

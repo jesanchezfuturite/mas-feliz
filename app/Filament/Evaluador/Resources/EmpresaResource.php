@@ -113,6 +113,33 @@ class EmpresaResource extends Resource
             ->actions([
                 \Filament\Actions\EditAction::make(),
                 \Filament\Actions\ViewAction::make(),
+                // El acompañante es quien sigue de cerca el avance de la empresa,
+                // así que puede mover la Ruta Crítica sin depender del administrador.
+                \Filament\Actions\Action::make('certificarFase')
+                    ->label('Actualizar Fase')
+                    ->icon('heroicon-o-check-badge')
+                    ->color('success')
+                    ->iconButton()
+                    ->tooltip('Actualizar fase de la Ruta Crítica')
+                    ->modalHeading('Ruta Crítica de Avance')
+                    ->modalDescription(fn (Empresa $record) => 'La empresa verá esta fase en su escritorio: ' . $record->nombre_empresa)
+                    ->modalSubmitActionLabel('Guardar fase')
+                    ->fillForm(fn (Empresa $record) => ['paso_certificacion' => $record->paso_certificacion])
+                    ->form([
+                        Forms\Components\Select::make('paso_certificacion')
+                            ->label('Fase actual de certificación')
+                            ->options(Empresa::opcionesPasoCertificacion())
+                            ->required(),
+                    ])
+                    ->action(function (Empresa $record, array $data): void {
+                        $record->update(['paso_certificacion' => $data['paso_certificacion']]);
+
+                        \Filament\Notifications\Notification::make()
+                            ->title('Fase actualizada')
+                            ->body('La empresa ya ve la fase «' . (Empresa::PASOS_CERTIFICACION[$data['paso_certificacion']] ?? '') . '» en su escritorio.')
+                            ->success()
+                            ->send();
+                    }),
                 \Filament\Actions\Action::make('agendarVisita')
                     ->label('Agendar Visita')
                     ->icon('heroicon-o-calendar-days')
