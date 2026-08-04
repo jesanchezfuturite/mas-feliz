@@ -71,6 +71,42 @@ class EmpresaPanelProvider extends PanelProvider
                 \Filament\View\PanelsRenderHook::FOOTER,
                 fn (): string => view('filament.footer-logos')->render()
             )
+            // Listado de personas en riesgo: Salud pidió una vista de captura que
+            // crezca hacia la derecha manteniendo a la vista el nombre del
+            // colaborador y los encabezados. Filament no trae columnas fijas, así
+            // que se resuelve con CSS y se limita a esta pantalla.
+            ->renderHook(
+                \Filament\View\PanelsRenderHook::PAGE_START,
+                fn (): string => \Illuminate\Support\Facades\Blade::render('<style>
+                    .fi-ta-ctn { max-height: 72vh; overflow: auto !important; }
+
+                    .fi-ta-table thead th {
+                        position: sticky;
+                        top: 0;
+                        z-index: 3;
+                        background-color: #f9fafb !important;
+                        box-shadow: inset 0 -1px 0 #e5e7eb;
+                    }
+
+                    .fi-ta-table th.col-nombre-fija,
+                    .fi-ta-table td.col-nombre-fija {
+                        position: sticky;
+                        left: 0;
+                        z-index: 2;
+                        background-color: #ffffff;
+                        box-shadow: 1px 0 0 #e5e7eb;
+                        min-width: 15rem;
+                    }
+
+                    .fi-ta-table th.col-nombre-fija { z-index: 4; background-color: #f9fafb !important; }
+
+                    .fi-ta-table tbody tr:hover td.col-nombre-fija { background-color: #f9fafb; }
+
+                    /* La captura en línea necesita celdas que no se aplasten. */
+                    .fi-ta-table td .fi-input-wrp, .fi-ta-table td .fi-select { min-width: 9rem; }
+                </style>'),
+                scopes: \App\Filament\Empresa\Resources\CasoSeguimientos\Pages\ListCasoSeguimientos::class,
+            )
             ->renderHook(
                 \Filament\View\PanelsRenderHook::HEAD_END,
                 fn (): string => \Illuminate\Support\Facades\Blade::render('<style>
