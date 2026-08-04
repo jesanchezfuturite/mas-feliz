@@ -131,9 +131,12 @@ class Columnas
             CheckboxColumn::make('referencia_secretaria_salud')
                 ->label('Secretaría de Salud'),
 
+            // No está en el documento de Salud, pero existe desde antes y hay
+            // casos con el dato capturado: se conserva oculta y se puede
+            // mostrar desde el selector de columnas.
             TextInputColumn::make('institucion_canalizacion')
                 ->label('Institución de canalización')
-                ->toggleable(),
+                ->toggleable(isToggledHiddenByDefault: true),
         ];
     }
 

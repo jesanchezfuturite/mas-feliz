@@ -101,6 +101,14 @@ class Empresa extends Model implements Authenticatable, HasName, CanResetPasswor
     }
 
     /**
+     * Formatos de referencia enviados a Secretaría de Salud.
+     */
+    public function solicitudesReferencia()
+    {
+        return $this->hasMany(SolicitudReferencia::class);
+    }
+
+    /**
      * Get the email address where password reset links are sent.
      */
     public function getEmailForPasswordReset(): string
