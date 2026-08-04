@@ -31,6 +31,8 @@ class DiagnosticarEvidencias extends Command
     {
         $disco = Storage::disk('public');
 
+        $this->diagnosticarEntorno($disco);
+
         $referenciadas = $this->evidenciasReferenciadas();
         $enDisco = $this->archivosEnDisco($disco);
 
@@ -70,11 +72,60 @@ class DiagnosticarEvidencias extends Command
             $this->line('vuelvan a adjuntar (ya sin perderse, porque la modal ahora guarda al vuelo).');
         }
 
+        if ($rotas->isNotEmpty()) {
+            $this->newLine();
+            $this->info('Antes de dar por perdidos los archivos, búscalos en el resto del servidor:');
+            $this->line('  find ~ -name "' . basename($rotas->first()['ruta']) . '" 2>/dev/null');
+            $this->line('Si aparecen en otra ruta, el despliegue los dejó atrás y basta con moverlos a:');
+            $this->line('  ' . storage_path('app/public/' . dirname($rotas->first()['ruta'])));
+        }
+
         if ($rotas->isEmpty() && $huerfanas->isEmpty()) {
             $this->info('Todo en orden: cada evidencia referenciada tiene su archivo y no hay huérfanos.');
         }
 
         return self::SUCCESS;
+    }
+
+    /**
+     * Estado del entorno. Sirve para distinguir "el archivo nunca se guardó"
+     * de "el archivo se guardó en otra ruta" o "la carpeta se perdió en un
+     * despliegue", que desde la interfaz se ven exactamente igual.
+     */
+    private function diagnosticarEntorno($disco): void
+    {
+        $raiz = storage_path('app/public');
+
+        $this->newLine();
+        $this->info('=== Entorno ===');
+        $this->line('Directorio de la aplicación ........ ' . base_path());
+        $this->line('Raíz del disco público ............. ' . $raiz);
+        $this->line('  ¿existe? ......................... ' . (is_dir($raiz) ? 'sí' : 'NO'));
+        $this->line('  ¿escribible? ..................... ' . (is_writable($raiz) ? 'sí' : 'NO'));
+
+        foreach (self::DIRECTORIOS as $directorio) {
+            $ruta = $raiz . '/' . $directorio;
+            $this->line('  ' . str_pad($directorio, 32, '.') . ' ' . (is_dir($ruta)
+                ? count(glob($ruta . '/*')) . ' archivo(s)'
+                : 'no existe'));
+        }
+
+        $enlace = public_path('storage');
+        $this->line('Enlace public/storage .............. ' . (file_exists($enlace)
+            ? (is_link($enlace) ? 'symlink → ' . readlink($enlace) : 'existe pero NO es symlink')
+            : 'NO existe (falta php artisan storage:link)'));
+
+        $this->line('APP_URL ............................ ' . config('app.url'));
+        $this->line('FILESYSTEM_DISK .................... ' . config('filesystems.default'));
+
+        // Si las autoevaluaciones no encuentran su empresa, el problema no es
+        // de archivos sino de datos: apunta a una base de otro ambiente.
+        $huerfanasDeEmpresa = Autoevaluacion::whereDoesntHave('empresa')->count();
+        $this->line('Empresas registradas ............... ' . \App\Models\Empresa::count());
+        $this->line('Autoevaluaciones ................... ' . Autoevaluacion::count()
+            . ($huerfanasDeEmpresa > 0 ? "  (⚠ {$huerfanasDeEmpresa} sin empresa asociada)" : ''));
+
+        $this->newLine();
     }
 
     /**
