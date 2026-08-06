@@ -174,12 +174,7 @@ class CasoSeguimientoForm
 
                 Select::make('estatus_atencion')
                     ->label('Estatus de atención')
-                    ->options([
-                        'En seguimiento' => 'En seguimiento',
-                        'Abandonó' => 'Abandonó',
-                        'Canalizado' => 'Canalizado',
-                        'Cerrado satisfactorio' => 'Cerrado satisfactorio',
-                    ])
+                    ->options(\App\Models\CasoSeguimiento::ESTATUS_ATENCION)
                     ->required()
                     ->live(),
 

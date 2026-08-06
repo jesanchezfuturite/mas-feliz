@@ -32,13 +32,7 @@ class CasosSeguimientoRelationManager extends RelationManager
                 \Filament\Infolists\Components\TextEntry::make('estatus_atencion')
                     ->label('Estatus de Atención')
                     ->badge()
-                    ->color(fn (string $state): string => match ($state) {
-                        'En seguimiento' => 'info',
-                        'Canalizado' => 'warning',
-                        'Cerrado satisfactorio' => 'success',
-                        'Abandonó' => 'gray',
-                        default => 'gray',
-                    }),
+                    ->color(fn (string $state): string => \App\Models\CasoSeguimiento::COLORES_ESTATUS[$state] ?? 'gray'),
                 \Filament\Infolists\Components\TextEntry::make('institucion_canalizacion')
                     ->label('Institución de Canalización')
                     ->placeholder('N/A'),
@@ -99,13 +93,7 @@ class CasosSeguimientoRelationManager extends RelationManager
                 TextColumn::make('estatus_atencion')
                     ->label('Estatus de Atención')
                     ->badge()
-                    ->color(fn (string $state): string => match ($state) {
-                        'En seguimiento' => 'info',
-                        'Canalizado' => 'warning',
-                        'Cerrado satisfactorio' => 'success',
-                        'Abandonó' => 'gray',
-                        default => 'gray',
-                    })
+                    ->color(fn (string $state): string => \App\Models\CasoSeguimiento::COLORES_ESTATUS[$state] ?? 'gray')
                     ->sortable(),
 
 

@@ -55,13 +55,6 @@ class Columnas
         'Más de 5 años' => 'Más de 5 años',
     ];
 
-    public const ESTATUS_ATENCION = [
-        'En seguimiento' => 'En seguimiento',
-        'Abandonó' => 'Abandonó',
-        'Canalizado' => 'Canalizado',
-        'Cerrado satisfactorio' => 'Cerrado satisfactorio',
-    ];
-
     public const NIVELES_RIESGO = [
         'Leve' => 'Leve',
         'Moderado' => 'Moderado',
@@ -114,7 +107,7 @@ class Columnas
             // --- ESTATUS DE ATENCIÓN ---
             SelectColumn::make('estatus_atencion')
                 ->label('Estatus de atención')
-                ->options(self::ESTATUS_ATENCION)
+                ->options(\App\Models\CasoSeguimiento::ESTATUS_ATENCION)
                 ->selectablePlaceholder(false),
 
             // --- SERVICIO ---

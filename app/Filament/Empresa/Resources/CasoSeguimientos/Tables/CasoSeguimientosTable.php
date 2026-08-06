@@ -37,12 +37,7 @@ class CasoSeguimientosTable
                     ]),
                 \Filament\Tables\Filters\SelectFilter::make('estatus_atencion')
                     ->label('Estatus de Atención')
-                    ->options([
-                        'En seguimiento' => 'En seguimiento',
-                        'Canalizado' => 'Canalizado',
-                        'Cerrado satisfactorio' => 'Cerrado satisfactorio',
-                        'Abandonó' => 'Abandonó',
-                    ]),
+                    ->options(\App\Models\CasoSeguimiento::ESTATUS_ATENCION),
             ])
             ->recordActions([
                 \Filament\Actions\Action::make('VerDetalle')

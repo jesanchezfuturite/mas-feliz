@@ -55,7 +55,10 @@ class AvanceAtencionStats extends BaseWidget
                 ->color('warning'),
 
             Stat::make('Casos en seguimiento', $metricas->casosAbiertos())
-                ->description($metricas->casosCerrados() . ' cerrados satisfactoriamente')
+                ->description($metricas->casosCerrados() . ' cerrados satisfactoriamente'
+                    . ($metricas->casosCerradosSinAtender() > 0
+                        ? ' · ' . $metricas->casosCerradosSinAtender() . ' cerrados sin atender'
+                        : ''))
                 ->descriptionIcon('heroicon-m-heart')
                 ->color('success'),
 

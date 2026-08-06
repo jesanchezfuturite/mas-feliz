@@ -129,6 +129,33 @@ class MetricasAtencionTest extends TestCase
         $this->assertSame(0, $m->referenciasSinCita());
     }
 
+    public function test_los_casos_cerrados_sin_atender_se_cuentan_aparte(): void
+    {
+        CasoSeguimiento::create([
+            'empresa_id' => $this->empresaA->id,
+            'identificador_empleado' => 'P4',
+            'nivel_riesgo_detectado' => 'Urgente',
+            'estatus_atencion' => 'Cerrado no atendido',
+        ]);
+
+        $m = MetricasAtencion::paraEmpresas();
+
+        // No se mezclan con los cerrados satisfactoriamente.
+        $this->assertSame(1, $m->casosCerrados());
+        $this->assertSame(1, $m->casosCerradosSinAtender());
+    }
+
+    public function test_el_estatus_cerrado_no_atendido_esta_disponible(): void
+    {
+        $this->assertArrayHasKey('Cerrado no atendido', CasoSeguimiento::ESTATUS_ATENCION);
+        $this->assertCount(5, CasoSeguimiento::ESTATUS_ATENCION);
+
+        // Cada estatus tiene color propio en los listados.
+        foreach (array_keys(CasoSeguimiento::ESTATUS_ATENCION) as $estatus) {
+            $this->assertArrayHasKey($estatus, CasoSeguimiento::COLORES_ESTATUS);
+        }
+    }
+
     public function test_sin_tamizajes_el_porcentaje_no_truena(): void
     {
         $vacia = $this->crearEmpresa('Empresa Vacía', 'vacia@empresa.test');

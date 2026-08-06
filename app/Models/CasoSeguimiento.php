@@ -6,6 +6,31 @@ use Illuminate\Database\Eloquent\Model;
 
 class CasoSeguimiento extends Model
 {
+    /**
+     * Estatus de atención del caso. "Cerrado no atendido" lo pidió Angélica el
+     * 06/08/2026: hacía falta poder cerrar un caso que nunca se atendió, que es
+     * distinto de cerrarlo satisfactoriamente o de que la persona abandonara.
+     *
+     * Vive aquí porque lo consumen el formulario, la tabla de captura, los
+     * filtros, el listado del administrador y las métricas.
+     */
+    public const ESTATUS_ATENCION = [
+        'En seguimiento' => 'En seguimiento',
+        'Canalizado' => 'Canalizado',
+        'Cerrado satisfactorio' => 'Cerrado satisfactorio',
+        'Cerrado no atendido' => 'Cerrado no atendido',
+        'Abandonó' => 'Abandonó',
+    ];
+
+    /** Color con el que se distingue cada estatus en los listados. */
+    public const COLORES_ESTATUS = [
+        'En seguimiento' => 'info',
+        'Canalizado' => 'warning',
+        'Cerrado satisfactorio' => 'success',
+        'Cerrado no atendido' => 'danger',
+        'Abandonó' => 'gray',
+    ];
+
     protected $guarded = [];
 
     protected $casts = [

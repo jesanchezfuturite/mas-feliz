@@ -93,6 +93,16 @@ class MetricasAtencion
         return (int) $this->casosPorEstatus()->get('Cerrado satisfactorio', 0);
     }
 
+    /**
+     * Casos que se cerraron sin que la persona llegara a ser atendida. Se
+     * cuentan aparte de los cerrados satisfactoriamente porque son justo los
+     * que Salud querría revisar.
+     */
+    public function casosCerradosSinAtender(): int
+    {
+        return (int) $this->casosPorEstatus()->get('Cerrado no atendido', 0);
+    }
+
     public function referenciasEnviadas(): int
     {
         return $this->acotar(SolicitudReferencia::query())->count();
