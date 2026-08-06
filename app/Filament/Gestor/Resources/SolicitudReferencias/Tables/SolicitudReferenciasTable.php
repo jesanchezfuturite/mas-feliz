@@ -76,6 +76,15 @@ class SolicitudReferenciasTable
                     ->color(fn ($record) => $record->fecha_cita ? 'success' : 'warning')
                     ->description(fn ($record) => $record->unidad_atencion_completa)
                     ->sortable(),
+
+                // Avance de la cita, con los mismos colores que Salud usa en su
+                // propio concentrado para no tener que reinterpretarlos.
+                TextColumn::make('estatus_cita')
+                    ->label('Estatus')
+                    ->badge()
+                    ->placeholder('Sin registrar')
+                    ->color(fn (?string $state): string => SolicitudReferenciaForm::COLORES_ESTATUS_CITA[$state] ?? 'gray')
+                    ->sortable(),
             ])
             ->defaultSort('fecha_solicitud', 'desc')
             ->filters([
@@ -109,7 +118,7 @@ class SolicitudReferenciasTable
                     ->modalDescription(fn ($record) => 'Folio ' . $record->folio . ' · ' . $record->nombre_usuario)
                     ->modalSubmitActionLabel('Guardar cita')
                     ->fillForm(fn ($record) => $record->only([
-                        'fecha_cita', 'unidad_atencion', 'unidad_atencion_otra', 'estatus_somos',
+                        'fecha_cita', 'unidad_atencion', 'unidad_atencion_otra', 'estatus_cita',
                     ]))
                     ->form([
                         DateTimePicker::make('fecha_cita')
@@ -130,9 +139,9 @@ class SolicitudReferenciasTable
                             ->visible(fn (Get $get): bool => $get('unidad_atencion') === 'Otro')
                             ->required(fn (Get $get): bool => $get('unidad_atencion') === 'Otro'),
 
-                        TextInput::make('estatus_somos')
-                            ->label('Estatus SOMOS+')
-                            ->maxLength(255),
+                        Select::make('estatus_cita')
+                            ->label('Estatus')
+                            ->options(SolicitudReferenciaForm::ESTATUS_CITA),
                     ])
                     ->action(function (array $data, $record) {
                         $record->update($data + ['asignada_por' => auth()->id()]);

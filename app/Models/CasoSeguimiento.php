@@ -65,6 +65,20 @@ class CasoSeguimiento extends Model
     }
 
     /**
+     * Dato de identificación del colaborador (edad, sexo, funciones, tiempo).
+     *
+     * Angélica lo confirmó el 06/08/2026: "los datos que ya registró el
+     * trabajador se arrastran tal cual, como los contestó en el tamizaje, no se
+     * llenan aparte". Por eso la respuesta del cuestionario manda sobre
+     * cualquier copia guardada en el caso; el valor propio solo aplica a los
+     * casos capturados a mano, que no tienen tamizaje.
+     */
+    public function datoIdentificacion(string $campo): ?string
+    {
+        return $this->tamizaje?->{$campo} ?: $this->{$campo};
+    }
+
+    /**
      * El documento de Salud pide Medicina, Psicología, Psiquiatría y Otro como
      * casillas independientes, pero se guardan en un solo arreglo porque una
      * persona puede requerir varios. Estos accesores exponen cada casilla como

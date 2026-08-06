@@ -197,9 +197,9 @@ class CasoSeguimientosTable
                                 \Filament\Forms\Components\Placeholder::make('folio_referencia')
                                     ->label('Folio')
                                     ->content(fn ($record) => new \Illuminate\Support\HtmlString("<div style=\"color: #0f766e; font-size: 0.95rem; font-weight: 600;\">" . ($record->solicitudReferencia?->folio ?? 'N/A') . "</div>")),
-                                \Filament\Forms\Components\Placeholder::make('estatus_somos')
-                                    ->label('Estatus SOMOS+')
-                                    ->content(fn ($record) => new \Illuminate\Support\HtmlString("<div style=\"color: #6b7280; font-size: 0.95rem;\">" . ($record->solicitudReferencia?->estatus_somos ?: 'Sin registrar') . "</div>")),
+                                \Filament\Forms\Components\Placeholder::make('estatus_cita')
+                                    ->label('Estatus de la cita')
+                                    ->content(fn ($record) => new \Illuminate\Support\HtmlString("<div style=\"color: #6b7280; font-size: 0.95rem;\">" . ($record->solicitudReferencia?->estatus_cita ?: 'Sin registrar') . "</div>")),
                                 \Filament\Forms\Components\Placeholder::make('fecha_cita')
                                     ->label('Fecha de la cita')
                                     ->content(fn ($record) => new \Illuminate\Support\HtmlString("<div style=\"color: #6b7280; font-size: 0.95rem;\">" . ($record->solicitudReferencia?->fecha_cita?->format('d/m/Y H:i') ?: 'Pendiente de asignar') . "</div>")),
@@ -226,7 +226,7 @@ class CasoSeguimientosTable
                         // La empresa nunca escribe el bloque de cita: son campos
                         // deshabilitados y Filament no los envía, pero se descartan
                         // de forma explícita para que no puedan colarse.
-                        unset($data['fecha_cita'], $data['unidad_atencion'], $data['unidad_atencion_otra'], $data['estatus_somos']);
+                        unset($data['fecha_cita'], $data['unidad_atencion'], $data['unidad_atencion_otra'], $data['estatus_cita']);
 
                         $record->solicitudReferencia()->updateOrCreate(
                             ['caso_seguimiento_id' => $record->id],

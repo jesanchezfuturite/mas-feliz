@@ -174,15 +174,16 @@ class Columnas
     }
 
     /**
-     * Campo que el tamizaje ya contestó: se muestra ese valor si el caso no
-     * tiene uno propio, y queda bloqueado para no contradecir al cuestionario.
+     * Dato de identificación del colaborador. La regla de cuál valor manda vive
+     * en el modelo (CasoSeguimiento::datoIdentificacion); aquí solo se muestra
+     * y se bloquea cuando proviene del cuestionario.
      */
     private static function selectDeTamizaje(string $campo, string $etiqueta, array $opciones): SelectColumn
     {
         return SelectColumn::make($campo)
             ->label($etiqueta)
             ->options($opciones)
-            ->getStateUsing(fn ($record) => $record->{$campo} ?: $record->tamizaje?->{$campo})
+            ->getStateUsing(fn ($record) => $record->datoIdentificacion($campo))
             ->disabled(fn ($record) => $record->es_de_tamizaje);
     }
 

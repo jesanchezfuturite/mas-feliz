@@ -26,12 +26,45 @@ use Filament\Schemas\Components\Utilities\Get;
  */
 class SolicitudReferenciaForm
 {
+    /**
+     * Catálogos confirmados por Angélica R el 06/08/2026.
+     */
     public const UNIDADES_ATENCION = [
         'Centro de Salud' => 'Centro de Salud',
-        'Hospital General' => 'Hospital General',
-        'CESAME' => 'CESAME (Centro de Salud Mental)',
-        'UNEME-CAPA' => 'UNEME-CAPA',
+        'Hospital General' => 'Hospital General (HG)',
+        'Centro Integral' => 'Centro Integral',
+        'CECOSAMA' => 'CECOSAMA',
         'Otro' => 'Otro',
+    ];
+
+    /** Las ocho jurisdicciones sanitarias del estado. */
+    public const JURISDICCIONES = [
+        '1' => 'Jurisdicción 1',
+        '2' => 'Jurisdicción 2',
+        '3' => 'Jurisdicción 3',
+        '4' => 'Jurisdicción 4',
+        '5' => 'Jurisdicción 5',
+        '6' => 'Jurisdicción 6',
+        '7' => 'Jurisdicción 7',
+        '8' => 'Jurisdicción 8',
+    ];
+
+    /** Avance de la cita. Antes se llamaba "Estatus SOMOS+". */
+    public const ESTATUS_CITA = [
+        'Confirmo asistencia de cita' => 'Confirmo asistencia de cita',
+        'Acudió a cita' => 'Acudió a cita',
+        'Reagendo cita' => 'Reagendo cita',
+        'Atendido por ruta alterna' => 'Atendido por ruta alterna',
+        'Notificación a empresa' => 'Notificación a empresa',
+    ];
+
+    /** Colores con los que Salud distingue cada estatus en su propio tablero. */
+    public const COLORES_ESTATUS_CITA = [
+        'Confirmo asistencia de cita' => 'purple',
+        'Acudió a cita' => 'success',
+        'Reagendo cita' => 'danger',
+        'Atendido por ruta alterna' => 'teal',
+        'Notificación a empresa' => 'warning',
     ];
 
     public const DERECHOHABIENCIA = [
@@ -87,11 +120,10 @@ class SolicitudReferenciaForm
                             ->disabled($ro)
                             ->maxLength(255),
 
-                        TextInput::make('jurisdiccion')
+                        Select::make('jurisdiccion')
                             ->label('Jurisdicción')
-                            ->placeholder('J1')
-                            ->disabled($ro)
-                            ->maxLength(255),
+                            ->options(self::JURISDICCIONES)
+                            ->disabled($ro),
 
                         Select::make('nivel_riesgo')
                             ->label('Nivel de riesgo')
@@ -202,9 +234,9 @@ class SolicitudReferenciaForm
                             ->live()
                             ->disabled($ro || ! $puedeAgendar),
 
-                        TextInput::make('estatus_somos')
-                            ->label('Estatus SOMOS+')
-                            ->maxLength(255)
+                        Select::make('estatus_cita')
+                            ->label('Estatus')
+                            ->options(self::ESTATUS_CITA)
                             ->disabled($ro || ! $puedeAgendar),
                     ]),
 
@@ -232,7 +264,7 @@ class SolicitudReferenciaForm
                 'fecha_solicitud', 'municipio', 'jurisdiccion', 'nivel_riesgo',
                 'nombre_usuario', 'sexo', 'edad', 'curp', 'telefono_contacto',
                 'ine_path', 'domicilio', 'derechohabiencia', 'servicio_solicitado',
-                'informe_valoracion_path', 'estatus_somos', 'fecha_cita',
+                'informe_valoracion_path', 'estatus_cita', 'fecha_cita',
                 'unidad_atencion', 'unidad_atencion_otra',
             ]);
         }
