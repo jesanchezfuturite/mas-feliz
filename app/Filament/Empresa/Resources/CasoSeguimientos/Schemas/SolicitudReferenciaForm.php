@@ -27,15 +27,15 @@ use Filament\Schemas\Components\Utilities\Get;
 class SolicitudReferenciaForm
 {
     /**
-     * Catálogos confirmados por Angélica R el 06/08/2026.
+     * Catálogo oficial de unidades de atención, agrupado por tipo.
+     * Vive en App\Support\CatalogoUnidadesAtencion porque son 156 unidades.
+     *
+     * @return array<string, array<string, string>|string>
      */
-    public const UNIDADES_ATENCION = [
-        'Centro de Salud' => 'Centro de Salud',
-        'Hospital General' => 'Hospital General (HG)',
-        'Centro Integral' => 'Centro Integral',
-        'CECOSAMA' => 'CECOSAMA',
-        'Otro' => 'Otro',
-    ];
+    public static function unidadesAtencion(): array
+    {
+        return \App\Support\CatalogoUnidadesAtencion::opciones();
+    }
 
     /** Las ocho jurisdicciones sanitarias del estado. */
     public const JURISDICCIONES = [
@@ -230,7 +230,8 @@ class SolicitudReferenciaForm
 
                         Select::make('unidad_atencion')
                             ->label('Unidad de atención')
-                            ->options(self::UNIDADES_ATENCION)
+                            ->options(self::unidadesAtencion())
+                            ->searchable()
                             ->live()
                             ->disabled($ro || ! $puedeAgendar),
 

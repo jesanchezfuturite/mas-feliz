@@ -129,7 +129,8 @@ class SolicitudReferenciasTable
 
                         Select::make('unidad_atencion')
                             ->label('Unidad de atención')
-                            ->options(SolicitudReferenciaForm::UNIDADES_ATENCION)
+                            ->options(SolicitudReferenciaForm::unidadesAtencion())
+                            ->searchable()
                             ->live()
                             ->required(),
 

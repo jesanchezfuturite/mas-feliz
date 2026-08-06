@@ -41,12 +41,36 @@ class CatalogosSaludTest extends TestCase
         ]);
     }
 
-    public function test_las_unidades_de_atencion_son_las_que_indico_salud(): void
+    public function test_el_catalogo_de_unidades_es_el_concentrado_oficial_de_salud(): void
     {
+        $catalogo = \App\Support\CatalogoUnidadesAtencion::UNIDADES;
+
+        $this->assertCount(156, $catalogo);
+        $this->assertSame($catalogo, array_unique($catalogo), 'El catálogo no debe traer unidades repetidas');
+
+        // Las ocho CECOSAMAs que mencionó Angélica.
+        $cecosamas = array_values(array_filter($catalogo, fn ($u) => str_starts_with($u, 'CECOSAMA')));
+        $this->assertCount(8, $cecosamas);
+        $this->assertContains('CECOSAMA SALTILLO', $cecosamas);
+
+        $this->assertContains('CENTRO INTEGRAL DE SALUD MENTAL', $catalogo);
+        $this->assertContains('HG DE SALTILLO', $catalogo);
+    }
+
+    public function test_las_unidades_se_ofrecen_agrupadas_y_con_opcion_otro(): void
+    {
+        $opciones = Formato::unidadesAtencion();
+
         $this->assertSame(
-            ['Centro de Salud', 'Hospital General', 'Centro Integral', 'CECOSAMA', 'Otro'],
-            array_keys(Formato::UNIDADES_ATENCION),
+            ['Centro Integral de Salud Mental', 'CECOSAMA', 'Hospitales', 'Centros de Salud', 'Otra unidad'],
+            array_keys($opciones),
         );
+
+        $this->assertCount(8, $opciones['CECOSAMA']);
+        $this->assertArrayHasKey('Otro', $opciones['Otra unidad']);
+
+        // Cada unidad se guarda con su nombre tal cual, sin traducciones.
+        $this->assertSame('CECOSAMA TORREON', $opciones['CECOSAMA']['CECOSAMA TORREON']);
     }
 
     public function test_hay_ocho_jurisdicciones_numeradas(): void
