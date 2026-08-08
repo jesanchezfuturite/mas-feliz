@@ -5,9 +5,11 @@ namespace Tests\Feature;
 use App\Filament\Empresa\Resources\CasoSeguimientos\Schemas\SolicitudReferenciaForm as Formato;
 use App\Models\CasoSeguimiento;
 use App\Models\Empresa;
+use App\Models\Setting;
 use App\Models\SolicitudReferencia;
 use App\Models\Tamizaje;
 use App\Models\User;
+use App\Support\CatalogoUnidadesAtencion;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Schema;
 use Tests\TestCase;
@@ -25,7 +27,7 @@ class CatalogosSaludTest extends TestCase
     {
         parent::setUp();
 
-        \App\Models\Setting::updateOrCreate(['key' => 'global_config'], ['herramientas_empresa_activas' => true]);
+        Setting::updateOrCreate(['key' => 'global_config'], ['herramientas_empresa_activas' => true]);
 
         $this->empresa = Empresa::create([
             'nombre_empresa' => 'Empresa Catálogos',
@@ -43,7 +45,7 @@ class CatalogosSaludTest extends TestCase
 
     public function test_el_catalogo_de_unidades_es_el_concentrado_oficial_de_salud(): void
     {
-        $catalogo = \App\Support\CatalogoUnidadesAtencion::UNIDADES;
+        $catalogo = CatalogoUnidadesAtencion::UNIDADES;
 
         $this->assertCount(156, $catalogo);
         $this->assertSame($catalogo, array_unique($catalogo), 'El catálogo no debe traer unidades repetidas');
@@ -71,6 +73,21 @@ class CatalogosSaludTest extends TestCase
 
         // Cada unidad se guarda con su nombre tal cual, sin traducciones.
         $this->assertSame('CECOSAMA TORREON', $opciones['CECOSAMA']['CECOSAMA TORREON']);
+    }
+
+    /**
+     * Angélica reportó el 08/08/2026 que el desplegable se cortaba en
+     * "COMUNIDAD NEGROS MASCOGOS": es la opción número 50 y ese es el tope que
+     * Filament aplica por omisión a los Select buscables.
+     */
+    public function test_el_desplegable_alcanza_a_mostrar_todo_el_catalogo(): void
+    {
+        $limite = CatalogoUnidadesAtencion::limiteOpciones();
+
+        $planas = CatalogoUnidadesAtencion::planas();
+
+        $this->assertGreaterThanOrEqual(count($planas), $limite);
+        $this->assertGreaterThan(50, $limite, 'Debe superar el tope por omisión de Filament');
     }
 
     public function test_hay_ocho_jurisdicciones_numeradas(): void

@@ -199,6 +199,21 @@ class CatalogoUnidadesAtencion
     }
 
     /**
+     * Cuántas opciones debe alcanzar a mostrar el desplegable.
+     *
+     * Los Select buscables de Filament recortan la lista a 50 opciones. Con el
+     * catálogo completo eso la dejaba cortada en "CENTRO DE SALUD RURAL
+     * MARGARITA GONZALEZ (COMUNIDAD NEGROS MASCOGOS)", que es justo la número
+     * 50, y las 106 unidades restantes solo aparecían si se escribía en el
+     * buscador. Se deriva del tamaño del catálogo para que el límite siga
+     * siendo correcto si Salud lo actualiza.
+     */
+    public static function limiteOpciones(): int
+    {
+        return count(self::UNIDADES) + 1;
+    }
+
+    /**
      * Lista plana, para validar o para mostrar sin agrupar.
      *
      * @return array<string, string>

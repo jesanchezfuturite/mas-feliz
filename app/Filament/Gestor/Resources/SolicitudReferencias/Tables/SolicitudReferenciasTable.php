@@ -3,12 +3,16 @@
 namespace App\Filament\Gestor\Resources\SolicitudReferencias\Tables;
 
 use App\Filament\Empresa\Resources\CasoSeguimientos\Schemas\SolicitudReferenciaForm;
+use App\Support\CatalogoUnidadesAtencion;
 use Filament\Actions\Action;
 use Filament\Forms\Components\DateTimePicker;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
+use Filament\Notifications\Notification;
 use Filament\Schemas\Components\Utilities\Get;
 use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Filters\Filter;
+use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
 
 /**
@@ -43,7 +47,7 @@ class SolicitudReferenciasTable
                 TextColumn::make('municipio')
                     ->label('Municipio')
                     ->searchable()
-                    ->description(fn ($record) => $record->jurisdiccion ? 'Jurisdicción ' . $record->jurisdiccion : null)
+                    ->description(fn ($record) => $record->jurisdiccion ? 'Jurisdicción '.$record->jurisdiccion : null)
                     ->sortable(),
 
                 TextColumn::make('nivel_riesgo')
@@ -88,12 +92,12 @@ class SolicitudReferenciasTable
             ])
             ->defaultSort('fecha_solicitud', 'desc')
             ->filters([
-                \Filament\Tables\Filters\Filter::make('sin_cita')
+                Filter::make('sin_cita')
                     ->label('Pendientes de agendar')
                     ->query(fn ($query) => $query->whereNull('fecha_cita'))
                     ->default(),
 
-                \Filament\Tables\Filters\SelectFilter::make('nivel_riesgo')
+                SelectFilter::make('nivel_riesgo')
                     ->label('Nivel de riesgo')
                     ->options([
                         'Leve' => 'Leve',
@@ -101,7 +105,7 @@ class SolicitudReferenciasTable
                         'Urgente' => 'Urgente',
                     ]),
 
-                \Filament\Tables\Filters\SelectFilter::make('empresa_id')
+                SelectFilter::make('empresa_id')
                     ->label('Empresa')
                     ->relationship('empresa', 'nombre_empresa')
                     ->searchable()
@@ -115,7 +119,7 @@ class SolicitudReferenciasTable
                     ->tooltip('Asignar cita y unidad de atención')
                     ->color('primary')
                     ->modalHeading('Asignar cita')
-                    ->modalDescription(fn ($record) => 'Folio ' . $record->folio . ' · ' . $record->nombre_usuario)
+                    ->modalDescription(fn ($record) => 'Folio '.$record->folio.' · '.$record->nombre_usuario)
                     ->modalSubmitActionLabel('Guardar cita')
                     ->fillForm(fn ($record) => $record->only([
                         'fecha_cita', 'unidad_atencion', 'unidad_atencion_otra', 'estatus_cita',
@@ -131,6 +135,7 @@ class SolicitudReferenciasTable
                             ->label('Unidad de atención')
                             ->options(SolicitudReferenciaForm::unidadesAtencion())
                             ->searchable()
+                            ->optionsLimit(CatalogoUnidadesAtencion::limiteOpciones())
                             ->live()
                             ->required(),
 
@@ -147,7 +152,7 @@ class SolicitudReferenciasTable
                     ->action(function (array $data, $record) {
                         $record->update($data + ['asignada_por' => auth()->id()]);
 
-                        \Filament\Notifications\Notification::make()
+                        Notification::make()
                             ->title('Cita asignada')
                             ->body('La empresa solicitante ya puede ver la fecha y la unidad de atención.')
                             ->success()

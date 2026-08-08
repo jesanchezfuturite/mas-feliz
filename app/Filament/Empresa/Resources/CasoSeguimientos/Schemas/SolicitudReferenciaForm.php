@@ -2,6 +2,8 @@
 
 namespace App\Filament\Empresa\Resources\CasoSeguimientos\Schemas;
 
+use App\Models\Tamizaje;
+use App\Support\CatalogoUnidadesAtencion;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\DateTimePicker;
 use Filament\Forms\Components\FileUpload;
@@ -11,6 +13,7 @@ use Filament\Forms\Components\TextInput;
 use Filament\Schemas\Components\Grid;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Components\Utilities\Get;
+use Illuminate\Support\HtmlString;
 
 /**
  * Formato de referencia complementaria a Secretaría de Salud.
@@ -34,7 +37,7 @@ class SolicitudReferenciaForm
      */
     public static function unidadesAtencion(): array
     {
-        return \App\Support\CatalogoUnidadesAtencion::opciones();
+        return CatalogoUnidadesAtencion::opciones();
     }
 
     /** Las ocho jurisdicciones sanitarias del estado. */
@@ -79,7 +82,7 @@ class SolicitudReferenciaForm
 
     /**
      * @param  bool  $puedeAgendar  true para Gestor y admin: habilita el bloque de cita.
-     * @param  bool  $soloLectura   true para consultar el formato sin poder editarlo.
+     * @param  bool  $soloLectura  true para consultar el formato sin poder editarlo.
      */
     public static function componentes(bool $puedeAgendar = false, bool $soloLectura = false): array
     {
@@ -94,10 +97,10 @@ class SolicitudReferenciaForm
                             ->content(function ($record) {
                                 $folio = $record?->folio ?? $record?->solicitudReferencia?->folio;
 
-                                return new \Illuminate\Support\HtmlString(
+                                return new HtmlString(
                                     '<span style="font-weight: 600; color: #0f766e;">'
-                                    . ($folio ?: 'Se generará automáticamente al guardar')
-                                    . '</span>'
+                                    .($folio ?: 'Se generará automáticamente al guardar')
+                                    .'</span>'
                                 );
                             }),
 
@@ -232,6 +235,7 @@ class SolicitudReferenciaForm
                             ->label('Unidad de atención')
                             ->options(self::unidadesAtencion())
                             ->searchable()
+                            ->optionsLimit(CatalogoUnidadesAtencion::limiteOpciones())
                             ->live()
                             ->disabled($ro || ! $puedeAgendar),
 
@@ -270,7 +274,7 @@ class SolicitudReferenciaForm
             ]);
         }
 
-        $tamizaje = \App\Models\Tamizaje::where('empresa_id', $caso->empresa_id)
+        $tamizaje = Tamizaje::where('empresa_id', $caso->empresa_id)
             ->where('nombre_completo', $caso->identificador_empleado)
             ->first();
 
