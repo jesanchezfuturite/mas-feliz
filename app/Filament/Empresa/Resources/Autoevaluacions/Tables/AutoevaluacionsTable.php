@@ -30,6 +30,12 @@ class AutoevaluacionsTable
                     ->dateTime('d/m/Y H:i')
                     ->sortable(),
 
+                TextColumn::make('updated_at')
+                    ->label('Última Actualización')
+                    ->dateTime('d/m/Y H:i')
+                    ->description(fn ($record) => $record->updated_at?->diffForHumans())
+                    ->sortable(),
+
                 TextColumn::make('estatus')
                     ->label('Estatus')
                     ->badge()
@@ -80,12 +86,53 @@ class AutoevaluacionsTable
                     ->tooltip('Solicitar Revisión')
                     ->requiresConfirmation()
                     ->modalHeading('Solicitar Revisión')
-                    ->modalDescription('¿Estás seguro de solicitar la revisión?')
                     ->modalSubmitActionLabel('Sí, solicitar')
-                    ->modalCancelActionLabel('No')
+                    ->modalCancelActionLabel(fn ($record) => empty(\App\Filament\Empresa\Resources\Autoevaluacions\Schemas\AutoevaluacionForm::criteriosIncompletos($record->respuestas))
+                        ? 'No'
+                        : 'Entendido')
                     ->hidden(fn ($record) => $record->estatus !== 'Borrador')
+                    // La empresa debe contestar toda la autoevaluación antes de enviarla:
+                    // de lo contrario el evaluador recibe solicitudes criterio por criterio.
+                    ->modalDescription(function ($record) {
+                        $pendientes = \App\Filament\Empresa\Resources\Autoevaluacions\Schemas\AutoevaluacionForm::criteriosIncompletos($record->respuestas);
+
+                        if (empty($pendientes)) {
+                            return '¿Estás seguro de solicitar la revisión?';
+                        }
+
+                        $totalElementos = array_sum($pendientes);
+                        $criterios = implode(', ', array_keys($pendientes));
+
+                        return new \Illuminate\Support\HtmlString(
+                            '<div style="color: #b45309;">Aún no puedes solicitar la revisión: te faltan <strong>'
+                            . $totalElementos . '</strong> respuesta(s) en el/los criterio(s) <strong>'
+                            . $criterios . '</strong>.<br><br>Contesta la autoevaluación completa y vuelve a intentarlo.</div>'
+                        );
+                    })
+                    ->modalSubmitAction(fn ($action, $record) => $action->hidden(
+                        ! empty(\App\Filament\Empresa\Resources\Autoevaluacions\Schemas\AutoevaluacionForm::criteriosIncompletos($record->respuestas))
+                    ))
                     ->action(function ($record) {
-                        $record->update(['estatus' => 'En revisión']);
+                        $pendientes = \App\Filament\Empresa\Resources\Autoevaluacions\Schemas\AutoevaluacionForm::criteriosIncompletos($record->respuestas);
+
+                        // Segunda barrera por si la acción se dispara sin pasar por la modal.
+                        if (! empty($pendientes)) {
+                            \Filament\Notifications\Notification::make()
+                                ->title('Autoevaluación incompleta')
+                                ->body('Faltan ' . array_sum($pendientes) . ' respuesta(s) en los criterios ' . implode(', ', array_keys($pendientes)) . '.')
+                                ->warning()
+                                ->send();
+
+                            return;
+                        }
+
+                        // La fecha de evaluación se sella al enviar a revisión: es la fecha
+                        // de la versión que el evaluador va a dictaminar, y la que se imprime
+                        // en el acuse. Antes solo se fijaba al crear y nunca se actualizaba.
+                        $record->update([
+                            'estatus' => 'En revisión',
+                            'fecha_evaluacion' => now(),
+                        ]);
                         \Filament\Notifications\Notification::make()
                             ->title('Revisión solicitada')
                             ->success()

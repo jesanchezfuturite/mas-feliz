@@ -45,6 +45,10 @@ class User extends Authenticatable implements FilamentUser
             return $this->role === 'evaluador' && $this->estatus === true;
         }
 
+        if ($panel->getId() === 'gestor') {
+            return $this->role === 'gestor' && $this->estatus === true;
+        }
+
         return $this->estatus === true;
     }
 

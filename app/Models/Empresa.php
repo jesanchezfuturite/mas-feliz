@@ -16,6 +16,36 @@ class Empresa extends Model implements Authenticatable, HasName, CanResetPasswor
 {
     use AuthenticatableTrait, Notifiable, CanResetPasswordTrait;
 
+    /**
+     * Fases de la Ruta Crítica de Avance. Viven aquí porque las consumen el
+     * acompañante y la administración al actualizar el avance, y la línea de
+     * tiempo que ve la empresa en su escritorio.
+     */
+    public const PASOS_CERTIFICACION = [
+        1 => 'Registro',
+        2 => 'Diagnóstico inicial/Autoevaluación',
+        3 => 'Retroalimentación y Acompañamiento',
+        4 => 'Plan de acción/Implementación',
+        5 => 'Evaluación y Dictaminación',
+        6 => 'Reconocimiento acorde al nivel de Madurez',
+    ];
+
+    /**
+     * Las mismas fases numeradas, para los desplegables.
+     *
+     * @return array<int, string>
+     */
+    public static function opcionesPasoCertificacion(): array
+    {
+        $opciones = [];
+
+        foreach (self::PASOS_CERTIFICACION as $numero => $etiqueta) {
+            $opciones[$numero] = $numero . '. ' . $etiqueta;
+        }
+
+        return $opciones;
+    }
+
     protected $fillable = [
         'folio',
         'token_tamizaje',
@@ -98,6 +128,14 @@ class Empresa extends Model implements Authenticatable, HasName, CanResetPasswor
     public function casosSeguimiento()
     {
         return $this->hasMany(CasoSeguimiento::class);
+    }
+
+    /**
+     * Formatos de referencia enviados a Secretaría de Salud.
+     */
+    public function solicitudesReferencia()
+    {
+        return $this->hasMany(SolicitudReferencia::class);
     }
 
     /**

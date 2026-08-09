@@ -61,27 +61,5 @@
             </div>
         </div>
 
-        <!-- Checklist de Avance -->
-        <div style="background-color: #ffffff; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1); border-radius: 1rem; padding: 2rem;">
-            <h3 style="font-size: 1.25rem; font-weight: 600; color: #1e293b; margin-bottom: 1.25rem; border-bottom: 1px solid #f1f5f9; padding-bottom: 0.75rem;">Lista de Autoverificación para Criterio 9</h3>
-            <div style="display: flex; flex-direction: column; gap: 1rem;">
-                <label style="display: flex; align-items: flex-start; gap: 0.75rem; cursor: pointer;">
-                    <input type="checkbox" style="margin-top: 0.25rem; border-radius: 0.25rem; border: 1px solid #cbd5e1; width: 1.125rem; height: 1.125rem; color: #556ee6;" />
-                    <span style="color: #334155; font-size: 0.95rem; line-height: 1.4;">¿El programa está documentado y firmado por el Comité de Salud Mental?</span>
-                </label>
-                <label style="display: flex; align-items: flex-start; gap: 0.75rem; cursor: pointer;">
-                    <input type="checkbox" style="margin-top: 0.25rem; border-radius: 0.25rem; border: 1px solid #cbd5e1; width: 1.125rem; height: 1.125rem; color: #556ee6;" />
-                    <span style="color: #334155; font-size: 0.95rem; line-height: 1.4;">¿El programa define con claridad objetivos, metas, responsables y cronograma de actividades?</span>
-                </label>
-                <label style="display: flex; align-items: flex-start; gap: 0.75rem; cursor: pointer;">
-                    <input type="checkbox" style="margin-top: 0.25rem; border-radius: 0.25rem; border: 1px solid #cbd5e1; width: 1.125rem; height: 1.125rem; color: #556ee6;" />
-                    <span style="color: #334155; font-size: 0.95rem; line-height: 1.4;">¿Se tienen canales establecidos para la difusión periódica del material informativo al personal?</span>
-                </label>
-                <label style="display: flex; align-items: flex-start; gap: 0.75rem; cursor: pointer;">
-                    <input type="checkbox" style="margin-top: 0.25rem; border-radius: 0.25rem; border: 1px solid #cbd5e1; width: 1.125rem; height: 1.125rem; color: #556ee6;" />
-                    <span style="color: #334155; font-size: 0.95rem; line-height: 1.4;">¿Contamos con evidencias de las actividades realizadas (fotos, listas de asistencia, materiales)?</span>
-                </label>
-            </div>
-        </div>
     </div>
 </x-filament-panels::page>

@@ -76,14 +76,7 @@ class EmpresasTable
                     ->form([
                         \Filament\Forms\Components\Select::make('paso_certificacion')
                             ->label('Fase Actual de Certificación')
-                            ->options([
-                                1 => '1. Registro',
-                                2 => '2. Diagnóstico inicial/Autoevaluación',
-                                3 => '3. Retroalimentación y Acompañamiento',
-                                4 => '4. Plan de acción/Implementación',
-                                5 => '5. Evaluación y Dictaminación',
-                                6 => '6. Reconocimiento acorde al nivel de Madurez',
-                            ])
+                            ->options(Empresa::opcionesPasoCertificacion())
                             ->required()
                             ->default(fn ($record) => $record->paso_certificacion),
                     ])

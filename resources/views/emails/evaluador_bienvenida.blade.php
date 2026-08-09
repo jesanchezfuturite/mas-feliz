@@ -40,7 +40,7 @@
                                 El Distintivo <strong>+Feliz</strong> es un reconocimiento estatal que distingue a las organizaciones comprometidas con la prevención, cuidado y fortalecimiento de la salud mental de sus colaboradores.
                             </p>
                             <p style="font-family: 'Montserrat', Helvetica, Arial, sans-serif; font-size: 16px; line-height: 24px; font-weight: 400; text-align: justify; color: #333333; margin-bottom: 35px;">
-                                Te compartimos tus credenciales como Evaluador para ingresar a la plataforma y dar seguimiento a las organizaciones:
+                                Te compartimos tus credenciales como {{ $rolLabel ?? 'Evaluador' }} para ingresar a la plataforma y dar seguimiento a las organizaciones:
                             </p>
                             
                             <table width="100%" border="0" cellspacing="0" cellpadding="5" style="margin-bottom: 40px;">
@@ -54,7 +54,7 @@
                                 </tr>
                                 <tr>
                                     <td style="font-size: 16px; font-weight: 700;">Liga de acceso:</td>
-                                    <td style="font-size: 16px;"><a href="{{ url('/evaluador') }}" style="color: #000000; text-decoration: underline; font-weight: 700;">{{ url('/evaluador') }}</a></td>
+                                    <td style="font-size: 16px;"><a href="{{ url($panelUrl ?? '/evaluador') }}" style="color: #000000; text-decoration: underline; font-weight: 700;">{{ url($panelUrl ?? '/evaluador') }}</a></td>
                                 </tr>
                             </table>
                             

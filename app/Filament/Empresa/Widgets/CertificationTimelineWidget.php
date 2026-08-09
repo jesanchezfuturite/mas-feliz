@@ -10,37 +10,35 @@ class CertificationTimelineWidget extends Widget
 
     protected int | string | array $columnSpan = 'full';
 
+    // Es lo primero que la empresa busca al entrar a su escritorio: se dibuja
+    // junto con la página, no en diferido.
+    protected static bool $isLazy = false;
+
     protected function getViewData(): array
     {
         $empresa = auth()->user();
         $pasoActual = $empresa->paso_certificacion ?? 1;
 
-        $steps = [
-            [
-                'label' => 'Registro',
-                'icon' => 'heroicon-o-clipboard-document-list',
-            ],
-            [
-                'label' => 'Diagnóstico inicial/Autoevaluación',
-                'icon' => 'heroicon-o-chat-bubble-left-right',
-            ],
-            [
-                'label' => 'Retroalimentación y Acompañamiento',
-                'icon' => 'heroicon-o-arrow-path',
-            ],
-            [
-                'label' => 'Plan de acción/Implementación',
-                'icon' => 'heroicon-o-book-open',
-            ],
-            [
-                'label' => 'Evaluación y Dictaminación',
-                'icon' => 'heroicon-o-document-text',
-            ],
-            [
-                'label' => 'Reconocimiento acorde al nivel de Madurez',
-                'icon' => 'heroicon-o-shield-check',
-            ],
+        // Las etiquetas vienen del modelo para que la línea de tiempo que ve la
+        // empresa y el desplegable que usan acompañante y administración no se
+        // puedan desincronizar.
+        $iconos = [
+            'heroicon-o-clipboard-document-list',
+            'heroicon-o-chat-bubble-left-right',
+            'heroicon-o-arrow-path',
+            'heroicon-o-book-open',
+            'heroicon-o-document-text',
+            'heroicon-o-shield-check',
         ];
+
+        $steps = [];
+
+        foreach (array_values(\App\Models\Empresa::PASOS_CERTIFICACION) as $indice => $etiqueta) {
+            $steps[] = [
+                'label' => $etiqueta,
+                'icon' => $iconos[$indice] ?? 'heroicon-o-check-circle',
+            ];
+        }
 
         foreach ($steps as $index => &$step) {
             $pasoNumero = $index + 1;

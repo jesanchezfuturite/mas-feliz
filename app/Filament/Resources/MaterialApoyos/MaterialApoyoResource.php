@@ -46,18 +46,36 @@ class MaterialApoyoResource extends Resource
                                 'imagen' => 'Imagen / Flyer',
                                 'video' => 'Video (YouTube/Vimeo)',
                                 'enlace' => 'Enlace Externo',
+                                'aviso' => 'Aviso / Fecha de capacitación',
                             ])
                             ->required()
                             ->live(),
-                        
+
                         Forms\Components\Select::make('seccion')
                             ->label('Sección del Tablero')
                             ->options([
                                 'prevencion_promocion' => 'Prevención y Promoción',
                                 'crisis' => 'Crisis',
+                                'capacitacion' => 'Capacitación',
                             ])
                             ->default('prevencion_promocion')
                             ->required(),
+
+                        Forms\Components\Textarea::make('descripcion')
+                            ->label('Descripción')
+                            ->helperText('Opcional. En los avisos se usa para el detalle: duración, temario, sede o instrucciones.')
+                            ->rows(3)
+                            ->maxLength(65535)
+                            ->columnSpanFull(),
+
+                        // Un aviso no lleva archivo ni enlace: comunica una fecha.
+                        Forms\Components\DateTimePicker::make('fecha_evento')
+                            ->label('Fecha y hora de la capacitación')
+                            ->displayFormat('d/m/Y h:i A')
+                            ->seconds(false)
+                            ->required(fn (Get $get) => $get('tipo') === 'aviso')
+                            ->visible(fn (Get $get) => $get('tipo') === 'aviso')
+                            ->columnSpanFull(),
 
                         Forms\Components\TextInput::make('enlace_url')
                             ->label('URL del Enlace / Video')
@@ -99,8 +117,25 @@ class MaterialApoyoResource extends Resource
                         'imagen' => 'success',
                         'video' => 'warning',
                         'enlace' => 'info',
+                        'aviso' => 'primary',
                         default => 'gray',
                     }),
+                Tables\Columns\TextColumn::make('seccion')
+                    ->label('Sección')
+                    ->badge()
+                    ->color('gray')
+                    ->formatStateUsing(fn (?string $state) => match ($state) {
+                        'prevencion_promocion' => 'Prevención y Promoción',
+                        'crisis' => 'Crisis',
+                        'capacitacion' => 'Capacitación',
+                        default => $state,
+                    })
+                    ->sortable(),
+                Tables\Columns\TextColumn::make('fecha_evento')
+                    ->label('Fecha del evento')
+                    ->dateTime('d/m/Y h:i A')
+                    ->placeholder('—')
+                    ->sortable(),
                 Tables\Columns\IconColumn::make('activo')
                     ->label('Activo')
                     ->boolean()
@@ -117,6 +152,14 @@ class MaterialApoyoResource extends Resource
                         'imagen' => 'Imagen',
                         'video' => 'Video',
                         'enlace' => 'Enlace',
+                        'aviso' => 'Aviso',
+                    ]),
+                Tables\Filters\SelectFilter::make('seccion')
+                    ->label('Sección')
+                    ->options([
+                        'prevencion_promocion' => 'Prevención y Promoción',
+                        'crisis' => 'Crisis',
+                        'capacitacion' => 'Capacitación',
                     ]),
             ])
             ->actions([
