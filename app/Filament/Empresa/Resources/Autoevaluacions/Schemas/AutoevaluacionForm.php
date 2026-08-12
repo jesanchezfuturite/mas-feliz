@@ -423,7 +423,7 @@ class AutoevaluacionForm
                                 ])
                                 ->modalSubmitAction(fn ($action) => $action->hidden(fn ($record) => ! $isAdmin && $record && in_array($record->estatus, ['En revisión', 'Validado'])))
                                 ->modalCancelAction(fn ($action) => $action->hidden(fn ($record) => ! $isAdmin && $record && in_array($record->estatus, ['En revisión', 'Validado'])))
-                                ->form(function () use ($isAdmin) {
+                                ->form(function () use ($isAdmin, $i, $elemId) {
                                     return [
                                         Textarea::make('comentario')
                                             ->label('Comentario')
