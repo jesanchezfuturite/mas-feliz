@@ -3,34 +3,51 @@
 namespace App\Filament\Empresa\Resources\Tamizajes;
 
 use App\Filament\Empresa\Resources\Tamizajes\Pages\ManageTamizajes;
+use App\Models\CasoSeguimiento;
+use App\Models\Setting;
 use App\Models\Tamizaje;
 use BackedEnum;
-use Filament\Resources\Resource;
-use Filament\Schemas\Schema;
-use Filament\Tables\Table;
-use Filament\Tables\Columns\TextColumn;
-use Filament\Forms\Components\TextInput;
-use Filament\Forms\Components\Textarea;
+use Filament\Actions\Action;
+use Filament\Actions\EditAction;
 use Filament\Forms\Components\Placeholder;
-use Filament\Schemas\Components\Section;
+use Filament\Forms\Components\Textarea;
+use Filament\Resources\Resource;
+use Filament\Schemas\Components\Grid;
+use Filament\Schemas\Schema;
+use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\HtmlString;
 
 class TamizajeResource extends Resource
 {
+    /**
+     * Además del interruptor global de herramientas, este listado respeta el de
+     * "resultados del tamizaje por individuo": Angélica pidió ocultarlo en
+     * producción mientras se aclara en reunión cómo debe leerse el resultado del
+     * instrumento. La vista general (Diagnóstico y Tamizaje) no se toca.
+     */
     public static function canAccess(): bool
     {
-        return \App\Models\Setting::where('key', 'global_config')->first()?->herramientas_empresa_activas ?? false;
+        $herramientasActivas = Setting::where('key', 'global_config')->first()?->herramientas_empresa_activas ?? false;
+
+        return $herramientasActivas && Setting::resultadosTamizajeVisibles();
     }
 
     protected static ?string $model = Tamizaje::class;
 
     protected static ?string $modelLabel = 'Diagnóstico/ Tamizaje';
+
     protected static ?string $pluralModelLabel = 'Diagnósticos/ Tamizajes';
+
     protected static ?string $navigationLabel = 'Diagnóstico/ Tamizaje (Apoyo al criterio indispensable 4)';
+
     protected static ?int $navigationSort = 4;
+
     protected static string|BackedEnum|null $navigationIcon = 'heroicon-o-document-chart-bar';
 
-    public static function getEloquentQuery(): \Illuminate\Database\Eloquent\Builder
+    public static function getEloquentQuery(): Builder
     {
         return parent::getEloquentQuery()
             ->where('empresa_id', auth()->id());
@@ -39,9 +56,16 @@ class TamizajeResource extends Resource
     public static function form(Schema $schema): Schema
     {
         $getColor = function ($level) {
-            if (in_array($level, ['Grave', 'Moderadamente grave', 'Riesgo Agudo', 'Urgente'])) return '#ef4444'; // Red
-            if (in_array($level, ['Moderada', 'Evaluación Adicional', 'Moderado'])) return '#f59e0b'; // Orange
-            if (in_array($level, ['Leve', 'Mínima o sin ansiedad', 'Mínima o ausente', 'Negativo'])) return '#22c55e'; // Green
+            if (in_array($level, ['Grave', 'Moderadamente grave', 'Riesgo Agudo', 'Urgente'])) {
+                return '#ef4444';
+            } // Red
+            if (in_array($level, ['Moderada', 'Evaluación Adicional', 'Moderado'])) {
+                return '#f59e0b';
+            } // Orange
+            if (in_array($level, ['Leve', 'Mínima o sin ansiedad', 'Mínima o ausente', 'Negativo'])) {
+                return '#22c55e';
+            } // Green
+
             return '#6b7280'; // Gray
         };
 
@@ -51,6 +75,7 @@ class TamizajeResource extends Resource
                 ->content(function ($record) use ($getColor, $field, $labelPrefix) {
                     $value = $record ? $record->{$field} : 'N/A';
                     $color = $getColor($value);
+
                     return new HtmlString("<span style=\"background-color: {$color}; color: white; padding: 8px 16px; border-radius: 9999px; font-size: 0.875rem; font-weight: 600; display: inline-block; width: 100%; text-align: center;\">{$labelPrefix}: {$value}</span>");
                 });
         };
@@ -63,6 +88,7 @@ class TamizajeResource extends Resource
                     if ($field === 'actividad_trabajo') {
                         $value = $record?->actividad_trabajo === 'Otra' ? $record->actividad_trabajo_otra : $record?->actividad_trabajo;
                     }
+
                     return new HtmlString("<div style=\"color: #6b7280; font-size: 0.95rem;\">{$value}</div>");
                 });
         };
@@ -70,7 +96,7 @@ class TamizajeResource extends Resource
         return $schema
             ->columns(1)
             ->components([
-                \Filament\Schemas\Components\Grid::make(3)
+                Grid::make(3)
                     ->schema([
                         $makeBadge('nivel_ansiedad', 'Ansiedad'),
                         $makeBadge('nivel_depresion', 'Depresión'),
@@ -81,7 +107,7 @@ class TamizajeResource extends Resource
                     ->hiddenLabel()
                     ->content(new HtmlString('<div style="display: flex; justify-content: space-between; align-items: center; padding-bottom: 0.75rem; border-bottom: 1px solid #e5e7eb; margin-top: 1.5rem;"><h3 style="font-size: 1.125rem; font-weight: 600; color: #111827;">Información del Empleado</h3><span style="color: #556ee6;"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" style="width: 1.5rem; height: 1.5rem;"><path fill-rule="evenodd" d="M7.5 6a4.5 4.5 0 1 1 9 0 4.5 4.5 0 0 1-9 0ZM3.751 20.105a8.25 8.25 0 0 1 16.498 0 .75.75 0 0 1-.437.695A18.683 18.683 0 0 1 12 22.5c-2.786 0-5.433-.608-7.812-1.7a.75.75 0 0 1-.437-.695Z" clip-rule="evenodd" /></svg></span></div>')),
 
-                \Filament\Schemas\Components\Grid::make(2)
+                Grid::make(2)
                     ->schema([
                         $makeText('nombre_completo', 'Nombre Completo'),
                         $makeText('genero', 'Sexo'),
@@ -92,6 +118,7 @@ class TamizajeResource extends Resource
                             ->label('Fecha de Evaluación')
                             ->content(function ($record) {
                                 $value = $record && $record->created_at ? $record->created_at->format('d/m/Y') : 'N/A';
+
                                 return new HtmlString("<div style=\"color: #6b7280; font-size: 0.95rem;\">{$value}</div>");
                             }),
                     ]),
@@ -100,11 +127,11 @@ class TamizajeResource extends Resource
                     ->hiddenLabel()
                     ->content(new HtmlString('<div style="display: flex; justify-content: space-between; align-items: center; padding-bottom: 0.75rem; border-bottom: 1px solid #e5e7eb; margin-top: 1.5rem;"><h3 style="font-size: 1.125rem; font-weight: 600; color: #111827;">Seguimiento</h3><span style="color: #556ee6;"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" style="width: 1.5rem; height: 1.5rem;"><path d="M21.731 2.269a2.625 2.625 0 0 0-3.712 0l-1.157 1.158 3.712 3.712 1.157-1.157a2.625 2.625 0 0 0 0-3.712ZM19.513 8.199l-3.712-3.712-8.4 8.4a5.25 5.25 0 0 0-1.32 2.214l-.8 2.685a.75.75 0 0 0 .933.933l2.685-.8a5.25 5.25 0 0 0 2.214-1.32l8.4-8.4Z" /><path d="M5.25 5.25a3 3 0 0 0-3 3v10.5a3 3 0 0 0 3 3h10.5a3 3 0 0 0 3-3V13.5a.75.75 0 0 0-1.5 0v5.25a1.5 1.5 0 0 1-1.5 1.5H5.25a1.5 1.5 0 0 1-1.5-1.5V8.25a1.5 1.5 0 0 1 1.5-1.5h5.25a.75.75 0 0 0 0-1.5H5.25Z" /></svg></span></div>')),
 
-                \Filament\Schemas\Components\Grid::make(1)
+                Grid::make(1)
                     ->schema([
                         Placeholder::make('comentarios_display')
                             ->label('Comentarios')
-                            ->visible(fn ($record) => !empty($record?->comentarios))
+                            ->visible(fn ($record) => ! empty($record?->comentarios))
                             ->content(fn ($record) => new HtmlString("<div style=\"color: #6b7280; font-size: 0.95rem; white-space: pre-wrap;\">{$record->comentarios}</div>")),
 
                         Textarea::make('comentarios')
@@ -119,7 +146,7 @@ class TamizajeResource extends Resource
     public static function table(Table $table): Table
     {
         return $table
-            ->description(new \Illuminate\Support\HtmlString('
+            ->description(new HtmlString('
                 <div style="display: flex; align-items: center; gap: 1rem; border-radius: 1rem; border: 1px solid #3b82f6; background-color: #eff6ff; padding: 0.75rem 1.25rem; color: #1d4ed8; margin-top: 1rem; margin-bottom: 0.5rem; text-align: left;">
                     <div style="display: flex; height: 2.5rem; width: 2.5rem; flex-shrink: 0; align-items: center; justify-content: center; border-radius: 9999px; background-color: #dbeafe;">
                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" style="height: 1.25rem; width: 1.25rem;">
@@ -156,7 +183,7 @@ class TamizajeResource extends Resource
                 //
             ])
             ->recordActions([
-                \Filament\Actions\EditAction::make('Ver')
+                EditAction::make('Ver')
                     ->label('Ver detalle')
                     ->icon('heroicon-m-eye')
                     ->iconButton()
@@ -165,10 +192,10 @@ class TamizajeResource extends Resource
                     ->modalHeading('Detalle de Evaluación')
                     ->modalSubmitActionLabel('Enviar a seguimiento')
                     ->modalFooterActionsAlignment('right')
-                    ->form(fn (\Filament\Schemas\Schema $schema) => static::form($schema))
-                    ->after(function (\Illuminate\Database\Eloquent\Model $record) {
-                        if (!empty($record->comentarios)) {
-                            \App\Models\CasoSeguimiento::create([
+                    ->form(fn (Schema $schema) => static::form($schema))
+                    ->after(function (Model $record) {
+                        if (! empty($record->comentarios)) {
+                            CasoSeguimiento::create([
                                 'empresa_id' => $record->empresa_id,
                                 'identificador_empleado' => $record->nombre_completo,
                                 'nivel_riesgo_detectado' => $record->nivel_riesgo_general,
@@ -178,17 +205,17 @@ class TamizajeResource extends Resource
                         }
                     }),
 
-                \Filament\Actions\Action::make('VerDetalle')
+                Action::make('VerDetalle')
                     ->label('Ver detalle')
                     ->icon('heroicon-m-eye')
                     ->iconButton()
                     ->tooltip('Ver detalle')
-                    ->visible(fn ($record) => !empty($record->comentarios))
+                    ->visible(fn ($record) => ! empty($record->comentarios))
                     ->modalHeading('Detalle de Evaluación')
                     ->modalSubmitAction(false)
                     ->modalCancelActionLabel('Cerrar')
                     ->modalFooterActionsAlignment('right')
-                    ->form(fn (\Filament\Schemas\Schema $schema) => static::form($schema)),
+                    ->form(fn (Schema $schema) => static::form($schema)),
             ])
             ->toolbarActions([
                 //
