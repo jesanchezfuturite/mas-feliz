@@ -18,7 +18,7 @@ class AvanceAtencionStats extends BaseWidget
 
     protected static ?int $sort = 1;
 
-    protected int | string | array $columnSpan = 'full';
+    protected int|string|array $columnSpan = 'full';
 
     // Es el primer dato que se busca al entrar: se carga junto con la página,
     // no en diferido. Son consultas de conteo, no pesan.
@@ -42,11 +42,29 @@ class AvanceAtencionStats extends BaseWidget
         $canalizados = $metricas->casosCanalizados();
         $referencias = $metricas->referenciasEnviadas();
         $sinCita = $metricas->referenciasSinCita();
+        $universo = $metricas->colaboradoresRegistrados();
+        $participacion = $metricas->porcentajeParticipacion();
+        $consentimiento = $metricas->porcentajeConsentimiento();
+        $porEstatus = $metricas->casosPorCadaEstatus();
 
         return [
-            Stat::make('Tamizajes aplicados', $aplicados)
-                ->description($metricas->porcentajeParticipacion() . '% participó · ' . $metricas->noParticiparon() . ' declinaron')
+            // El porcentaje va sobre el universo convocado, no sobre los
+            // cuestionarios respondidos: es la lectura contra la que se mide la
+            // meta indispensable del 90%.
+            Stat::make('Participación', $participacion === null ? 'Sin dato' : $participacion.'%')
+                ->description($universo > 0
+                    ? $aplicados.' de '.$universo.' colaboradores registrados · meta 90%'
+                    : 'Las organizaciones no han declarado su total de colaboradores')
                 ->descriptionIcon('heroicon-m-clipboard-document-check')
+                ->color(match (true) {
+                    $participacion === null => 'gray',
+                    $participacion >= 90 => 'success',
+                    default => 'warning',
+                }),
+
+            Stat::make('Consentimiento', $consentimiento === null ? 'Sin dato' : $consentimiento.'%')
+                ->description($metricas->participaron().' otorgaron · '.$metricas->noParticiparon().' declinaron')
+                ->descriptionIcon('heroicon-m-hand-raised')
                 ->color('info'),
 
             Stat::make('Personas detectadas en riesgo', $metricas->detectadosEnRiesgo())
@@ -54,21 +72,23 @@ class AvanceAtencionStats extends BaseWidget
                 ->descriptionIcon('heroicon-m-exclamation-triangle')
                 ->color('warning'),
 
-            Stat::make('Casos en seguimiento', $metricas->casosAbiertos())
-                ->description($metricas->casosCerrados() . ' cerrados satisfactoriamente'
-                    . ($metricas->casosCerradosSinAtender() > 0
-                        ? ' · ' . $metricas->casosCerradosSinAtender() . ' cerrados sin atender'
-                        : ''))
+            Stat::make('Casos en seguimiento', $porEstatus['En seguimiento'])
+                ->description($porEstatus['Abandonó'].' abandonaron el seguimiento')
                 ->descriptionIcon('heroicon-m-heart')
                 ->color('success'),
 
+            Stat::make('Casos cerrados', $porEstatus['Cerrado satisfactorio'])
+                ->description($porEstatus['Cerrado no atendido'].' cerrados sin atender')
+                ->descriptionIcon('heroicon-m-check-circle')
+                ->color($porEstatus['Cerrado no atendido'] > 0 ? 'warning' : 'success'),
+
             Stat::make('Casos derivados', $canalizados)
-                ->description($referencias . ' con formato de referencia enviado')
+                ->description($referencias.' con formato de referencia enviado')
                 ->descriptionIcon('heroicon-m-arrow-right-circle')
                 ->color($canalizados > 0 ? 'danger' : 'gray'),
 
             Stat::make('Citas asignadas por Salud', $metricas->referenciasConCita())
-                ->description($sinCita > 0 ? $sinCita . ' referencias esperan cita' : 'Sin referencias pendientes')
+                ->description($sinCita > 0 ? $sinCita.' referencias esperan cita' : 'Sin referencias pendientes')
                 ->descriptionIcon('heroicon-m-calendar-days')
                 ->color($sinCita > 0 ? 'warning' : 'success'),
         ];

@@ -72,7 +72,7 @@ class MetricasAtencionTest extends TestCase
     {
         return Tamizaje::create([
             'empresa_id' => $empresa->id,
-            'nombre_completo' => 'Colaborador ' . uniqid(),
+            'nombre_completo' => 'Colaborador '.uniqid(),
             'consentimiento_otorgado' => $nivel !== 'No participó',
             'riesgo_ansiedad' => 0,
             'riesgo_depresion' => 0,
@@ -105,13 +105,41 @@ class MetricasAtencionTest extends TestCase
         $this->assertSame(0, $m->referenciasEnviadas());
     }
 
-    public function test_quien_declina_cuenta_en_el_total_pero_no_en_la_participacion(): void
+    /**
+     * Angélica (17/08/2026): la participación se mide contra el total de
+     * colaboradores que la organización registró al inicio, y quien declina
+     * cuenta igual, porque también fue convocado.
+     */
+    public function test_la_participacion_se_mide_sobre_el_universo_registrado(): void
     {
         $m = MetricasAtencion::paraEmpresas([$this->empresaA->id]);
 
+        $this->assertSame(10, $m->colaboradoresRegistrados());
         $this->assertSame(3, $m->tamizajesAplicados());
+
+        // 3 de 10 convocados respondieron, incluida la persona que declinó.
+        $this->assertSame(30, $m->porcentajeParticipacion());
+    }
+
+    /** La tasa de consentimiento sigue disponible, pero como lectura aparte. */
+    public function test_el_consentimiento_se_reporta_por_separado(): void
+    {
+        $m = MetricasAtencion::paraEmpresas([$this->empresaA->id]);
+
         $this->assertSame(2, $m->participaron());
-        $this->assertSame(67, $m->porcentajeParticipacion());
+        $this->assertSame(1, $m->noParticiparon());
+
+        // 2 de los 3 que respondieron otorgaron su consentimiento.
+        $this->assertSame(67, $m->porcentajeConsentimiento());
+    }
+
+    public function test_el_universo_se_suma_de_todas_las_empresas_del_alcance(): void
+    {
+        $m = MetricasAtencion::paraEmpresas();
+
+        // Dos empresas de 10 colaboradores cada una, 4 tamizajes en total.
+        $this->assertSame(20, $m->colaboradoresRegistrados());
+        $this->assertSame(20, $m->porcentajeParticipacion());
     }
 
     public function test_una_referencia_sin_cita_se_reporta_como_pendiente(): void
@@ -164,6 +192,44 @@ class MetricasAtencionTest extends TestCase
 
         $this->assertSame(0, $m->tamizajesAplicados());
         $this->assertSame(0, $m->porcentajeParticipacion());
+        $this->assertNull($m->porcentajeConsentimiento());
+    }
+
+    /**
+     * Sin universo declarado no hay porcentaje que dar: se reporta null para que
+     * el tablero diga "Sin dato" en vez de inventar un 0% o, como pasaba antes,
+     * dividir entre 1 y anunciar 300%.
+     */
+    public function test_sin_universo_declarado_no_hay_porcentaje(): void
+    {
+        $sinUniverso = $this->crearEmpresa('Empresa Sin Universo', 'sinuniverso@empresa.test');
+        $sinUniverso->update(['numero_trabajadores' => 0]);
+        $this->crearTamizaje($sinUniverso, 'Leve');
+
+        $m = MetricasAtencion::paraEmpresas([$sinUniverso->id]);
+
+        $this->assertSame(0, $m->colaboradoresRegistrados());
+        $this->assertSame(1, $m->tamizajesAplicados());
+        $this->assertNull($m->porcentajeParticipacion());
+    }
+
+    /** Punto 7: el desglose incluye todos los estatus, también los que van en cero. */
+    public function test_el_desglose_de_casos_cubre_todos_los_estatus(): void
+    {
+        CasoSeguimiento::create([
+            'empresa_id' => $this->empresaA->id,
+            'identificador_empleado' => 'P5',
+            'nivel_riesgo_detectado' => 'Moderado',
+            'estatus_atencion' => 'Abandonó',
+        ]);
+
+        $m = MetricasAtencion::paraEmpresas();
+        $desglose = $m->casosPorCadaEstatus();
+
+        $this->assertSame(array_keys(CasoSeguimiento::ESTATUS_ATENCION), array_keys($desglose));
+        $this->assertSame(1, $desglose['Abandonó']);
+        $this->assertSame(1, $m->casosAbandonados());
+        $this->assertSame(0, $desglose['Cerrado no atendido']);
     }
 
     public function test_el_evaluador_solo_ve_las_metricas_de_sus_empresas(): void
