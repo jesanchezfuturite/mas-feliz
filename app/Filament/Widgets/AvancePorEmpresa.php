@@ -19,7 +19,7 @@ class AvancePorEmpresa extends BaseWidget
 {
     protected static ?int $sort = 3;
 
-    protected int | string | array $columnSpan = 'full';
+    protected int|string|array $columnSpan = 'full';
 
     protected static bool $isLazy = false;
 
@@ -44,6 +44,7 @@ class AvancePorEmpresa extends BaseWidget
                     ->withCount([
                         'tamizajes',
                         'tamizajes as participaron_count' => fn (Builder $q) => $q->where('nivel_riesgo_general', '!=', 'No participó'),
+                        'tamizajes as declinaron_count' => fn (Builder $q) => $q->where('nivel_riesgo_general', 'No participó'),
                         'tamizajes as en_riesgo_count' => fn (Builder $q) => $q->whereIn('nivel_riesgo_general', ['Moderado', 'Urgente']),
                         'casosSeguimiento as casos_abiertos_count' => fn (Builder $q) => $q->where('estatus_atencion', 'En seguimiento'),
                         'casosSeguimiento as casos_canalizados_count' => fn (Builder $q) => $q->where('estatus_atencion', 'Canalizado'),
@@ -59,13 +60,37 @@ class AvancePorEmpresa extends BaseWidget
                     ->wrap()
                     ->description(fn ($record) => $record->municipio),
 
+                TextColumn::make('numero_trabajadores')
+                    ->label('Colaboradores')
+                    ->alignCenter()
+                    ->sortable()
+                    ->placeholder('Sin declarar')
+                    ->description('Universo registrado'),
+
+                // El porcentaje se calcula sobre el universo que la organización
+                // declaró al registrarse, contando también a quien declinó: es lo
+                // que pidió Angélica y es la lectura que se compara con la meta
+                // del 90%. Antes se dividía entre los propios tamizajes, con lo
+                // que medía consentimiento y no avance.
                 TextColumn::make('tamizajes_count')
                     ->label('Tamizajes')
                     ->alignCenter()
                     ->sortable()
-                    ->description(fn ($record) => $record->tamizajes_count > 0
-                        ? round($record->participaron_count * 100 / $record->tamizajes_count) . '% participó'
-                        : 'Sin aplicar'),
+                    ->description(function ($record) {
+                        $universo = (int) $record->numero_trabajadores;
+
+                        if ($universo <= 0) {
+                            return 'Sin universo declarado';
+                        }
+
+                        return round($record->tamizajes_count * 100 / $universo).'% participó';
+                    }),
+
+                TextColumn::make('participaron_count')
+                    ->label('Consintieron')
+                    ->alignCenter()
+                    ->sortable()
+                    ->description(fn ($record) => $record->declinaron_count.' declinaron'),
 
                 TextColumn::make('en_riesgo_count')
                     ->label('En riesgo')
@@ -90,7 +115,7 @@ class AvancePorEmpresa extends BaseWidget
                     ->label('Citas asignadas')
                     ->alignCenter()
                     ->sortable()
-                    ->description(fn ($record) => $record->referencias_count . ' referencias'),
+                    ->description(fn ($record) => $record->referencias_count.' referencias'),
 
                 TextColumn::make('estatus_distintivo')
                     ->label('Distintivo')

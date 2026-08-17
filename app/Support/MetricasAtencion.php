@@ -3,6 +3,7 @@
 namespace App\Support;
 
 use App\Models\CasoSeguimiento;
+use App\Models\Empresa;
 use App\Models\SolicitudReferencia;
 use App\Models\Tamizaje;
 use Illuminate\Support\Collection;
@@ -36,6 +37,23 @@ class MetricasAtencion
         return $this->empresaIds === null
             ? $query
             : $query->whereIn('empresa_id', $this->empresaIds);
+    }
+
+    /** Igual que acotar(), pero sobre la tabla de empresas, donde la llave es `id`. */
+    private function acotarEmpresas($query)
+    {
+        return $this->empresaIds === null
+            ? $query
+            : $query->whereIn('id', $this->empresaIds);
+    }
+
+    /**
+     * Universo convocado: la suma de colaboradores que las organizaciones
+     * declararon al registrarse (`empresas.numero_trabajadores`).
+     */
+    public function colaboradoresRegistrados(): int
+    {
+        return (int) $this->acotarEmpresas(Empresa::query())->sum('numero_trabajadores');
     }
 
     /** Todos los cuestionarios respondidos, incluidas las no participaciones. */
@@ -78,9 +96,35 @@ class MetricasAtencion
             ->pluck('total', 'estatus_atencion');
     }
 
+    /**
+     * Conteo de cada estatus del catálogo, incluidos los que van en cero.
+     *
+     * Punto 7 de Angélica: el evaluador necesita ver todas las opciones que la
+     * organización puede asignar —cuántos en seguimiento, cuántos abandonaron—
+     * y no solo las que hoy tienen casos.
+     *
+     * @return array<string,int>
+     */
+    public function casosPorCadaEstatus(): array
+    {
+        $conteos = $this->casosPorEstatus();
+        $desglose = [];
+
+        foreach (array_keys(CasoSeguimiento::ESTATUS_ATENCION) as $estatus) {
+            $desglose[$estatus] = (int) $conteos->get($estatus, 0);
+        }
+
+        return $desglose;
+    }
+
     public function casosAbiertos(): int
     {
         return (int) $this->casosPorEstatus()->get('En seguimiento', 0);
+    }
+
+    public function casosAbandonados(): int
+    {
+        return (int) $this->casosPorEstatus()->get('Abandonó', 0);
     }
 
     public function casosCanalizados(): int
@@ -119,12 +163,43 @@ class MetricasAtencion
     }
 
     /**
-     * Porcentaje de participación sobre los cuestionarios enviados.
+     * Avance de participación sobre el universo convocado.
+     *
+     * Angélica lo pidió explícito (17/08/2026): el porcentaje va sobre el total
+     * de colaboradores que la organización registró al inicio, y quien declina
+     * también cuenta, porque igual fue convocado. Antes se dividía entre los
+     * cuestionarios respondidos, así que en realidad medía la tasa de
+     * consentimiento y salía siempre alto: 94% en una empresa de 102
+     * colaboradores con 14 tamizajes. La meta indispensable del 90% se lee
+     * contra este número.
+     *
+     * null = la organización no declaró su universo; no hay porcentaje que dar
+     * y es mejor decirlo que inventar un 0%.
      */
-    public function porcentajeParticipacion(): int
+    public function porcentajeParticipacion(): ?int
     {
-        $total = $this->tamizajesAplicados();
+        $universo = $this->colaboradoresRegistrados();
 
-        return $total === 0 ? 0 : (int) round($this->participaron() * 100 / $total);
+        if ($universo === 0) {
+            return null;
+        }
+
+        return (int) round($this->tamizajesAplicados() * 100 / $universo);
+    }
+
+    /**
+     * La otra lectura que pidió Angélica: de quienes abrieron el cuestionario,
+     * cuántos otorgaron su consentimiento. Es lo que el tablero mostraba antes
+     * como "participación", y sigue siendo útil, pero como dato aparte.
+     */
+    public function porcentajeConsentimiento(): ?int
+    {
+        $respondieron = $this->tamizajesAplicados();
+
+        if ($respondieron === 0) {
+            return null;
+        }
+
+        return (int) round($this->participaron() * 100 / $respondieron);
     }
 }

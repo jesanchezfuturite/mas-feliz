@@ -197,7 +197,7 @@
                         <label class="block text-sm font-semibold text-slate-800 dark:text-slate-200">
                             1. Nombre completo (Nombre/s Apellido Apellido) <span class="text-red-500">*</span>
                         </label>
-                        <input type="text" wire:model="nombre_completo" class="w-full rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white px-4 py-3 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-colors" placeholder="Escribe tu nombre completo">
+                        <input type="text" wire:model="nombre_completo" maxlength="191" class="w-full rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white px-4 py-3 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-colors" placeholder="Escribe tu nombre completo">
                         @error('nombre_completo') <span class="text-xs text-red-500 block font-medium mt-1">{{ $message }}</span> @enderror
                     </div>
 
@@ -258,7 +258,7 @@
                         <label class="block text-sm font-semibold text-slate-800 dark:text-slate-200">
                             Por favor, especifica tu actividad <span class="text-red-500">*</span>
                         </label>
-                        <input type="text" wire:model="actividad_trabajo_otra" class="w-full rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white px-4 py-3 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-colors" placeholder="Escribe tu actividad">
+                        <input type="text" wire:model="actividad_trabajo_otra" maxlength="191" class="w-full rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white px-4 py-3 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-colors" placeholder="Escribe tu actividad">
                         @error('actividad_trabajo_otra') <span class="text-xs text-red-500 block font-medium mt-1">{{ $message }}</span> @enderror
                     </div>
                     @endif

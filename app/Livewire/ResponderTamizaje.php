@@ -2,72 +2,107 @@
 
 namespace App\Livewire;
 
-use Livewire\Component;
 use App\Models\Empresa;
 use App\Models\Tamizaje;
+use Livewire\Component;
 
 class ResponderTamizaje extends Component
 {
     public $token;
+
     public $empresa;
 
     // Flow control fields
     public $step = 'consentimiento';
+
     public $consentimiento_otorgado = null;
 
     // Declarations checklist
     public bool $declaracion_1 = false;
+
     public bool $declaracion_2 = false;
+
     public bool $declaracion_3 = false;
+
     public bool $declaracion_4 = false;
+
     public bool $declaracion_5 = false;
 
     // Sociodemographic fields
     public $nombre_completo = null;
+
     public $genero = null;
+
     public $edad = null;
+
     public $actividad_trabajo = null;
+
     public $actividad_trabajo_otra = null;
+
     public $tiempo_trabajando = null;
+
     public $telefono = null;
+
     public $correo = null;
 
     // Form fields
     public $ansiedad_1 = null;
+
     public $ansiedad_2 = null;
+
     public $ansiedad_3 = null;
+
     public $ansiedad_4 = null;
+
     public $ansiedad_5 = null;
+
     public $ansiedad_6 = null;
+
     public $ansiedad_7 = null;
 
     public $depresion_1 = null;
+
     public $depresion_2 = null;
+
     public $depresion_3 = null;
+
     public $depresion_4 = null;
+
     public $depresion_5 = null;
+
     public $depresion_6 = null;
+
     public $depresion_7 = null;
+
     public $depresion_8 = null;
+
     public $depresion_9 = null;
 
     public $suicidio_1 = null;
+
     public $suicidio_2 = null;
+
     public $suicidio_3 = null;
+
     public $suicidio_4 = null;
 
     public bool $success = false;
 
+    // Los máximos son 191 porque `Schema::defaultStringLength(191)` deja las
+    // columnas en VARCHAR(191). Con `max:255` (o sin máximo, como estaba
+    // `actividad_trabajo_otra`) el texto pasaba la validación y reventaba en el
+    // INSERT con "Data too long", perdiendo el tamizaje completo del
+    // colaborador ya contestado. Pasó en producción el 13/08/2026.
     protected $rules = [
         'consentimiento_otorgado' => 'required|in:si',
-        'nombre_completo' => 'required|string|max:255',
+        'nombre_completo' => 'required|string|max:191',
         'genero' => 'required|string',
         'edad' => 'required|string',
         'actividad_trabajo' => 'required|string',
-        'actividad_trabajo_otra' => 'required_if:actividad_trabajo,Otra',
+        'actividad_trabajo_otra' => 'required_if:actividad_trabajo,Otra|nullable|string|max:191',
         'tiempo_trabajando' => 'required|string',
         'telefono' => 'required|string|max:20',
-        'correo' => 'nullable|email|max:255',
+        'correo' => 'nullable|email|max:191',
 
         'ansiedad_1' => 'required|in:0,1,2,3',
         'ansiedad_2' => 'required|in:0,1,2,3',
@@ -104,7 +139,7 @@ class ResponderTamizaje extends Component
         $this->token = $token;
         $this->empresa = Empresa::where('token_tamizaje', $token)->first();
 
-        if (!$this->empresa) {
+        if (! $this->empresa) {
             abort(404);
         }
     }
@@ -161,15 +196,16 @@ class ResponderTamizaje extends Component
 
     public function irACuestionario()
     {
+        // Mismos máximos que $rules: el ancho real de las columnas es 191.
         $this->validate([
-            'nombre_completo' => 'required|string|max:255',
+            'nombre_completo' => 'required|string|max:191',
             'genero' => 'required|string',
             'edad' => 'required|string',
             'actividad_trabajo' => 'required|string',
-            'actividad_trabajo_otra' => 'required_if:actividad_trabajo,Otra',
+            'actividad_trabajo_otra' => 'required_if:actividad_trabajo,Otra|nullable|string|max:191',
             'tiempo_trabajando' => 'required|string',
             'telefono' => 'required|string|max:20',
-            'correo' => 'nullable|email|max:255',
+            'correo' => 'nullable|email|max:191',
         ]);
 
         $this->step = 'cuestionario';
@@ -179,8 +215,8 @@ class ResponderTamizaje extends Component
     {
         $this->validate();
 
-        $scoreAnsiedad = (int)$this->ansiedad_1 + (int)$this->ansiedad_2 + (int)$this->ansiedad_3 + (int)$this->ansiedad_4 + (int)$this->ansiedad_5 + (int)$this->ansiedad_6 + (int)$this->ansiedad_7;
-        
+        $scoreAnsiedad = (int) $this->ansiedad_1 + (int) $this->ansiedad_2 + (int) $this->ansiedad_3 + (int) $this->ansiedad_4 + (int) $this->ansiedad_5 + (int) $this->ansiedad_6 + (int) $this->ansiedad_7;
+
         // GAD-7 Heuristics
         if ($scoreAnsiedad >= 15) {
             $nivelAnsiedad = 'Grave';
@@ -191,8 +227,8 @@ class ResponderTamizaje extends Component
         } else {
             $nivelAnsiedad = 'Mínima o sin ansiedad';
         }
-        $scoreDepresion = (int)$this->depresion_1 + (int)$this->depresion_2 + (int)$this->depresion_3 + (int)$this->depresion_4 + (int)$this->depresion_5 + (int)$this->depresion_6 + (int)$this->depresion_7 + (int)$this->depresion_8 + (int)$this->depresion_9;
-        
+        $scoreDepresion = (int) $this->depresion_1 + (int) $this->depresion_2 + (int) $this->depresion_3 + (int) $this->depresion_4 + (int) $this->depresion_5 + (int) $this->depresion_6 + (int) $this->depresion_7 + (int) $this->depresion_8 + (int) $this->depresion_9;
+
         // PHQ-9 Heuristics
         if ($scoreDepresion >= 20) {
             $nivelDepresion = 'Grave';
@@ -205,10 +241,10 @@ class ResponderTamizaje extends Component
         } else {
             $nivelDepresion = 'Mínima o ausente';
         }
-        $s1 = (int)$this->suicidio_1;
-        $s2 = (int)$this->suicidio_2;
-        $s3 = (int)$this->suicidio_3;
-        $s4 = (int)$this->suicidio_4;
+        $s1 = (int) $this->suicidio_1;
+        $s2 = (int) $this->suicidio_2;
+        $s3 = (int) $this->suicidio_3;
+        $s4 = (int) $this->suicidio_4;
 
         if ($s4 === 1) {
             $nivelSuicidio = 'Riesgo Agudo';
