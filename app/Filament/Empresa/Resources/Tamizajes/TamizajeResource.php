@@ -24,9 +24,11 @@ class TamizajeResource extends Resource
 {
     /**
      * Además del interruptor global de herramientas, este listado respeta el de
-     * "resultados del tamizaje por individuo": Angélica pidió ocultarlo en
-     * producción mientras se aclara en reunión cómo debe leerse el resultado del
-     * instrumento. La vista general (Diagnóstico y Tamizaje) no se toca.
+     * "resultados del tamizaje": Angélica pidió ocultarlo en producción mientras
+     * se aclara en reunión cómo debe leerse el resultado del instrumento. El
+     * mismo interruptor apaga la distribución de riesgos y el desglose de
+     * resultados de la página Diagnóstico y Tamizaje (ver RiesgosGeneralesChart y
+     * EstadisticaTamizajeWidget); ahí solo queda el avance de participación.
      */
     public static function canAccess(): bool
     {
