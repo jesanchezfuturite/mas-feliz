@@ -2,13 +2,24 @@
 
 namespace App\Filament\Empresa\Widgets;
 
+use App\Models\Setting;
 use Filament\Widgets\Widget;
 
 class EstadisticaTamizajeWidget extends Widget
 {
     protected string $view = 'filament.empresa.widgets.estadistica-tamizaje';
 
-    protected int | string | array $columnSpan = 'full';
+    protected int|string|array $columnSpan = 'full';
+
+    /**
+     * Mismo interruptor que el listado por individuo: este bloque desglosa los
+     * niveles de cada instrumento (GAD-7, PHQ-9, conducta suicida) y es justo lo
+     * que no debe leerse hasta que se aclare cómo interpretarlos.
+     */
+    public static function canView(): bool
+    {
+        return Setting::resultadosTamizajeVisibles();
+    }
 
     /**
      * Se bloquea igual que el resto de widgets del diagnóstico:
@@ -65,6 +76,7 @@ class EstadisticaTamizajeWidget extends Widget
             foreach ($counts as $lvl => $n) {
                 $niveles[] = ['label' => $lvl, 'count' => $n, 'color' => $color($lvl)];
             }
+
             return ['total' => $total, 'niveles' => $niveles];
         };
 
@@ -83,6 +95,7 @@ class EstadisticaTamizajeWidget extends Widget
                     $out[$key]['total']++;
                 }
             }
+
             return $out;
         };
 
@@ -99,6 +112,7 @@ class EstadisticaTamizajeWidget extends Widget
                     $out[$k] = $v;
                 }
             }
+
             return $out;
         };
 

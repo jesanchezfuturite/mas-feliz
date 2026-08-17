@@ -84,8 +84,8 @@ class ConfiguradorLanding extends Page implements HasForms
                             ->helperText('Si está inactivo, las empresas no tendrán acceso a los menús de herramientas y solo verán un mensaje de espera en su tablero principal.'),
 
                         Toggle::make('resultados_tamizaje_visibles')
-                            ->label('Mostrar resultados del tamizaje por individuo')
-                            ->helperText('Si está inactivo, la empresa deja de ver el listado de resultados colaborador por colaborador. La vista general del diagnóstico (porcentaje de participación, gráficas y distribución de riesgos) se sigue mostrando.'),
+                            ->label('Mostrar resultados del tamizaje a las empresas')
+                            ->helperText('Si está inactivo, la empresa deja de ver el listado de resultados colaborador por colaborador y también, dentro de "Diagnóstico y Tamizaje", la distribución de niveles de riesgo y el desglose de resultados. Conserva la liga del diagnóstico y su porcentaje de participación.'),
                     ]),
 
                 Actions::make([

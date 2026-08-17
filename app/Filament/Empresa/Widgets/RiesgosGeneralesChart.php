@@ -2,17 +2,30 @@
 
 namespace App\Filament\Empresa\Widgets;
 
+use App\Models\Setting;
 use Filament\Widgets\ChartWidget;
 
 class RiesgosGeneralesChart extends ChartWidget
 {
+    /**
+     * El interruptor de resultados del tamizaje también apaga esta gráfica: si la
+     * empresa no debe leer niveles de riesgo por persona mientras se aclara en
+     * reunión cómo debe interpretarse el instrumento, tampoco debe leerlos
+     * agregados. Lo que sigue visible en la página es el avance de participación
+     * y la liga del diagnóstico (DashboardStatsOverview).
+     */
+    public static function canView(): bool
+    {
+        return Setting::resultadosTamizajeVisibles();
+    }
+
     public function getView(): string
     {
         $empresa = auth()->user();
         $autoevaluacion = $empresa->autoevaluaciones()->first();
         $hasSubmitted = $autoevaluacion && in_array($autoevaluacion->estatus, ['En revisión', 'Validado']);
 
-        if (!$hasSubmitted) {
+        if (! $hasSubmitted) {
             return 'filament.empresa.widgets.chart-locked';
         }
 
@@ -21,7 +34,7 @@ class RiesgosGeneralesChart extends ChartWidget
 
     protected ?string $heading = 'Distribución de Niveles de Riesgo';
 
-    protected int | string | array $columnSpan = 'full';
+    protected int|string|array $columnSpan = 'full';
 
     protected ?string $maxHeight = '280px';
 

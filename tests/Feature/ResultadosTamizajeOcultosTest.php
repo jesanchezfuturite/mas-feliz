@@ -3,6 +3,9 @@
 namespace Tests\Feature;
 
 use App\Filament\Empresa\Resources\Tamizajes\TamizajeResource;
+use App\Filament\Empresa\Widgets\DashboardStatsOverview;
+use App\Filament\Empresa\Widgets\EstadisticaTamizajeWidget;
+use App\Filament\Empresa\Widgets\RiesgosGeneralesChart;
 use App\Models\Setting;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
@@ -42,6 +45,35 @@ class ResultadosTamizajeOcultosTest extends TestCase
 
         $this->assertFalse(Setting::resultadosTamizajeVisibles());
         $this->assertFalse(TamizajeResource::canAccess());
+    }
+
+    /**
+     * El mismo interruptor apaga las secciones de la página "Diagnóstico y
+     * Tamizaje" que muestran niveles de riesgo: distribución general y desglose
+     * por instrumento. Filament filtra los widgets de encabezado con `canView()`.
+     */
+    public function test_con_el_interruptor_apagado_se_ocultan_los_widgets_de_riesgo(): void
+    {
+        $this->configurar(herramientas: true, resultados: false);
+
+        $this->assertFalse(RiesgosGeneralesChart::canView());
+        $this->assertFalse(EstadisticaTamizajeWidget::canView());
+    }
+
+    public function test_con_el_interruptor_encendido_los_widgets_de_riesgo_se_ven(): void
+    {
+        $this->configurar(herramientas: true, resultados: true);
+
+        $this->assertTrue(RiesgosGeneralesChart::canView());
+        $this->assertTrue(EstadisticaTamizajeWidget::canView());
+    }
+
+    /** El avance de participación no depende del interruptor: siempre se muestra. */
+    public function test_el_widget_de_participacion_no_se_oculta(): void
+    {
+        $this->configurar(herramientas: true, resultados: false);
+
+        $this->assertTrue(DashboardStatsOverview::canView());
     }
 
     /** El interruptor global de herramientas sigue mandando por encima. */
