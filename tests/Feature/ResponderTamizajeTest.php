@@ -2,12 +2,13 @@
 
 namespace Tests\Feature;
 
-use Illuminate\Foundation\Testing\RefreshDatabase;
-use Tests\TestCase;
+use App\Livewire\ResponderTamizaje;
 use App\Models\Empresa;
 use App\Models\Tamizaje;
+use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Log;
 use Livewire\Livewire;
-use App\Livewire\ResponderTamizaje;
+use Tests\TestCase;
 
 class ResponderTamizajeTest extends TestCase
 {
@@ -91,6 +92,49 @@ class ResponderTamizajeTest extends TestCase
             ->set('edad', '25 a 34 años')
             ->set('actividad_trabajo', 'Administrativas')
             ->set('tiempo_trabajando', 'De 6 meses a 1 año')
+            ->call('irACuestionario')
+            ->assertHasNoErrors()
+            ->assertSet('step', 'cuestionario');
+    }
+
+    /**
+     * Las columnas son VARCHAR(191) por `Schema::defaultStringLength(191)`. Sin
+     * tope en la validación, un texto largo pasaba el paso de demográficos y
+     * reventaba con "Data too long" al insertar, perdiendo el tamizaje ya
+     * contestado. Ocurrió en producción el 13/08/2026 con
+     * `actividad_trabajo_otra`, que no tenía máximo alguno.
+     */
+    public function test_los_textos_largos_se_rechazan_antes_de_llegar_a_la_base(): void
+    {
+        Livewire::test(ResponderTamizaje::class, ['token' => $this->empresa->token_tamizaje])
+            ->set('step', 'demograficos')
+            ->set('nombre_completo', str_repeat('a', 192))
+            ->set('genero', 'Hombre')
+            ->set('edad', '25 a 34 años')
+            ->set('actividad_trabajo', 'Otra')
+            ->set('actividad_trabajo_otra', str_repeat('b', 192))
+            ->set('tiempo_trabajando', 'De 6 meses a 1 año')
+            ->set('telefono', '8711234567')
+            ->call('irACuestionario')
+            ->assertHasErrors([
+                'nombre_completo' => 'max',
+                'actividad_trabajo_otra' => 'max',
+            ])
+            ->assertSet('step', 'demograficos');
+    }
+
+    /** Justo en el límite sí debe pasar. */
+    public function test_un_texto_de_191_caracteres_es_valido(): void
+    {
+        Livewire::test(ResponderTamizaje::class, ['token' => $this->empresa->token_tamizaje])
+            ->set('step', 'demograficos')
+            ->set('nombre_completo', str_repeat('a', 191))
+            ->set('genero', 'Hombre')
+            ->set('edad', '25 a 34 años')
+            ->set('actividad_trabajo', 'Otra')
+            ->set('actividad_trabajo_otra', str_repeat('b', 191))
+            ->set('tiempo_trabajando', 'De 6 meses a 1 año')
+            ->set('telefono', '8711234567')
             ->call('irACuestionario')
             ->assertHasNoErrors()
             ->assertSet('step', 'cuestionario');
@@ -213,11 +257,11 @@ class ResponderTamizajeTest extends TestCase
 
     public function test_declined_consent_logs_message(): void
     {
-        \Illuminate\Support\Facades\Log::shouldReceive('info')
+        Log::shouldReceive('info')
             ->once()
             ->with(\Mockery::on(function ($message) {
-                return str_contains($message, 'Colaborador declinó participar') 
-                    && str_contains($message, (string)$this->empresa->id)
+                return str_contains($message, 'Colaborador declinó participar')
+                    && str_contains($message, (string) $this->empresa->id)
                     && str_contains($message, $this->empresa->nombre_empresa);
             }));
 
