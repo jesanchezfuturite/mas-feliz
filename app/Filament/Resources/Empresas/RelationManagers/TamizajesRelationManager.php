@@ -21,7 +21,7 @@ class TamizajesRelationManager extends RelationManager
     {
         $getColor = function ($level) {
             if (in_array($level, ['Grave', 'Moderadamente grave', 'Riesgo Agudo', 'Urgente'])) return '#ef4444'; // Red
-            if (in_array($level, ['Moderada', 'Evaluación Adicional', 'Moderado'])) return '#f59e0b'; // Orange
+            if (in_array($level, ['Moderada', 'Evaluación Adicional', 'Positivo: requiere valoración posterior', 'Moderado'])) return '#f59e0b'; // Orange
             if (in_array($level, ['Leve', 'Mínima o sin ansiedad', 'Mínima o ausente', 'Negativo'])) return '#22c55e'; // Green
             return '#6b7280'; // Gray
         };

@@ -188,7 +188,7 @@ class Columnas
             ->getStateUsing(fn ($record) => $valor($record->tamizaje) ?? 'N/A')
             ->color(fn (string $state): string => match ($state) {
                 'Grave', 'Moderadamente grave', 'Riesgo Agudo' => 'danger',
-                'Moderada', 'Evaluación Adicional' => 'warning',
+                'Moderada', 'Evaluación Adicional', 'Positivo: requiere valoración posterior' => 'warning',
                 'Leve', 'Mínima o sin ansiedad', 'Mínima o ausente', 'Negativo' => 'success',
                 default => 'gray',
             });

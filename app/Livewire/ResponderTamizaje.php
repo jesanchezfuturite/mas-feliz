@@ -86,6 +86,11 @@ class ResponderTamizaje extends Component
 
     public $suicidio_4 = null;
 
+    // Pregunta de agudeza (ASQ). Solo se formula a quien contestó "Sí" en
+    // alguna de las cuatro anteriores, y es la única que establece riesgo
+    // agudo. Ver comentario en `rules()`.
+    public $suicidio_5 = null;
+
     public bool $success = false;
 
     // Los máximos son 191 porque `Schema::defaultStringLength(191)` deja las
@@ -93,7 +98,48 @@ class ResponderTamizaje extends Component
     // `actividad_trabajo_otra`) el texto pasaba la validación y reventaba en el
     // INSERT con "Data too long", perdiendo el tamizaje completo del
     // colaborador ya contestado. Pasó en producción el 13/08/2026.
-    protected $rules = [
+    /**
+     * Niveles de conducta suicida.
+     *
+     * Antes del 18/08/2026 un "Sí" en la pregunta 4 —"¿Alguna vez has
+     * intentado quitarte la vida?"— marcaba por sí solo `Riesgo Agudo`. Esa
+     * pregunta mide toda la vida, mientras que las tres anteriores preguntan
+     * por las últimas semanas, así que alguien con un intento hace años y sin
+     * ningún síntoma actual salía como emergencia: 933 de las 1,771 alertas
+     * urgentes acumuladas no tenían indicador reciente. La agudeza ahora la
+     * establece únicamente la pregunta 5.
+     */
+    public const SUICIDIO_NEGATIVO = 'Negativo';
+
+    public const SUICIDIO_POSITIVO = 'Positivo: requiere valoración posterior';
+
+    public const SUICIDIO_AGUDO = 'Riesgo Agudo';
+
+    /**
+     * `suicidio_5` solo es obligatoria si hubo al menos un "Sí" en las cuatro
+     * anteriores: es la exploración de agudeza del instrumento, no una
+     * pregunta que se le haga a todo el mundo. Por eso las reglas son un
+     * método y no una propiedad — dependen del estado del formulario.
+     */
+    protected function rules(): array
+    {
+        return array_merge($this->reglasBase, [
+            'suicidio_5' => $this->requiereAgudeza()
+                ? 'required|in:0,1'
+                : 'nullable|in:0,1',
+        ]);
+    }
+
+    /** ¿Contestó "Sí" a alguna de las cuatro preguntas de conducta suicida? */
+    public function requiereAgudeza(): bool
+    {
+        return (int) $this->suicidio_1 === 1
+            || (int) $this->suicidio_2 === 1
+            || (int) $this->suicidio_3 === 1
+            || (int) $this->suicidio_4 === 1;
+    }
+
+    protected $reglasBase = [
         'consentimiento_otorgado' => 'required|in:si',
         'nombre_completo' => 'required|string|max:191',
         'genero' => 'required|string',
@@ -246,23 +292,31 @@ class ResponderTamizaje extends Component
         $s3 = (int) $this->suicidio_3;
         $s4 = (int) $this->suicidio_4;
 
-        if ($s4 === 1) {
-            $nivelSuicidio = 'Riesgo Agudo';
-        } elseif ($s1 === 1 || $s2 === 1 || $s3 === 1) {
-            $nivelSuicidio = 'Evaluación Adicional';
+        // El puntaje sigue siendo el de los cuatro ítems del ASQ: la pregunta
+        // de agudeza no puntúa, califica. Así los registros nuevos siguen
+        // siendo comparables con los ya aplicados.
+        $scoreSuicidio = $s1 + $s2 + $s3 + $s4;
+        $s5 = $this->suicidio_5 === null || $this->suicidio_5 === '' ? null : (int) $this->suicidio_5;
+
+        if ($scoreSuicidio > 0 && $s5 === 1) {
+            $nivelSuicidio = self::SUICIDIO_AGUDO;
+        } elseif ($scoreSuicidio > 0) {
+            $nivelSuicidio = self::SUICIDIO_POSITIVO;
         } else {
-            $nivelSuicidio = 'Negativo';
+            $nivelSuicidio = self::SUICIDIO_NEGATIVO;
         }
 
-        $scoreSuicidio = $s1 + $s2 + $s3 + $s4;
-
-        $total = $scoreAnsiedad + $scoreDepresion;
-
-        if ($nivelSuicidio === 'Riesgo Agudo' || $nivelSuicidio === 'Evaluación Adicional') {
+        // Urgente lo determina exclusivamente la conducta suicida aguda. La
+        // ansiedad y la depresión graves ya no escalan aquí —eso aportaba 401
+        // de las alertas urgentes previas— y siguen visibles en el resultado
+        // de su propio instrumento.
+        if ($nivelSuicidio === self::SUICIDIO_AGUDO) {
             $nivelRiesgo = 'Urgente';
-        } elseif ($nivelDepresion === 'Grave' || $nivelDepresion === 'Moderadamente grave' || $nivelAnsiedad === 'Grave') {
-            $nivelRiesgo = 'Urgente';
-        } elseif ($nivelDepresion === 'Moderada' || $nivelAnsiedad === 'Moderada') {
+        } elseif (
+            $scoreSuicidio > 0
+            || in_array($nivelDepresion, ['Moderada', 'Moderadamente grave', 'Grave'], true)
+            || in_array($nivelAnsiedad, ['Moderada', 'Grave'], true)
+        ) {
             $nivelRiesgo = 'Moderado';
         } else {
             $nivelRiesgo = 'Leve';
@@ -286,9 +340,46 @@ class ResponderTamizaje extends Component
             'riesgo_conducta_suicida' => $scoreSuicidio,
             'nivel_suicidio' => $nivelSuicidio,
             'nivel_riesgo_general' => $nivelRiesgo,
+            'respuestas' => $this->respuestasCapturadas($s5),
         ]);
 
         $this->success = true;
+    }
+
+    /**
+     * Respuesta a respuesta, tal como la contestó la persona.
+     *
+     * Hasta ahora solo se guardaba la ponderación, así que revisar un caso
+     * concreto obligaba a pedirle capturas de pantalla al colaborador.
+     */
+    private function respuestasCapturadas(?int $s5): array
+    {
+        $recoger = function (string $prefijo, int $hasta): array {
+            $items = [];
+            for ($i = 1; $i <= $hasta; $i++) {
+                $items[$i] = (int) $this->{$prefijo.'_'.$i};
+            }
+
+            return $items;
+        };
+
+        return [
+            'ansiedad' => $recoger('ansiedad', 7),
+            'depresion' => $recoger('depresion', 9),
+            'conducta_suicida' => $recoger('suicidio', 4) + [5 => $s5],
+        ];
+    }
+
+    /**
+     * Si la persona se retracta y deja las cuatro en "No", la pregunta de
+     * agudeza deja de aplicar y su respuesta previa no debe quedar guardada.
+     */
+    public function updated($property): void
+    {
+        if (str_starts_with($property, 'suicidio_') && ! $this->requiereAgudeza()) {
+            $this->suicidio_5 = null;
+            $this->resetValidation('suicidio_5');
+        }
     }
 
     public function render()

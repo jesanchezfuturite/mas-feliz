@@ -412,6 +412,26 @@
                             @error('suicidio_'.$index) <span class="text-xs text-red-500 block font-medium mt-1">{{ $message }}</span> @enderror
                         </div>
                         @endforeach
+
+                        {{-- Pregunta de agudeza. Solo se formula a quien contestó "Sí" en
+                             alguna de las cuatro anteriores; es la única que establece
+                             riesgo agudo y la que decide la canalización a Salud. --}}
+                        @if($this->requiereAgudeza())
+                        <div class="space-y-3 rounded-2xl border border-orange-200 dark:border-orange-900/60 bg-orange-50/40 dark:bg-orange-950/10 p-5">
+                            <label class="block text-sm font-semibold text-slate-800 dark:text-slate-200">
+                                5. ¿Estás pensando en quitarte la vida en este momento?
+                            </label>
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                @foreach(['0' => 'No', '1' => 'Sí'] as $val => $label)
+                                    <label class="flex items-center justify-center py-3 px-4 border rounded-xl cursor-pointer transition-all duration-200 {{ $suicidio_5 == $val && $suicidio_5 !== null ? 'border-orange-600 bg-orange-50/50 dark:bg-orange-950/20 text-orange-700 dark:text-orange-300 ring-2 ring-orange-500/20 font-semibold' : 'border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 hover:bg-slate-50 dark:hover:bg-slate-800/40 text-slate-600 dark:text-slate-400' }}">
+                                        <input type="radio" wire:model.live="suicidio_5" value="{{ $val }}" class="sr-only" />
+                                        <span class="text-sm font-medium text-center leading-tight">{{ $label }}</span>
+                                    </label>
+                                @endforeach
+                            </div>
+                            @error('suicidio_5') <span class="text-xs text-red-500 block font-medium mt-1">{{ $message }}</span> @enderror
+                        </div>
+                        @endif
                     </div>
                 </div>
 

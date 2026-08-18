@@ -50,7 +50,7 @@ class EstadisticaTamizajeWidget extends Widget
         // Color por severidad del nivel (consistente con el resto del sistema).
         $color = fn ($nivel) => match ($nivel) {
             'Grave', 'Moderadamente grave', 'Riesgo Agudo' => '#ef4444',
-            'Moderada', 'Evaluación Adicional' => '#f59e0b',
+            'Moderada', 'Evaluación Adicional', 'Positivo: requiere valoración posterior' => '#f59e0b',
             'Leve' => '#84cc16',
             'Mínima o sin ansiedad', 'Mínima o ausente', 'Negativo' => '#22c55e',
             default => '#94a3b8',
@@ -124,7 +124,7 @@ class EstadisticaTamizajeWidget extends Widget
             'instrumentos' => [
                 ['titulo' => 'Ansiedad (GAD-7)'] + $instrumento($rows, 'nivel_ansiedad', ['Mínima o sin ansiedad', 'Leve', 'Moderada', 'Grave']),
                 ['titulo' => 'Depresión (PHQ-9)'] + $instrumento($rows, 'nivel_depresion', ['Mínima o ausente', 'Leve', 'Moderada', 'Moderadamente grave', 'Grave']),
-                ['titulo' => 'Riesgo suicida'] + $instrumento($rows, 'nivel_suicidio', ['Negativo', 'Evaluación Adicional', 'Riesgo Agudo']),
+                ['titulo' => 'Riesgo suicida'] + $instrumento($rows, 'nivel_suicidio', ['Negativo', 'Positivo: requiere valoración posterior', 'Evaluación Adicional', 'Riesgo Agudo']),
             ],
             'dimensiones' => [
                 [

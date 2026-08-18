@@ -145,7 +145,7 @@ class CasosSeguimientoRelationManager extends RelationManager
                                         $value = $tamizaje->nivel_ansiedad ?? 'N/A';
                                         $color = match($value) {
                                             'Grave', 'Moderadamente grave', 'Riesgo Agudo', 'Urgente' => '#ef4444',
-                                            'Moderada', 'Evaluación Adicional', 'Moderado' => '#f59e0b',
+                                            'Moderada', 'Evaluación Adicional', 'Positivo: requiere valoración posterior', 'Moderado' => '#f59e0b',
                                             'Leve', 'Mínima o sin ansiedad', 'Mínima o ausente', 'Negativo' => '#22c55e',
                                             default => '#6b7280',
                                         };
@@ -158,7 +158,7 @@ class CasosSeguimientoRelationManager extends RelationManager
                                         $value = $tamizaje->nivel_depresion ?? 'N/A';
                                         $color = match($value) {
                                             'Grave', 'Moderadamente grave', 'Riesgo Agudo', 'Urgente' => '#ef4444',
-                                            'Moderada', 'Evaluación Adicional', 'Moderado' => '#f59e0b',
+                                            'Moderada', 'Evaluación Adicional', 'Positivo: requiere valoración posterior', 'Moderado' => '#f59e0b',
                                             'Leve', 'Mínima o sin ansiedad', 'Mínima o ausente', 'Negativo' => '#22c55e',
                                             default => '#6b7280',
                                         };
@@ -171,7 +171,7 @@ class CasosSeguimientoRelationManager extends RelationManager
                                         $value = $tamizaje->nivel_suicidio ?? 'N/A';
                                         $color = match($value) {
                                             'Grave', 'Moderadamente grave', 'Riesgo Agudo', 'Urgente' => '#ef4444',
-                                            'Moderada', 'Evaluación Adicional', 'Moderado' => '#f59e0b',
+                                            'Moderada', 'Evaluación Adicional', 'Positivo: requiere valoración posterior', 'Moderado' => '#f59e0b',
                                             'Leve', 'Mínima o sin ansiedad', 'Mínima o ausente', 'Negativo' => '#22c55e',
                                             default => '#6b7280',
                                         };
