@@ -417,4 +417,31 @@ class ResponderTamizajeTest extends TestCase
         $this->assertSame(1, $tamizaje->respuestas['conducta_suicida'][1]);
         $this->assertSame(0, $tamizaje->respuestas['conducta_suicida'][5]);
     }
+
+    public function test_la_confirmacion_muestra_la_linea_de_vida(): void
+    {
+        $this->responder()
+            ->assertSee('¿Necesitas hablar con alguien?')
+            ->assertSee('Línea de la Vida')
+            ->assertSee('800 953 6453')
+            ->assertSee('Ninguno de estos cuestionarios reemplaza un diagnóstico médico formal');
+    }
+
+    public function test_quien_declina_tambien_ve_la_linea_de_vida(): void
+    {
+        Livewire::test(ResponderTamizaje::class, ['token' => $this->empresa->token_tamizaje])
+            ->set('consentimiento_otorgado', 'no')
+            ->call('enviarNoParticipacion')
+            ->assertSet('success', true)
+            ->assertSee('Línea de la Vida')
+            ->assertSee('800 953 6453');
+    }
+
+    public function test_los_modulos_indican_el_periodo_de_las_dos_semanas(): void
+    {
+        Livewire::test(ResponderTamizaje::class, ['token' => $this->empresa->token_tamizaje])
+            ->set('consentimiento_otorgado', 'si')
+            ->set('step', 'cuestionario')
+            ->assertSeeHtml('Responda, en las últimas dos semanas, ¿con qué frecuencia le han molestado los siguientes problemas?');
+    }
 }
