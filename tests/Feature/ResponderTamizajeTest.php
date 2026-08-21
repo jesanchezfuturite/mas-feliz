@@ -214,7 +214,7 @@ class ResponderTamizajeTest extends TestCase
         ]);
     }
 
-    public function test_un_si_sin_agudeza_queda_positivo_y_moderado(): void
+    public function test_un_si_no_agudo_queda_positivo_y_prioridad_alta(): void
     {
         Livewire::test(ResponderTamizaje::class, ['token' => $this->empresa->token_tamizaje])
             ->set('consentimiento_otorgado', 'si')
@@ -256,7 +256,7 @@ class ResponderTamizajeTest extends TestCase
             'riesgo_depresion' => 0,
             'riesgo_conducta_suicida' => 1,
             'nivel_suicidio' => 'Positivo: requiere valoración posterior',
-            'nivel_riesgo_general' => 'Moderado',
+            'nivel_riesgo_general' => 'Alta',
         ]);
     }
 
@@ -321,7 +321,7 @@ class ResponderTamizajeTest extends TestCase
      */
     public function test_intento_en_el_pasado_sin_agudeza_no_es_urgente(): void
     {
-        $this->responder(['suicidio_4' => '1', 'suicidio_5' => '0'])
+        $this->responder(['suicidio_4' => '1', 'suicidio_4_ultimo_intento' => 'Más de 12 meses', 'suicidio_5' => '0'])
             ->assertHasNoErrors()
             ->assertSet('success', true);
 
@@ -330,13 +330,13 @@ class ResponderTamizajeTest extends TestCase
             'nivel_ansiedad' => 'Mínima o sin ansiedad',
             'nivel_depresion' => 'Mínima o ausente',
             'nivel_suicidio' => 'Positivo: requiere valoración posterior',
-            'nivel_riesgo_general' => 'Moderado',
+            'nivel_riesgo_general' => 'Alta',
         ]);
     }
 
     public function test_la_pregunta_cinco_es_la_unica_que_establece_riesgo_agudo(): void
     {
-        $this->responder(['suicidio_4' => '1', 'suicidio_5' => '1'])
+        $this->responder(['suicidio_4' => '1', 'suicidio_4_ultimo_intento' => 'Menos de 12 meses', 'suicidio_5' => '1'])
             ->assertHasNoErrors();
 
         $this->assertDatabaseHas('tamizajes', [
@@ -346,7 +346,7 @@ class ResponderTamizajeTest extends TestCase
         ]);
     }
 
-    public function test_ansiedad_y_depresion_graves_ya_no_escalan_a_urgente(): void
+    public function test_ansiedad_y_depresion_graves_son_prioridad_alta_no_urgente(): void
     {
         $graves = [];
         foreach (range(1, 7) as $i) {
@@ -365,7 +365,7 @@ class ResponderTamizajeTest extends TestCase
             'nivel_ansiedad' => 'Grave',
             'nivel_depresion' => 'Grave',
             'nivel_suicidio' => 'Negativo',
-            'nivel_riesgo_general' => 'Moderado',
+            'nivel_riesgo_general' => 'Alta',
         ]);
     }
 
@@ -443,5 +443,88 @@ class ResponderTamizajeTest extends TestCase
             ->set('consentimiento_otorgado', 'si')
             ->set('step', 'cuestionario')
             ->assertSeeHtml('Responda, en las últimas dos semanas, ¿con qué frecuencia le han molestado los siguientes problemas?');
+    }
+
+    /**
+     * Escala de prioridad de atención del 21/08/2026. Ansiedad o depresión
+     * leve/moderada con ASQ negativo es Moderada; la severidad de cualquiera de
+     * los dos instrumentos sube a Alta.
+     */
+    public function test_ansiedad_leve_sin_asq_es_prioridad_moderada(): void
+    {
+        // 5 puntos en el GAD-7 es el umbral de "Leve".
+        $this->responder(['ansiedad_1' => '2', 'ansiedad_2' => '3'])->assertHasNoErrors();
+
+        $this->assertDatabaseHas('tamizajes', [
+            'empresa_id' => $this->empresa->id,
+            'nivel_ansiedad' => 'Leve',
+            'nivel_suicidio' => 'Negativo',
+            'nivel_riesgo_general' => 'Moderada',
+        ]);
+    }
+
+    public function test_depresion_moderadamente_grave_sin_asq_es_prioridad_alta(): void
+    {
+        // 15 puntos en el PHQ-9 es el umbral de "Moderadamente grave".
+        $respuestas = [];
+        foreach (range(1, 5) as $i) {
+            $respuestas['depresion_'.$i] = '3';
+        }
+
+        $this->responder($respuestas)->assertHasNoErrors();
+
+        $this->assertDatabaseHas('tamizajes', [
+            'empresa_id' => $this->empresa->id,
+            'nivel_depresion' => 'Moderadamente grave',
+            'nivel_riesgo_general' => 'Alta',
+        ]);
+    }
+
+    /**
+     * La pregunta que Angélica pidió derivar de la 4 el 21/08/2026. No cambia la
+     * prioridad —eso lo decide la 5—, pero sin ella la valoración clínica no
+     * sabe si el intento fue reciente.
+     */
+    public function test_el_ultimo_intento_es_obligatorio_si_reporta_un_intento_previo(): void
+    {
+        $this->responder(['suicidio_4' => '1', 'suicidio_5' => '0'])
+            ->assertHasErrors(['suicidio_4_ultimo_intento' => 'required']);
+
+        $this->assertDatabaseCount('tamizajes', 0);
+    }
+
+    public function test_el_ultimo_intento_se_guarda_con_las_respuestas(): void
+    {
+        $this->responder([
+            'suicidio_4' => '1',
+            'suicidio_4_ultimo_intento' => 'Menos de 12 meses',
+            'suicidio_5' => '0',
+        ])->assertHasNoErrors();
+
+        $tamizaje = Tamizaje::where('empresa_id', $this->empresa->id)->sole();
+
+        $this->assertSame('Menos de 12 meses', $tamizaje->respuestas['conducta_suicida']['ultimo_intento']);
+    }
+
+    public function test_el_ultimo_intento_no_se_pide_si_no_hubo_intento_previo(): void
+    {
+        // Un "Sí" en la 3 despliega la pregunta de agudeza, pero no la del intento.
+        $this->responder(['suicidio_3' => '1', 'suicidio_5' => '0'])
+            ->assertHasNoErrors()
+            ->assertSet('success', true);
+
+        $tamizaje = Tamizaje::where('empresa_id', $this->empresa->id)->sole();
+
+        $this->assertNull($tamizaje->respuestas['conducta_suicida']['ultimo_intento']);
+    }
+
+    public function test_el_ultimo_intento_se_limpia_si_la_persona_se_retracta(): void
+    {
+        Livewire::test(ResponderTamizaje::class, ['token' => $this->empresa->token_tamizaje])
+            ->set('suicidio_4', '1')
+            ->set('suicidio_4_ultimo_intento', 'Menos de 12 meses')
+            ->assertSet('suicidio_4_ultimo_intento', 'Menos de 12 meses')
+            ->set('suicidio_4', '0')
+            ->assertSet('suicidio_4_ultimo_intento', null);
     }
 }

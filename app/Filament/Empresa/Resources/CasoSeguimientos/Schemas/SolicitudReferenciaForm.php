@@ -4,6 +4,7 @@ namespace App\Filament\Empresa\Resources\CasoSeguimientos\Schemas;
 
 use App\Models\Tamizaje;
 use App\Support\CatalogoUnidadesAtencion;
+use App\Support\PrioridadAtencion;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\DateTimePicker;
 use Filament\Forms\Components\FileUpload;
@@ -129,12 +130,9 @@ class SolicitudReferenciaForm
                             ->disabled($ro),
 
                         Select::make('nivel_riesgo')
-                            ->label('Nivel de riesgo')
-                            ->options([
-                                'Leve' => 'Leve',
-                                'Moderado' => 'Moderado',
-                                'Urgente' => 'Urgente',
-                            ])
+                            ->label(PrioridadAtencion::ETIQUETA)
+                            ->options(PrioridadAtencion::opciones())
+                            ->helperText(PrioridadAtencion::NOTA)
                             ->disabled($ro),
                     ]),
                 ]),

@@ -3,9 +3,11 @@
 namespace App\Filament\Empresa\Resources\Tamizajes;
 
 use App\Filament\Empresa\Resources\Tamizajes\Pages\ManageTamizajes;
+use App\Livewire\ResponderTamizaje;
 use App\Models\CasoSeguimiento;
 use App\Models\Setting;
 use App\Models\Tamizaje;
+use App\Support\PrioridadAtencion;
 use BackedEnum;
 use Filament\Actions\Action;
 use Filament\Actions\EditAction;
@@ -58,10 +60,15 @@ class TamizajeResource extends Resource
     public static function form(Schema $schema): Schema
     {
         $getColor = function ($level) {
-            if (in_array($level, ['Grave', 'Moderadamente grave', 'Riesgo Agudo', 'Urgente'])) {
+            // Los niveles de la escala de prioridad traen su propio color; el
+            // resto son los niveles de cada instrumento.
+            if (isset(PrioridadAtencion::HEX[$level])) {
+                return PrioridadAtencion::HEX[$level];
+            }
+            if (in_array($level, ['Grave', 'Moderadamente grave', 'Riesgo Agudo'])) {
                 return '#ef4444';
             } // Red
-            if (in_array($level, ['Moderada', 'Evaluación Adicional', 'Positivo: requiere valoración posterior', 'Moderado'])) {
+            if (in_array($level, ['Moderada', 'Evaluación Adicional', 'Positivo: requiere valoración posterior'])) {
                 return '#f59e0b';
             } // Orange
             if (in_array($level, ['Leve', 'Mínima o sin ansiedad', 'Mínima o ausente', 'Negativo'])) {
@@ -103,6 +110,41 @@ class TamizajeResource extends Resource
                         $makeBadge('nivel_ansiedad', 'Ansiedad'),
                         $makeBadge('nivel_depresion', 'Depresión'),
                         $makeBadge('nivel_suicidio', 'Riesgo Suicida'),
+                    ]),
+
+                // La prioridad y la conducta que le corresponde no estaban en el
+                // detalle: había que deducirlas del listado. Angélica pidió que la
+                // revisión viera directamente qué sigue con cada persona.
+                Grid::make(1)
+                    ->schema([
+                        $makeBadge('nivel_riesgo_general', PrioridadAtencion::ETIQUETA),
+
+                        Placeholder::make('accion_sugerida')
+                            ->label('Acción que corresponde')
+                            ->content(function ($record) {
+                                $accion = ResponderTamizaje::ACCIONES_SUICIDIO[$record?->nivel_suicidio] ?? null;
+
+                                if (! $accion) {
+                                    return null;
+                                }
+
+                                return new HtmlString("<div style=\"color: #374151; font-size: 0.95rem;\">{$accion}</div>");
+                            }),
+
+                        // Solo aparece si la persona reportó un intento previo:
+                        // es la pregunta que se despliega desde la 4.
+                        Placeholder::make('ultimo_intento')
+                            ->label('¿Cuándo fue el último intento?')
+                            ->visible(fn ($record) => filled(data_get($record?->respuestas, 'conducta_suicida.ultimo_intento')))
+                            ->content(function ($record) {
+                                $valor = e(data_get($record->respuestas, 'conducta_suicida.ultimo_intento'));
+
+                                return new HtmlString("<div style=\"color: #374151; font-size: 0.95rem;\">{$valor}</div>");
+                            }),
+
+                        Placeholder::make('nota_prioridad')
+                            ->hiddenLabel()
+                            ->content(new HtmlString('<div style="color: #6b7280; font-size: 0.78rem; line-height: 1.4;"><strong>Nota:</strong> '.e(PrioridadAtencion::NOTA).'</div>')),
                     ]),
 
                 Placeholder::make('info_title')
@@ -159,6 +201,9 @@ class TamizajeResource extends Resource
                         Esta herramienta te permite consultar los resultados detallados de las evaluaciones aplicadas a tus colaboradores y enviarlos a seguimiento si requieren atención médica o psicológica.
                     </div>
                 </div>
+                <div style="border-radius: 0.75rem; border: 1px solid #e5e7eb; background-color: #f9fafb; padding: 0.65rem 1rem; color: #4b5563; font-size: 0.8rem; line-height: 1.4; text-align: left; margin-bottom: 0.5rem;">
+                    <strong>Nota:</strong> '.e(PrioridadAtencion::NOTA).'
+                </div>
             '))
             ->columns([
                 TextColumn::make('nombre_completo')->label('Nombre Completo')->searchable()->sortable(),
@@ -170,14 +215,9 @@ class TamizajeResource extends Resource
                     ->sortable()
                     ->alignCenter(),
                 TextColumn::make('nivel_riesgo_general')
-                    ->label('Riesgo General')
+                    ->label(PrioridadAtencion::ETIQUETA)
                     ->badge()
-                    ->color(fn (string $state): string => match ($state) {
-                        'Urgente' => 'danger',
-                        'Moderado' => 'warning',
-                        'Leve' => 'success',
-                        default => 'gray',
-                    })
+                    ->color(fn (string $state): string => PrioridadAtencion::COLORES[$state] ?? 'gray')
                     ->alignCenter(),
                 TextColumn::make('created_at')->label('Fecha')->dateTime('d/m/Y')->sortable()->alignCenter(),
             ])

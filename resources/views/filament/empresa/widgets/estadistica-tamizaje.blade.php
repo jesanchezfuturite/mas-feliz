@@ -51,13 +51,15 @@
 
         {{-- Sección 2: Riesgo general por perfil --}}
         <div style="display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 0.5rem; margin-bottom: 1rem; padding-bottom: 0.4rem; border-bottom: 1px solid #f1f5f9;">
-            <h4 style="font-size: 0.8rem; font-weight: 700; color: #334155; text-transform: uppercase; letter-spacing: 0.05em; margin: 0;">Nivel de riesgo general por perfil</h4>
-            <div style="display: flex; align-items: center; gap: 1rem; font-size: 0.72rem; color: #475569;">
-                <span style="display: inline-flex; align-items: center; gap: 0.35rem;"><span style="height:0.65rem;width:0.65rem;border-radius:2px;background:#10b981;display:inline-block;"></span>Leve</span>
-                <span style="display: inline-flex; align-items: center; gap: 0.35rem;"><span style="height:0.65rem;width:0.65rem;border-radius:2px;background:#f59e0b;display:inline-block;"></span>Moderado</span>
-                <span style="display: inline-flex; align-items: center; gap: 0.35rem;"><span style="height:0.65rem;width:0.65rem;border-radius:2px;background:#ef4444;display:inline-block;"></span>Urgente</span>
+            <h4 style="font-size: 0.8rem; font-weight: 700; color: #334155; text-transform: uppercase; letter-spacing: 0.05em; margin: 0;">Prioridad de atención por perfil</h4>
+            <div style="display: flex; flex-wrap: wrap; align-items: center; gap: 0.85rem; font-size: 0.72rem; color: #475569;">
+                @foreach ($escala as $nivel)
+                    <span style="display: inline-flex; align-items: center; gap: 0.35rem;"><span style="height:0.65rem;width:0.65rem;border-radius:2px;background:{{ $nivel['color'] }};display:inline-block;"></span>{{ $nivel['label'] }}</span>
+                @endforeach
             </div>
         </div>
+
+        <p style="font-size: 0.72rem; color: #94a3b8; margin: -0.5rem 0 1rem; line-height: 1.4;"><strong>Nota:</strong> {{ $nota }}</p>
 
         <div class="estad-grid-2" style="display: grid; grid-template-columns: 1fr; gap: 1.75rem;">
             @foreach ($dimensiones as $dim)
@@ -70,16 +72,16 @@
                             <div style="display: flex; align-items: baseline; justify-content: space-between; margin-bottom: 0.3rem;">
                                 <span style="font-size: 0.85rem; color: #1e293b; font-weight: 500;">{{ $categoria }}</span>
                                 <span style="font-size: 0.78rem; color: #64748b;">
-                                    <span style="color:#10b981; font-weight:600;">{{ $c['Leve'] }}</span> ·
-                                    <span style="color:#d97706; font-weight:600;">{{ $c['Moderado'] }}</span> ·
-                                    <span style="color:#ef4444; font-weight:600;">{{ $c['Urgente'] }}</span>
+                                    @foreach ($escala as $nivel)
+                                        <span style="color:{{ $nivel['color'] }}; font-weight:600;" title="{{ $nivel['label'] }}">{{ $c[$nivel['label']] }}</span>@if (! $loop->last) · @endif
+                                    @endforeach
                                     <span style="color:#94a3b8;">&nbsp;(Total: {{ $c['total'] }})</span>
                                 </span>
                             </div>
                             <div style="display: flex; height: 0.6rem; width: 100%; border-radius: 9999px; overflow: hidden; background-color: #f1f5f9;">
-                                <div style="width: {{ $c['Leve'] / $t * 100 }}%; background-color: #10b981;"></div>
-                                <div style="width: {{ $c['Moderado'] / $t * 100 }}%; background-color: #f59e0b;"></div>
-                                <div style="width: {{ $c['Urgente'] / $t * 100 }}%; background-color: #ef4444;"></div>
+                                @foreach ($escala as $nivel)
+                                    <div style="width: {{ $c[$nivel['label']] / $t * 100 }}%; background-color: {{ $nivel['color'] }};"></div>
+                                @endforeach
                             </div>
                         </div>
                     @empty

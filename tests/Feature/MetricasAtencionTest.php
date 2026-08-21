@@ -36,19 +36,19 @@ class MetricasAtencionTest extends TestCase
         $this->crearTamizaje($this->empresaA, 'No participó');
 
         // Empresa B: 1 tamizaje moderado.
-        $this->crearTamizaje($this->empresaB, 'Moderado');
+        $this->crearTamizaje($this->empresaB, 'Moderada');
 
         // Casos: A tiene uno en seguimiento y uno canalizado; B uno cerrado.
-        CasoSeguimiento::create(['empresa_id' => $this->empresaA->id, 'identificador_empleado' => 'P1', 'nivel_riesgo_detectado' => 'Urgente', 'estatus_atencion' => 'En seguimiento']);
-        $canalizado = CasoSeguimiento::create(['empresa_id' => $this->empresaA->id, 'identificador_empleado' => 'P2', 'nivel_riesgo_detectado' => 'Urgente', 'estatus_atencion' => 'Canalizado']);
-        CasoSeguimiento::create(['empresa_id' => $this->empresaB->id, 'identificador_empleado' => 'P3', 'nivel_riesgo_detectado' => 'Moderado', 'estatus_atencion' => 'Cerrado satisfactorio']);
+        CasoSeguimiento::create(['empresa_id' => $this->empresaA->id, 'identificador_empleado' => 'Colaborador Uno Prueba', 'nivel_riesgo_detectado' => 'Urgente', 'estatus_atencion' => 'En seguimiento']);
+        $canalizado = CasoSeguimiento::create(['empresa_id' => $this->empresaA->id, 'identificador_empleado' => 'Colaborador Dos Prueba', 'nivel_riesgo_detectado' => 'Urgente', 'estatus_atencion' => 'Canalizado']);
+        CasoSeguimiento::create(['empresa_id' => $this->empresaB->id, 'identificador_empleado' => 'Colaborador Tres Prueba', 'nivel_riesgo_detectado' => 'Moderada', 'estatus_atencion' => 'Cerrado satisfactorio']);
 
         // Una referencia enviada, todavía sin cita.
         SolicitudReferencia::create([
             'caso_seguimiento_id' => $canalizado->id,
             'empresa_id' => $this->empresaA->id,
             'municipio' => 'Torreón',
-            'nombre_usuario' => 'P2',
+            'nombre_usuario' => 'Colaborador Dos Prueba',
         ]);
     }
 
@@ -88,7 +88,7 @@ class MetricasAtencionTest extends TestCase
         $this->assertSame(4, $m->tamizajesAplicados());
         $this->assertSame(3, $m->participaron());
         $this->assertSame(1, $m->noParticiparon());
-        $this->assertSame(2, $m->detectadosEnRiesgo()); // Urgente + Moderado
+        $this->assertSame(2, $m->detectadosEnRiesgo()); // Urgente + Moderada
         $this->assertSame(1, $m->casosAbiertos());
         $this->assertSame(1, $m->casosCanalizados());
         $this->assertSame(1, $m->casosCerrados());
@@ -161,7 +161,7 @@ class MetricasAtencionTest extends TestCase
     {
         CasoSeguimiento::create([
             'empresa_id' => $this->empresaA->id,
-            'identificador_empleado' => 'P4',
+            'identificador_empleado' => 'Colaborador Cuatro Prueba',
             'nivel_riesgo_detectado' => 'Urgente',
             'estatus_atencion' => 'Cerrado no atendido',
         ]);
@@ -219,7 +219,7 @@ class MetricasAtencionTest extends TestCase
         CasoSeguimiento::create([
             'empresa_id' => $this->empresaA->id,
             'identificador_empleado' => 'P5',
-            'nivel_riesgo_detectado' => 'Moderado',
+            'nivel_riesgo_detectado' => 'Moderada',
             'estatus_atencion' => 'Abandonó',
         ]);
 
@@ -272,7 +272,10 @@ class MetricasAtencionTest extends TestCase
             ->assertSee('Avance de la atención')
             ->assertSee('Empresa A')
             // Angélica fue explícita: métricas sí, datos de los trabajadores no.
-            ->assertDontSee('P1')
-            ->assertDontSee('P2');
+            // Nombres largos y propios a propósito: con identificadores de dos
+            // letras la aserción coincidía por azar dentro de los `wire:id`
+            // aleatorios de Livewire y el test fallaba una vez de cada tres.
+            ->assertDontSee('Colaborador Uno Prueba')
+            ->assertDontSee('Colaborador Dos Prueba');
     }
 }

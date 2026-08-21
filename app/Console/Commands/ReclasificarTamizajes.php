@@ -4,34 +4,42 @@ namespace App\Console\Commands;
 
 use App\Livewire\ResponderTamizaje;
 use App\Models\Tamizaje;
+use App\Support\PrioridadAtencion;
 use Illuminate\Console\Command;
 
 /**
- * Reclasifica los tamizajes aplicados antes de la corrección del 18/08/2026.
+ * Reclasifica los tamizajes ya aplicados con la escala vigente.
  *
- * Hasta esa fecha un "Sí" en la pregunta 4 —"¿Alguna vez has intentado
- * quitarte la vida?", que abarca toda la vida— marcaba por sí solo riesgo
- * agudo, y la ansiedad o depresión graves escalaban el riesgo general a
- * urgente. De las 1,771 alertas urgentes acumuladas, 933 correspondían a
- * personas sin ningún indicador reciente de conducta suicida.
+ * Va en dos pasadas, cada una con su marca en `respuestas`:
  *
- * La pregunta de agudeza no existía cuando se aplicaron estos tamizajes, así
- * que NINGÚN registro histórico puede elevarse a riesgo agudo: esa
- * determinación corresponde a la valoración clínica. El comando solo corrige
- * a la baja lo que estaba sobreclasificado.
+ * - `reclasificacion_18_08_2026`: hasta esa fecha un "Sí" en la pregunta 4
+ *   —"¿Alguna vez has intentado quitarte la vida?", que abarca toda la vida—
+ *   marcaba por sí solo riesgo agudo, y la ansiedad o depresión graves
+ *   escalaban a urgente. De las 1,771 alertas urgentes acumuladas, 933 eran de
+ *   personas sin ningún indicador reciente.
+ *
+ * - `prioridad_atencion_21_08_2026`: Angélica cambió "Riesgo General" por
+ *   "Prioridad de atención" con la escala de cuatro niveles de
+ *   {@see PrioridadAtencion}. Los tamizajes aplicados antes de que existiera la
+ *   pregunta de agudeza no pueden clasificarse como "Alta" (que supone ASQ
+ *   positivo no agudo) ni como "Urgente": quedan en "Agudeza pendiente de
+ *   confirmar", que es el estado que ella pidió agregar para ellos.
+ *
+ * Ninguna pasada eleva un registro histórico a riesgo agudo: esa determinación
+ * corresponde a la valoración clínica, no a un recálculo.
  *
  * No toca los casos de seguimiento: sobre esos ya hay trabajo de las empresas
- * y de los gestores.
+ * y de los gestores. La migración de la escala sí renombra su nivel.
  */
 class ReclasificarTamizajes extends Command
 {
     protected $signature = 'tamizajes:reclasificar
                             {--aplicar : Escribe los cambios. Sin esta bandera solo muestra lo que haría}';
 
-    protected $description = 'Recalcula el nivel de los tamizajes aplicados antes de la corrección del 18/08/2026';
+    protected $description = 'Recalcula la prioridad de atención de los tamizajes ya aplicados';
 
-    /** Marca en `respuestas` que deja constancia y hace el comando idempotente. */
-    private const MARCA = 'reclasificacion_18_08_2026';
+    /** Marca de la pasada vigente. Deja constancia y hace el comando idempotente. */
+    private const MARCA = 'prioridad_atencion_21_08_2026';
 
     public function handle(): int
     {
@@ -46,7 +54,7 @@ class ReclasificarTamizajes extends Command
         $omitidos = 0;
 
         Tamizaje::query()
-            ->where('nivel_riesgo_general', '!=', 'No participó')
+            ->where('nivel_riesgo_general', '!=', PrioridadAtencion::NO_PARTICIPO)
             ->chunkById(500, function ($tamizajes) use ($aplicar, &$resumen, &$tocados, &$omitidos) {
                 foreach ($tamizajes as $tamizaje) {
                     $respuestas = $tamizaje->respuestas ?? [];
@@ -57,8 +65,14 @@ class ReclasificarTamizajes extends Command
                         continue;
                     }
 
-                    $suicidioNuevo = $this->nivelSuicidio($tamizaje);
-                    $riesgoNuevo = $this->nivelRiesgoGeneral($tamizaje, $suicidioNuevo);
+                    $agudeza = $this->agudeza($tamizaje);
+                    $suicidioNuevo = $this->nivelSuicidio($tamizaje, $agudeza);
+                    $riesgoNuevo = PrioridadAtencion::calcular(
+                        $tamizaje->nivel_ansiedad,
+                        $tamizaje->nivel_depresion,
+                        (int) $tamizaje->riesgo_conducta_suicida,
+                        $agudeza
+                    );
 
                     if ($suicidioNuevo === $tamizaje->nivel_suicidio && $riesgoNuevo === $tamizaje->nivel_riesgo_general) {
                         continue;
@@ -107,26 +121,26 @@ class ReclasificarTamizajes extends Command
     }
 
     /**
-     * Sin pregunta de agudeza, cualquier "Sí" en las cuatro preguntas queda
-     * como positivo que requiere valoración posterior.
+     * Respuesta a la pregunta de agudeza, o `null` si nunca se formuló.
+     *
+     * Los tamizajes aplicados antes del 18/08/2026 no la tienen, y esa
+     * ausencia es justo lo que los deja en "Agudeza pendiente de confirmar".
      */
-    private function nivelSuicidio(Tamizaje $tamizaje): string
+    private function agudeza(Tamizaje $tamizaje): ?int
     {
-        return $tamizaje->riesgo_conducta_suicida > 0
-            ? ResponderTamizaje::SUICIDIO_POSITIVO
-            : ResponderTamizaje::SUICIDIO_NEGATIVO;
+        $valor = data_get($tamizaje->respuestas, 'conducta_suicida.5');
+
+        return $valor === null || $valor === '' ? null : (int) $valor;
     }
 
-    private function nivelRiesgoGeneral(Tamizaje $tamizaje, string $nivelSuicidio): string
+    private function nivelSuicidio(Tamizaje $tamizaje, ?int $agudeza): string
     {
-        if ($nivelSuicidio === ResponderTamizaje::SUICIDIO_AGUDO) {
-            return 'Urgente';
+        if ((int) $tamizaje->riesgo_conducta_suicida === 0) {
+            return ResponderTamizaje::SUICIDIO_NEGATIVO;
         }
 
-        $requiereAtencion = $tamizaje->riesgo_conducta_suicida > 0
-            || in_array($tamizaje->nivel_depresion, ['Moderada', 'Moderadamente grave', 'Grave'], true)
-            || in_array($tamizaje->nivel_ansiedad, ['Moderada', 'Grave'], true);
-
-        return $requiereAtencion ? 'Moderado' : 'Leve';
+        return $agudeza === 1
+            ? ResponderTamizaje::SUICIDIO_AGUDO
+            : ResponderTamizaje::SUICIDIO_POSITIVO;
     }
 }

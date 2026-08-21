@@ -4,6 +4,8 @@ namespace App\Filament\Gestor\Resources\SolicitudReferencias\Tables;
 
 use App\Filament\Empresa\Resources\CasoSeguimientos\Schemas\SolicitudReferenciaForm;
 use App\Support\CatalogoUnidadesAtencion;
+use App\Support\ColorNivel;
+use App\Support\PrioridadAtencion;
 use Filament\Actions\Action;
 use Filament\Forms\Components\DateTimePicker;
 use Filament\Forms\Components\Select;
@@ -51,14 +53,9 @@ class SolicitudReferenciasTable
                     ->sortable(),
 
                 TextColumn::make('nivel_riesgo')
-                    ->label('Nivel de riesgo')
+                    ->label(PrioridadAtencion::ETIQUETA)
                     ->badge()
-                    ->color(fn (?string $state): string => match ($state) {
-                        'Leve' => 'success',
-                        'Moderado' => 'warning',
-                        'Urgente' => 'danger',
-                        default => 'gray',
-                    })
+                    ->color(fn (?string $state): string => ColorNivel::badge($state))
                     ->sortable(),
 
                 TextColumn::make('servicio_solicitado')
@@ -98,12 +95,8 @@ class SolicitudReferenciasTable
                     ->default(),
 
                 SelectFilter::make('nivel_riesgo')
-                    ->label('Nivel de riesgo')
-                    ->options([
-                        'Leve' => 'Leve',
-                        'Moderado' => 'Moderado',
-                        'Urgente' => 'Urgente',
-                    ]),
+                    ->label(PrioridadAtencion::ETIQUETA)
+                    ->options(PrioridadAtencion::opciones()),
 
                 SelectFilter::make('empresa_id')
                     ->label('Empresa')

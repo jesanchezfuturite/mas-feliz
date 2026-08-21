@@ -4,6 +4,7 @@ namespace App\Livewire;
 
 use App\Models\Empresa;
 use App\Models\Tamizaje;
+use App\Support\PrioridadAtencion;
 use Livewire\Component;
 
 class ResponderTamizaje extends Component
@@ -86,6 +87,12 @@ class ResponderTamizaje extends Component
 
     public $suicidio_4 = null;
 
+    // Pregunta que se deriva de la 4: solo se formula a quien reporta un
+    // intento previo. No puntúa ni cambia la prioridad —Angélica no la mapeó a
+    // ningún nivel—; sirve para que la valoración clínica sepa si el intento
+    // fue reciente. Se guarda dentro de `respuestas`.
+    public $suicidio_4_ultimo_intento = null;
+
     // Pregunta de agudeza (ASQ). Solo se formula a quien contestó "Sí" en
     // alguna de las cuatro anteriores, y es la única que establece riesgo
     // agudo. Ver comentario en `rules()`.
@@ -116,6 +123,23 @@ class ResponderTamizaje extends Component
     public const SUICIDIO_AGUDO = 'Riesgo Agudo';
 
     /**
+     * Conducta que sigue a cada resultado del ASQ, tal como la redactó Angélica
+     * en "PARA LA REVISIÓN". El nivel dice qué se encontró; esto, qué hacer.
+     * Se muestra junto al resultado en el detalle del tamizaje.
+     */
+    public const ACCIONES_SUICIDIO = [
+        self::SUICIDIO_NEGATIVO => 'Prevención / Promoción / Psicoeducación',
+        self::SUICIDIO_POSITIVO => 'Valoración psicológica adicional para confirmar o descartar riesgo y agudeza',
+        self::SUICIDIO_AGUDO => 'Valoración / Atención especializada prioritaria',
+    ];
+
+    /** Opciones de "¿Cuándo fue el último intento?". */
+    public const ULTIMO_INTENTO = [
+        'Menos de 12 meses',
+        'Más de 12 meses',
+    ];
+
+    /**
      * `suicidio_5` solo es obligatoria si hubo al menos un "Sí" en las cuatro
      * anteriores: es la exploración de agudeza del instrumento, no una
      * pregunta que se le haga a todo el mundo. Por eso las reglas son un
@@ -127,6 +151,9 @@ class ResponderTamizaje extends Component
             'suicidio_5' => $this->requiereAgudeza()
                 ? 'required|in:0,1'
                 : 'nullable|in:0,1',
+            'suicidio_4_ultimo_intento' => $this->reportaIntentoPrevio()
+                ? 'required|in:'.implode(',', self::ULTIMO_INTENTO)
+                : 'nullable|in:'.implode(',', self::ULTIMO_INTENTO),
         ]);
     }
 
@@ -137,6 +164,12 @@ class ResponderTamizaje extends Component
             || (int) $this->suicidio_2 === 1
             || (int) $this->suicidio_3 === 1
             || (int) $this->suicidio_4 === 1;
+    }
+
+    /** ¿Reportó un intento previo? Es lo que despliega la pregunta derivada. */
+    public function reportaIntentoPrevio(): bool
+    {
+        return (int) $this->suicidio_4 === 1;
     }
 
     protected $reglasBase = [
@@ -218,7 +251,7 @@ class ResponderTamizaje extends Component
             'riesgo_ansiedad' => 0,
             'riesgo_depresion' => 0,
             'riesgo_conducta_suicida' => 0,
-            'nivel_riesgo_general' => 'No participó',
+            'nivel_riesgo_general' => PrioridadAtencion::NO_PARTICIPO,
         ]);
 
         $this->success = true;
@@ -306,21 +339,10 @@ class ResponderTamizaje extends Component
             $nivelSuicidio = self::SUICIDIO_NEGATIVO;
         }
 
-        // Urgente lo determina exclusivamente la conducta suicida aguda. La
-        // ansiedad y la depresión graves ya no escalan aquí —eso aportaba 401
-        // de las alertas urgentes previas— y siguen visibles en el resultado
-        // de su propio instrumento.
-        if ($nivelSuicidio === self::SUICIDIO_AGUDO) {
-            $nivelRiesgo = 'Urgente';
-        } elseif (
-            $scoreSuicidio > 0
-            || in_array($nivelDepresion, ['Moderada', 'Moderadamente grave', 'Grave'], true)
-            || in_array($nivelAnsiedad, ['Moderada', 'Grave'], true)
-        ) {
-            $nivelRiesgo = 'Moderado';
-        } else {
-            $nivelRiesgo = 'Leve';
-        }
+        // La escala la define PrioridadAtencion, que también usa el comando de
+        // reclasificación: si la tabla de Angélica vuelve a cambiar, cambia en
+        // un solo lugar y los históricos se recalculan igual que los nuevos.
+        $nivelRiesgo = PrioridadAtencion::calcular($nivelAnsiedad, $nivelDepresion, $scoreSuicidio, $s5);
 
         Tamizaje::create([
             'empresa_id' => $this->empresa->id,
@@ -366,19 +388,31 @@ class ResponderTamizaje extends Component
         return [
             'ansiedad' => $recoger('ansiedad', 7),
             'depresion' => $recoger('depresion', 9),
-            'conducta_suicida' => $recoger('suicidio', 4) + [5 => $s5],
+            'conducta_suicida' => $recoger('suicidio', 4) + [
+                5 => $s5,
+                'ultimo_intento' => $this->reportaIntentoPrevio() ? $this->suicidio_4_ultimo_intento : null,
+            ],
         ];
     }
 
     /**
-     * Si la persona se retracta y deja las cuatro en "No", la pregunta de
-     * agudeza deja de aplicar y su respuesta previa no debe quedar guardada.
+     * Si la persona se retracta, las preguntas que se desplegaron dejan de
+     * aplicar y su respuesta previa no debe quedar guardada.
      */
     public function updated($property): void
     {
-        if (str_starts_with($property, 'suicidio_') && ! $this->requiereAgudeza()) {
+        if (! str_starts_with($property, 'suicidio_')) {
+            return;
+        }
+
+        if (! $this->requiereAgudeza()) {
             $this->suicidio_5 = null;
             $this->resetValidation('suicidio_5');
+        }
+
+        if (! $this->reportaIntentoPrevio()) {
+            $this->suicidio_4_ultimo_intento = null;
+            $this->resetValidation('suicidio_4_ultimo_intento');
         }
     }
 

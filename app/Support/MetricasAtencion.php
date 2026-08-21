@@ -69,22 +69,22 @@ class MetricasAtencion
     public function participaron(): int
     {
         return $this->acotar(Tamizaje::query())
-            ->where('nivel_riesgo_general', '!=', 'No participó')
+            ->where('nivel_riesgo_general', '!=', PrioridadAtencion::NO_PARTICIPO)
             ->count();
     }
 
     public function noParticiparon(): int
     {
         return $this->acotar(Tamizaje::query())
-            ->where('nivel_riesgo_general', 'No participó')
+            ->where('nivel_riesgo_general', PrioridadAtencion::NO_PARTICIPO)
             ->count();
     }
 
-    /** Personas cuyo tamizaje salió en riesgo moderado o urgente. */
+    /** Personas cuyo tamizaje salió por encima de prioridad leve. */
     public function detectadosEnRiesgo(): int
     {
         return $this->acotar(Tamizaje::query())
-            ->whereIn('nivel_riesgo_general', ['Moderado', 'Urgente'])
+            ->whereIn('nivel_riesgo_general', PrioridadAtencion::REQUIEREN_ATENCION)
             ->count();
     }
 

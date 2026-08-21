@@ -3,6 +3,7 @@
 namespace App\Filament\Empresa\Widgets;
 
 use App\Models\Setting;
+use App\Support\PrioridadAtencion;
 use Filament\Widgets\ChartWidget;
 
 class RiesgosGeneralesChart extends ChartWidget
@@ -32,11 +33,17 @@ class RiesgosGeneralesChart extends ChartWidget
         return parent::getView();
     }
 
-    protected ?string $heading = 'Distribución de Niveles de Riesgo';
+    protected ?string $heading = 'Distribución por prioridad de atención';
 
     protected int|string|array $columnSpan = 'full';
 
     protected ?string $maxHeight = '280px';
+
+    /** La aclaración que Angélica pidió que acompañe a la escala. */
+    public function getDescription(): ?string
+    {
+        return PrioridadAtencion::NOTA;
+    }
 
     protected function getData(): array
     {
@@ -59,23 +66,31 @@ class RiesgosGeneralesChart extends ChartWidget
             ->pluck('total', 'nivel_riesgo_detectado')
             ->toArray();
 
-        $leve = ($tamizajeCounts['Leve'] ?? 0) + ($manualCounts['Leve'] ?? 0);
-        $moderado = ($tamizajeCounts['Moderado'] ?? 0) + ($manualCounts['Moderado'] ?? 0);
-        $urgente = ($tamizajeCounts['Urgente'] ?? 0) + ($manualCounts['Urgente'] ?? 0);
+        // La escala pasó de tres niveles a cinco el 21/08/2026. Los niveles sin
+        // un solo registro se omiten para que la dona no muestre rebanadas
+        // vacías en la leyenda —lo habitual es que ninguna empresa tenga los
+        // cinco a la vez.
+        $niveles = [];
+        foreach (PrioridadAtencion::ESCALA as $nivel) {
+            $total = ($tamizajeCounts[$nivel] ?? 0) + ($manualCounts[$nivel] ?? 0);
+
+            if ($total > 0) {
+                $niveles[$nivel] = $total;
+            }
+        }
 
         return [
             'datasets' => [
                 [
                     'label' => 'Diagnósticos',
-                    'data' => [$leve, $moderado, $urgente],
-                    'backgroundColor' => [
-                        '#10b981', // Verde / Leve
-                        '#f59e0b', // Amarillo / Moderado
-                        '#ef4444', // Rojo / Urgente
-                    ],
+                    'data' => array_values($niveles),
+                    'backgroundColor' => array_map(
+                        fn (string $nivel) => PrioridadAtencion::HEX[$nivel],
+                        array_keys($niveles)
+                    ),
                 ],
             ],
-            'labels' => ['Leve', 'Moderado', 'Urgente'],
+            'labels' => array_keys($niveles),
         ];
     }
 

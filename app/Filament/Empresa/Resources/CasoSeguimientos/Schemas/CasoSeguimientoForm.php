@@ -164,12 +164,9 @@ class CasoSeguimientoForm
                     ->required(fn (Get $get): bool => in_array('Otro', $get('servicios') ?? [])),
 
                 Select::make('nivel_riesgo_detectado')
-                    ->label('Nivel de riesgo detectado')
-                    ->options([
-                        'Leve' => 'Leve',
-                        'Moderado' => 'Moderado',
-                        'Urgente' => 'Urgente',
-                    ])
+                    ->label(\App\Support\PrioridadAtencion::ETIQUETA)
+                    ->options(\App\Support\PrioridadAtencion::opciones())
+                    ->helperText(\App\Support\PrioridadAtencion::NOTA)
                     ->required(),
 
                 Select::make('estatus_atencion')

@@ -29,14 +29,9 @@ class CasosCanalizadosTable
                     ->wrap(),
 
                 TextColumn::make('nivel_riesgo_detectado')
-                    ->label('Nivel de riesgo')
+                    ->label(\App\Support\PrioridadAtencion::ETIQUETA)
                     ->badge()
-                    ->color(fn (string $state): string => match ($state) {
-                        'Leve' => 'success',
-                        'Moderado' => 'warning',
-                        'Urgente' => 'danger',
-                        default => 'gray',
-                    })
+                    ->color(fn (string $state): string => \App\Support\ColorNivel::badge($state))
                     ->sortable(),
 
                 TextColumn::make('servicios')
@@ -90,12 +85,8 @@ class CasosCanalizadosTable
             ->defaultSort('updated_at', 'desc')
             ->filters([
                 \Filament\Tables\Filters\SelectFilter::make('nivel_riesgo_detectado')
-                    ->label('Nivel de riesgo')
-                    ->options([
-                        'Leve' => 'Leve',
-                        'Moderado' => 'Moderado',
-                        'Urgente' => 'Urgente',
-                    ]),
+                    ->label(\App\Support\PrioridadAtencion::ETIQUETA)
+                    ->options(\App\Support\PrioridadAtencion::opciones()),
 
                 \Filament\Tables\Filters\SelectFilter::make('empresa_id')
                     ->label('Empresa')

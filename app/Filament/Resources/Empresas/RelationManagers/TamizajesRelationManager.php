@@ -2,6 +2,8 @@
 
 namespace App\Filament\Resources\Empresas\RelationManagers;
 
+use App\Support\ColorNivel;
+use App\Support\PrioridadAtencion;
 use Filament\Actions\ViewAction;
 use Filament\Resources\RelationManagers\RelationManager;
 use Filament\Schemas\Schema;
@@ -101,14 +103,9 @@ class TamizajesRelationManager extends RelationManager
                     ->sortable()
                     ->alignCenter(),
                 TextColumn::make('nivel_riesgo_general')
-                    ->label('Riesgo General')
+                    ->label(PrioridadAtencion::ETIQUETA)
                     ->badge()
-                    ->color(fn (string $state): string => match ($state) {
-                        'Urgente' => 'danger',
-                        'Moderado' => 'warning',
-                        'Leve' => 'success',
-                        default => 'gray',
-                    })
+                    ->color(fn (string $state): string => ColorNivel::badge($state))
                     ->alignCenter(),
                 TextColumn::make('created_at')->label('Fecha')->dateTime('d/m/Y')->sortable()->alignCenter(),
             ])

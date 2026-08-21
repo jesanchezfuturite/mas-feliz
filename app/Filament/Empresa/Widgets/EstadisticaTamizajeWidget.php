@@ -3,6 +3,7 @@
 namespace App\Filament\Empresa\Widgets;
 
 use App\Models\Setting;
+use App\Support\PrioridadAtencion;
 use Filament\Widgets\Widget;
 
 class EstadisticaTamizajeWidget extends Widget
@@ -44,14 +45,13 @@ class EstadisticaTamizajeWidget extends Widget
 
         // Solo tamizajes con resultado de riesgo real (excluye "No participó" y nulos).
         $rows = $empresa->tamizajes()
-            ->whereIn('nivel_riesgo_general', ['Leve', 'Moderado', 'Urgente'])
+            ->whereIn('nivel_riesgo_general', PrioridadAtencion::ESCALA)
             ->get(['genero', 'edad', 'tiempo_trabajando', 'actividad_trabajo', 'actividad_trabajo_otra', 'nivel_riesgo_general', 'nivel_ansiedad', 'nivel_depresion', 'nivel_suicidio']);
 
         // Color por severidad del nivel (consistente con el resto del sistema).
-        $color = fn ($nivel) => match ($nivel) {
+        $color = fn ($nivel) => PrioridadAtencion::HEX[$nivel] ?? match ($nivel) {
             'Grave', 'Moderadamente grave', 'Riesgo Agudo' => '#ef4444',
             'Moderada', 'Evaluación Adicional', 'Positivo: requiere valoración posterior' => '#f59e0b',
-            'Leve' => '#84cc16',
             'Mínima o sin ansiedad', 'Mínima o ausente', 'Negativo' => '#22c55e',
             default => '#94a3b8',
         };
@@ -87,7 +87,8 @@ class EstadisticaTamizajeWidget extends Widget
                 $key = $keyFn($r);
                 $key = ($key === null || $key === '') ? 'Sin especificar' : $key;
                 if (! isset($out[$key])) {
-                    $out[$key] = ['Leve' => 0, 'Moderado' => 0, 'Urgente' => 0, 'total' => 0];
+                    // Un contador por nivel de la escala vigente, más el total.
+                    $out[$key] = array_fill_keys(PrioridadAtencion::ESCALA, 0) + ['total' => 0];
                 }
                 $nivel = $r->nivel_riesgo_general;
                 if (isset($out[$key][$nivel])) {
@@ -121,6 +122,13 @@ class EstadisticaTamizajeWidget extends Widget
 
         return [
             'total' => $rows->count(),
+            // La escala se pasa a la vista en vez de repetirla ahí: pasó de
+            // tres niveles a cinco el 21/08/2026 y volverá a cambiar.
+            'escala' => array_map(
+                fn (string $nivel) => ['label' => $nivel, 'color' => PrioridadAtencion::HEX[$nivel]],
+                PrioridadAtencion::ESCALA
+            ),
+            'nota' => PrioridadAtencion::NOTA,
             'instrumentos' => [
                 ['titulo' => 'Ansiedad (GAD-7)'] + $instrumento($rows, 'nivel_ansiedad', ['Mínima o sin ansiedad', 'Leve', 'Moderada', 'Grave']),
                 ['titulo' => 'Depresión (PHQ-9)'] + $instrumento($rows, 'nivel_depresion', ['Mínima o ausente', 'Leve', 'Moderada', 'Moderadamente grave', 'Grave']),

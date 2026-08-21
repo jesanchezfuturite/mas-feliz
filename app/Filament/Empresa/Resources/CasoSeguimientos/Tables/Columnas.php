@@ -2,6 +2,8 @@
 
 namespace App\Filament\Empresa\Resources\CasoSeguimientos\Tables;
 
+use App\Support\ColorNivel;
+use App\Support\PrioridadAtencion;
 use Filament\Tables\Columns\CheckboxColumn;
 use Filament\Tables\Columns\SelectColumn;
 use Filament\Tables\Columns\TextColumn;
@@ -55,11 +57,15 @@ class Columnas
         'Más de 5 años' => 'Más de 5 años',
     ];
 
-    public const NIVELES_RIESGO = [
-        'Leve' => 'Leve',
-        'Moderado' => 'Moderado',
-        'Urgente' => 'Urgente',
-    ];
+    /**
+     * Escala de prioridad de atención. Vive en PrioridadAtencion porque la
+     * comparten el tamizaje, el caso y el formato de referencia; aquí solo se
+     * expone como opciones del selector.
+     */
+    public static function nivelesRiesgo(): array
+    {
+        return PrioridadAtencion::opciones();
+    }
 
     public static function definicion(): array
     {
@@ -71,19 +77,22 @@ class Columnas
             self::selectDeTamizaje('genero', 'Sexo', self::SEXO),
             self::selectDeTamizaje('actividad_trabajo', 'Funciones', self::FUNCIONES),
 
-            TextInputColumn::make('actividad_trabajo_otra')
-                ->label('¿Cuál función?')
-                ->disabled(fn ($record) => $record->es_de_tamizaje)
+            // Angélica reportó el 21/08/2026 que estas tres columnas salían
+            // vacías en los casos que vienen del tamizaje: se mostraban solo
+            // desde la copia del caso, que nunca se llena. Van por el tamizaje
+            // igual que edad, sexo y tiempo, así se arrastra lo que contestó
+            // la persona.
+            self::textoDeTamizaje('actividad_trabajo_otra', '¿Cuál función?')
                 ->toggleable(),
 
             self::selectDeTamizaje('tiempo_trabajando', 'Tiempo trabajando en la empresa', self::TIEMPO_TRABAJANDO),
 
-            TextInputColumn::make('correo')
-                ->label('Correo')
+            self::textoDeTamizaje('correo', 'Correo')
                 ->rules(['nullable', 'email', 'max:255']),
 
-            TextInputColumn::make('celular')
-                ->label('Celular')
+            // El tamizaje lo captura como `telefono`; el caso lo llama
+            // `celular`, así que el origen se indica aparte.
+            self::textoDeTamizaje('celular', 'Celular', 'telefono')
                 ->rules(['nullable', 'max:20']),
 
             // --- RESULTADOS (provienen del tamizaje, solo lectura) ---
@@ -92,8 +101,8 @@ class Columnas
             self::resultado('suicidio', 'Ideación y riesgo suicida', fn ($t) => $t?->nivel_suicidio),
 
             SelectColumn::make('nivel_riesgo_detectado')
-                ->label('Nivel de riesgo')
-                ->options(self::NIVELES_RIESGO)
+                ->label(PrioridadAtencion::ETIQUETA)
+                ->options(self::nivelesRiesgo())
                 ->selectablePlaceholder(false),
 
             // --- CONSENTIMIENTO ---
@@ -180,17 +189,29 @@ class Columnas
             ->disabled(fn ($record) => $record->es_de_tamizaje);
     }
 
+    /**
+     * Dato de texto que, si la persona contestó el tamizaje, se muestra tal
+     * como lo capturó ahí y no se puede editar. En los casos capturados a mano
+     * queda abierto.
+     *
+     * @param  string|null  $campoTamizaje  Columna del tamizaje, si se llama distinto.
+     */
+    private static function textoDeTamizaje(string $campo, string $etiqueta, ?string $campoTamizaje = null): TextInputColumn
+    {
+        $origen = $campoTamizaje ?? $campo;
+
+        return TextInputColumn::make($campo)
+            ->label($etiqueta)
+            ->getStateUsing(fn ($record) => $record->tamizaje?->{$origen} ?: $record->{$campo})
+            ->disabled(fn ($record) => filled($record->tamizaje?->{$origen}));
+    }
+
     private static function resultado(string $nombre, string $etiqueta, callable $valor): TextColumn
     {
         return TextColumn::make($nombre)
             ->label($etiqueta)
             ->badge()
             ->getStateUsing(fn ($record) => $valor($record->tamizaje) ?? 'N/A')
-            ->color(fn (string $state): string => match ($state) {
-                'Grave', 'Moderadamente grave', 'Riesgo Agudo' => 'danger',
-                'Moderada', 'Evaluación Adicional', 'Positivo: requiere valoración posterior' => 'warning',
-                'Leve', 'Mínima o sin ansiedad', 'Mínima o ausente', 'Negativo' => 'success',
-                default => 'gray',
-            });
+            ->color(fn (string $state): string => ColorNivel::badge($state));
     }
 }

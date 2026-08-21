@@ -56,10 +56,11 @@ class ReclasificarTamizajesTest extends TestCase
 
         $tamizaje->refresh();
         $this->assertSame('Positivo: requiere valoración posterior', $tamizaje->nivel_suicidio);
-        $this->assertSame('Moderado', $tamizaje->nivel_riesgo_general);
+        // Sin respuesta a la pregunta 5 no se puede afirmar que no sea agudo.
+        $this->assertSame('Agudeza pendiente de confirmar', $tamizaje->nivel_riesgo_general);
     }
 
-    public function test_la_ansiedad_grave_deja_de_ser_urgente(): void
+    public function test_la_ansiedad_grave_deja_de_ser_urgente_y_queda_alta(): void
     {
         $tamizaje = $this->tamizaje([
             'riesgo_ansiedad' => 21,
@@ -70,7 +71,7 @@ class ReclasificarTamizajesTest extends TestCase
 
         $this->artisan('tamizajes:reclasificar --aplicar')->assertSuccessful();
 
-        $this->assertSame('Moderado', $tamizaje->refresh()->nivel_riesgo_general);
+        $this->assertSame('Alta', $tamizaje->refresh()->nivel_riesgo_general);
     }
 
     public function test_conserva_el_nivel_anterior_para_la_auditoria(): void
@@ -83,7 +84,7 @@ class ReclasificarTamizajesTest extends TestCase
 
         $this->artisan('tamizajes:reclasificar --aplicar')->assertSuccessful();
 
-        $constancia = $tamizaje->refresh()->respuestas['reclasificacion_18_08_2026'];
+        $constancia = $tamizaje->refresh()->respuestas['prioridad_atencion_21_08_2026'];
         $this->assertSame('Riesgo Agudo', $constancia['nivel_suicidio_anterior']);
         $this->assertSame('Urgente', $constancia['nivel_riesgo_general_anterior']);
     }
@@ -124,8 +125,58 @@ class ReclasificarTamizajesTest extends TestCase
         $this->artisan('tamizajes:reclasificar --aplicar')->assertSuccessful();
         $this->artisan('tamizajes:reclasificar --aplicar')->assertSuccessful();
 
-        $constancia = $tamizaje->refresh()->respuestas['reclasificacion_18_08_2026'];
+        $constancia = $tamizaje->refresh()->respuestas['prioridad_atencion_21_08_2026'];
         $this->assertSame('Riesgo Agudo', $constancia['nivel_suicidio_anterior']);
-        $this->assertSame('Moderado', $tamizaje->nivel_riesgo_general);
+        $this->assertSame('Agudeza pendiente de confirmar', $tamizaje->nivel_riesgo_general);
+    }
+
+    /**
+     * Los tamizajes nuevos ya traen la pregunta de agudeza contestada; el
+     * comando debe respetarla en vez de tratarlos como históricos.
+     */
+    public function test_respeta_la_agudeza_ya_capturada(): void
+    {
+        $agudo = $this->tamizaje([
+            'riesgo_conducta_suicida' => 1,
+            'nivel_suicidio' => 'Positivo: requiere valoración posterior',
+            'nivel_riesgo_general' => 'Moderado',
+            'respuestas' => ['conducta_suicida' => [1 => 0, 2 => 0, 3 => 0, 4 => 1, 5 => 1]],
+        ]);
+
+        $noAgudo = $this->tamizaje([
+            'riesgo_conducta_suicida' => 1,
+            'nivel_suicidio' => 'Positivo: requiere valoración posterior',
+            'nivel_riesgo_general' => 'Moderado',
+            'respuestas' => ['conducta_suicida' => [1 => 1, 2 => 0, 3 => 0, 4 => 0, 5 => 0]],
+        ]);
+
+        $this->artisan('tamizajes:reclasificar --aplicar')->assertSuccessful();
+
+        $this->assertSame('Riesgo Agudo', $agudo->refresh()->nivel_suicidio);
+        $this->assertSame('Urgente', $agudo->nivel_riesgo_general);
+
+        $this->assertSame('Positivo: requiere valoración posterior', $noAgudo->refresh()->nivel_suicidio);
+        $this->assertSame('Alta', $noAgudo->nivel_riesgo_general);
+    }
+
+    /**
+     * El histórico que ya pasó por la reclasificación del 18/08/2026 vuelve a
+     * entrar: esa pasada lo dejó en la escala anterior.
+     */
+    public function test_reclasifica_lo_que_ya_paso_por_la_pasada_anterior(): void
+    {
+        $tamizaje = $this->tamizaje([
+            'riesgo_conducta_suicida' => 1,
+            'nivel_suicidio' => 'Positivo: requiere valoración posterior',
+            'nivel_riesgo_general' => 'Moderada',
+            'respuestas' => ['reclasificacion_18_08_2026' => ['nivel_riesgo_general_anterior' => 'Urgente']],
+        ]);
+
+        $this->artisan('tamizajes:reclasificar --aplicar')->assertSuccessful();
+
+        $tamizaje->refresh();
+        $this->assertSame('Agudeza pendiente de confirmar', $tamizaje->nivel_riesgo_general);
+        // La constancia de la pasada anterior se conserva.
+        $this->assertArrayHasKey('reclasificacion_18_08_2026', $tamizaje->respuestas);
     }
 }

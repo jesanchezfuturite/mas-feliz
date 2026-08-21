@@ -29,12 +29,8 @@ class CasoSeguimientosTable
             ->columns(Columnas::definicion())
             ->filters([
                 \Filament\Tables\Filters\SelectFilter::make('nivel_riesgo_detectado')
-                    ->label('Nivel de Riesgo')
-                    ->options([
-                        'Leve' => 'Leve',
-                        'Moderado' => 'Moderado',
-                        'Urgente' => 'Urgente',
-                    ]),
+                    ->label(\App\Support\PrioridadAtencion::ETIQUETA)
+                    ->options(\App\Support\PrioridadAtencion::opciones()),
                 \Filament\Tables\Filters\SelectFilter::make('estatus_atencion')
                     ->label('Estatus de Atención')
                     ->options(\App\Models\CasoSeguimiento::ESTATUS_ATENCION),
@@ -57,12 +53,7 @@ class CasoSeguimientosTable
                                     ->content(function ($record) {
                                         $tamizaje = \App\Models\Tamizaje::where('empresa_id', $record->empresa_id)->where('nombre_completo', $record->identificador_empleado)->first();
                                         $value = $tamizaje->nivel_ansiedad ?? 'N/A';
-                                        $color = match($value) {
-                                            'Grave', 'Moderadamente grave', 'Riesgo Agudo', 'Urgente' => '#ef4444',
-                                            'Moderada', 'Evaluación Adicional', 'Positivo: requiere valoración posterior', 'Moderado' => '#f59e0b',
-                                            'Leve', 'Mínima o sin ansiedad', 'Mínima o ausente', 'Negativo' => '#22c55e',
-                                            default => '#6b7280',
-                                        };
+                                        $color = \App\Support\ColorNivel::hex($value);
                                         return new \Illuminate\Support\HtmlString("<span style=\"background-color: {$color}; color: white; padding: 8px 16px; border-radius: 9999px; font-size: 0.875rem; font-weight: 600; display: inline-block; width: 100%; text-align: center;\">Ansiedad: {$value}</span>");
                                     }),
                                 \Filament\Forms\Components\Placeholder::make('nivel_depresion')
@@ -70,12 +61,7 @@ class CasoSeguimientosTable
                                     ->content(function ($record) {
                                         $tamizaje = \App\Models\Tamizaje::where('empresa_id', $record->empresa_id)->where('nombre_completo', $record->identificador_empleado)->first();
                                         $value = $tamizaje->nivel_depresion ?? 'N/A';
-                                        $color = match($value) {
-                                            'Grave', 'Moderadamente grave', 'Riesgo Agudo', 'Urgente' => '#ef4444',
-                                            'Moderada', 'Evaluación Adicional', 'Positivo: requiere valoración posterior', 'Moderado' => '#f59e0b',
-                                            'Leve', 'Mínima o sin ansiedad', 'Mínima o ausente', 'Negativo' => '#22c55e',
-                                            default => '#6b7280',
-                                        };
+                                        $color = \App\Support\ColorNivel::hex($value);
                                         return new \Illuminate\Support\HtmlString("<span style=\"background-color: {$color}; color: white; padding: 8px 16px; border-radius: 9999px; font-size: 0.875rem; font-weight: 600; display: inline-block; width: 100%; text-align: center;\">Depresión: {$value}</span>");
                                     }),
                                 \Filament\Forms\Components\Placeholder::make('nivel_suicidio')
@@ -83,12 +69,7 @@ class CasoSeguimientosTable
                                     ->content(function ($record) {
                                         $tamizaje = \App\Models\Tamizaje::where('empresa_id', $record->empresa_id)->where('nombre_completo', $record->identificador_empleado)->first();
                                         $value = $tamizaje->nivel_suicidio ?? 'N/A';
-                                        $color = match($value) {
-                                            'Grave', 'Moderadamente grave', 'Riesgo Agudo', 'Urgente' => '#ef4444',
-                                            'Moderada', 'Evaluación Adicional', 'Positivo: requiere valoración posterior', 'Moderado' => '#f59e0b',
-                                            'Leve', 'Mínima o sin ansiedad', 'Mínima o ausente', 'Negativo' => '#22c55e',
-                                            default => '#6b7280',
-                                        };
+                                        $color = \App\Support\ColorNivel::hex($value);
                                         return new \Illuminate\Support\HtmlString("<span style=\"background-color: {$color}; color: white; padding: 8px 16px; border-radius: 9999px; font-size: 0.875rem; font-weight: 600; display: inline-block; width: 100%; text-align: center;\">Riesgo Suicida: {$value}</span>");
                                     }),
                             ]),
