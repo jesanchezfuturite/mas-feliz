@@ -2,11 +2,15 @@
 
 namespace Tests\Feature;
 
+use App\Filament\Empresa\Widgets\EstadisticaTamizajeWidget;
+use App\Livewire\ResponderTamizaje;
 use App\Models\Empresa;
 use App\Models\Setting;
 use App\Models\Tamizaje;
 use App\Support\PrioridadAtencion;
+use Filament\Facades\Filament;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Livewire\Livewire;
 use PHPUnit\Framework\Attributes\DataProvider;
 use Tests\TestCase;
 
@@ -107,5 +111,52 @@ class PrioridadAtencionTest extends TestCase
             ->assertDontSee('Riesgo General')
             ->assertSee('Alta')
             ->assertSee('clasificación operativa del Distintivo', false);
+    }
+
+    /**
+     * Angélica reportó el 21/08/2026 que el desglose por instrumento mostraba
+     * "Positivo: requiere valoración posterior" y "Evaluación Adicional" como
+     * dos categorías, la segunda siempre en cero. "Evaluación Adicional" es el
+     * nombre que tuvo el positivo antes de la corrección; el ASQ tiene tres
+     * resultados, no cuatro.
+     */
+    public function test_el_desglose_del_asq_solo_muestra_los_tres_resultados(): void
+    {
+        // El desglose se destraba cuando la empresa ya envió su autoevaluación.
+        $this->empresa->autoevaluaciones()->create(['estatus' => 'En revisión']);
+
+        foreach ([['Negativo', 0], ['Positivo: requiere valoración posterior', 1], ['Riesgo Agudo', 2]] as $i => [$nivelSuicidio, $puntaje]) {
+            Tamizaje::create([
+                'empresa_id' => $this->empresa->id,
+                'nombre_completo' => 'Persona '.$i,
+                'consentimiento_otorgado' => true,
+                'riesgo_ansiedad' => 0,
+                'riesgo_depresion' => 0,
+                'riesgo_conducta_suicida' => $puntaje,
+                'nivel_ansiedad' => 'Mínima o sin ansiedad',
+                'nivel_depresion' => 'Mínima o ausente',
+                'nivel_suicidio' => $nivelSuicidio,
+                'nivel_riesgo_general' => PrioridadAtencion::LEVE,
+            ]);
+        }
+
+        Filament::setCurrentPanel(Filament::getPanel('empresa'));
+        $this->actingAs($this->empresa, 'empresa');
+
+        $widget = Livewire::test(EstadisticaTamizajeWidget::class);
+
+        $widget->assertSee('Riesgo suicida')
+            ->assertSee('Negativo')
+            ->assertSee('Riesgo Agudo')
+            // El cuarto nivel ya no se dibuja.
+            ->assertDontSee('Evaluación Adicional');
+    }
+
+    public function test_los_niveles_del_asq_son_exactamente_tres(): void
+    {
+        $this->assertSame(
+            ['Negativo', 'Positivo: requiere valoración posterior', 'Riesgo Agudo'],
+            ResponderTamizaje::NIVELES_SUICIDIO
+        );
     }
 }

@@ -123,6 +123,22 @@ class ResponderTamizaje extends Component
     public const SUICIDIO_AGUDO = 'Riesgo Agudo';
 
     /**
+     * Los tres resultados posibles del ASQ, en orden de gravedad.
+     *
+     * Son exactamente los que Angélica define en "PARA LA REVISIÓN": no hay un
+     * cuarto. El desglose por instrumento dibujaba además "Evaluación
+     * Adicional" —el nombre que tuvo el positivo antes— y se veía como dos
+     * categorías para lo mismo, una de ellas siempre en cero. Lo reportó el
+     * 21/08/2026. Cualquier listado que ordene o enumere niveles del ASQ debe
+     * leer de aquí.
+     */
+    public const NIVELES_SUICIDIO = [
+        self::SUICIDIO_NEGATIVO,
+        self::SUICIDIO_POSITIVO,
+        self::SUICIDIO_AGUDO,
+    ];
+
+    /**
      * Conducta que sigue a cada resultado del ASQ, tal como la redactó Angélica
      * en "PARA LA REVISIÓN". El nivel dice qué se encontró; esto, qué hacer.
      * Se muestra junto al resultado en el detalle del tamizaje.

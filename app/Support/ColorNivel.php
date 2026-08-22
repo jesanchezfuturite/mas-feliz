@@ -19,6 +19,13 @@ class ColorNivel
     /** Niveles de los instrumentos, del más grave al más leve. */
     private const GRAVE = ['Grave', 'Moderadamente grave', 'Riesgo Agudo'];
 
+    /**
+     * "Evaluación Adicional" es el nombre que tuvo el positivo del ASQ antes y
+     * ya no se asigna. Se conserva solo aquí, como color: si quedara algún
+     * registro histórico con ese valor, se pinta bien en vez de salir en gris.
+     * Como categoría del desglose ya no se dibuja —ver
+     * ResponderTamizaje::NIVELES_SUICIDIO—.
+     */
     private const INTERMEDIO = ['Moderada', 'Evaluación Adicional', 'Positivo: requiere valoración posterior'];
 
     private const LEVE = ['Leve', 'Mínima o sin ansiedad', 'Mínima o ausente', 'Negativo'];

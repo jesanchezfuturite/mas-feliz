@@ -7,6 +7,7 @@ use App\Livewire\ResponderTamizaje;
 use App\Models\CasoSeguimiento;
 use App\Models\Setting;
 use App\Models\Tamizaje;
+use App\Support\ColorNivel;
 use App\Support\PrioridadAtencion;
 use BackedEnum;
 use Filament\Actions\Action;
@@ -59,24 +60,7 @@ class TamizajeResource extends Resource
 
     public static function form(Schema $schema): Schema
     {
-        $getColor = function ($level) {
-            // Los niveles de la escala de prioridad traen su propio color; el
-            // resto son los niveles de cada instrumento.
-            if (isset(PrioridadAtencion::HEX[$level])) {
-                return PrioridadAtencion::HEX[$level];
-            }
-            if (in_array($level, ['Grave', 'Moderadamente grave', 'Riesgo Agudo'])) {
-                return '#ef4444';
-            } // Red
-            if (in_array($level, ['Moderada', 'Evaluación Adicional', 'Positivo: requiere valoración posterior'])) {
-                return '#f59e0b';
-            } // Orange
-            if (in_array($level, ['Leve', 'Mínima o sin ansiedad', 'Mínima o ausente', 'Negativo'])) {
-                return '#22c55e';
-            } // Green
-
-            return '#6b7280'; // Gray
-        };
+        $getColor = fn ($level) => ColorNivel::hex($level);
 
         $makeBadge = function ($field, $labelPrefix) use ($getColor) {
             return Placeholder::make($field)
