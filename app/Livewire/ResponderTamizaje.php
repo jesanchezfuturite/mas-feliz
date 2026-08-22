@@ -106,47 +106,42 @@ class ResponderTamizaje extends Component
     // INSERT con "Data too long", perdiendo el tamizaje completo del
     // colaborador ya contestado. Pasó en producción el 13/08/2026.
     /**
-     * Niveles de conducta suicida.
+     * Resultado del ASQ. Son dos, y salen tal cual del recuadro "PARA LA
+     * REVISIÓN" de Angélica: lo determinan las preguntas 1 a 4 y nada más.
      *
-     * Antes del 18/08/2026 un "Sí" en la pregunta 4 —"¿Alguna vez has
-     * intentado quitarte la vida?"— marcaba por sí solo `Riesgo Agudo`. Esa
-     * pregunta mide toda la vida, mientras que las tres anteriores preguntan
-     * por las últimas semanas, así que alguien con un intento hace años y sin
-     * ningún síntoma actual salía como emergencia: 933 de las 1,771 alertas
-     * urgentes acumuladas no tenían indicador reciente. La agudeza ahora la
-     * establece únicamente la pregunta 5.
+     * Hubo un tercer valor, `Riesgo Agudo`, que no está en ese recuadro: lo
+     * agregamos nosotros para que la pregunta 5 se notara en esta columna. El
+     * 21/08/2026 ella reportó que el listado no se parecía a su documento
+     * justamente por eso. La agudeza no desapareció, cambió de columna: la
+     * pregunta 5 en "Sí" sigue subiendo la prioridad a
+     * {@see PrioridadAtencion::URGENTE}, que es donde su propia escala la
+     * pide.
+     *
+     * El texto que acompaña a cada resultado va en `ACCIONES_SUICIDIO`, no
+     * dentro del nombre: en su documento el nombre es una palabra y la acción
+     * viene aparte.
      */
     public const SUICIDIO_NEGATIVO = 'Negativo';
 
-    public const SUICIDIO_POSITIVO = 'Positivo: requiere valoración posterior';
-
-    public const SUICIDIO_AGUDO = 'Riesgo Agudo';
+    public const SUICIDIO_POSITIVO = 'Positivo';
 
     /**
-     * Los tres resultados posibles del ASQ, en orden de gravedad.
-     *
-     * Son exactamente los que Angélica define en "PARA LA REVISIÓN": no hay un
-     * cuarto. El desglose por instrumento dibujaba además "Evaluación
-     * Adicional" —el nombre que tuvo el positivo antes— y se veía como dos
-     * categorías para lo mismo, una de ellas siempre en cero. Lo reportó el
-     * 21/08/2026. Cualquier listado que ordene o enumere niveles del ASQ debe
-     * leer de aquí.
+     * Los dos resultados posibles, en orden de gravedad. Cualquier listado,
+     * filtro o desglose que enumere resultados del ASQ debe leer de aquí.
      */
     public const NIVELES_SUICIDIO = [
         self::SUICIDIO_NEGATIVO,
         self::SUICIDIO_POSITIVO,
-        self::SUICIDIO_AGUDO,
     ];
 
     /**
-     * Conducta que sigue a cada resultado del ASQ, tal como la redactó Angélica
-     * en "PARA LA REVISIÓN". El nivel dice qué se encontró; esto, qué hacer.
+     * Conducta que sigue a cada resultado, tal como la redactó Angélica en
+     * "PARA LA REVISIÓN". El resultado dice qué se encontró; esto, qué hacer.
      * Se muestra junto al resultado en el detalle del tamizaje.
      */
     public const ACCIONES_SUICIDIO = [
         self::SUICIDIO_NEGATIVO => 'Prevención / Promoción / Psicoeducación',
         self::SUICIDIO_POSITIVO => 'Valoración psicológica adicional para confirmar o descartar riesgo y agudeza',
-        self::SUICIDIO_AGUDO => 'Valoración / Atención especializada prioritaria',
     ];
 
     /** Opciones de "¿Cuándo fue el último intento?". */
@@ -347,13 +342,11 @@ class ResponderTamizaje extends Component
         $scoreSuicidio = $s1 + $s2 + $s3 + $s4;
         $s5 = $this->suicidio_5 === null || $this->suicidio_5 === '' ? null : (int) $this->suicidio_5;
 
-        if ($scoreSuicidio > 0 && $s5 === 1) {
-            $nivelSuicidio = self::SUICIDIO_AGUDO;
-        } elseif ($scoreSuicidio > 0) {
-            $nivelSuicidio = self::SUICIDIO_POSITIVO;
-        } else {
-            $nivelSuicidio = self::SUICIDIO_NEGATIVO;
-        }
+        // Lo deciden las preguntas 1 a 4. La 5 no entra aquí: su efecto es
+        // elevar la prioridad a Urgente, unas líneas más abajo.
+        $nivelSuicidio = $scoreSuicidio > 0
+            ? self::SUICIDIO_POSITIVO
+            : self::SUICIDIO_NEGATIVO;
 
         // La escala la define PrioridadAtencion, que también usa el comando de
         // reclasificación: si la tabla de Angélica vuelve a cambiar, cambia en

@@ -66,7 +66,7 @@ class ReclasificarTamizajes extends Command
                     }
 
                     $agudeza = $this->agudeza($tamizaje);
-                    $suicidioNuevo = $this->nivelSuicidio($tamizaje, $agudeza);
+                    $suicidioNuevo = $this->nivelSuicidio($tamizaje);
                     $riesgoNuevo = PrioridadAtencion::calcular(
                         $tamizaje->nivel_ansiedad,
                         $tamizaje->nivel_depresion,
@@ -133,14 +133,14 @@ class ReclasificarTamizajes extends Command
         return $valor === null || $valor === '' ? null : (int) $valor;
     }
 
-    private function nivelSuicidio(Tamizaje $tamizaje, ?int $agudeza): string
+    /**
+     * Resultado del ASQ. Lo deciden las preguntas 1 a 4; la agudeza no entra
+     * —solo afecta la prioridad—, así que este método no la recibe.
+     */
+    private function nivelSuicidio(Tamizaje $tamizaje): string
     {
-        if ((int) $tamizaje->riesgo_conducta_suicida === 0) {
-            return ResponderTamizaje::SUICIDIO_NEGATIVO;
-        }
-
-        return $agudeza === 1
-            ? ResponderTamizaje::SUICIDIO_AGUDO
+        return (int) $tamizaje->riesgo_conducta_suicida === 0
+            ? ResponderTamizaje::SUICIDIO_NEGATIVO
             : ResponderTamizaje::SUICIDIO_POSITIVO;
     }
 }

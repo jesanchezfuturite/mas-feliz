@@ -17,16 +17,23 @@ namespace App\Support;
 class ColorNivel
 {
     /** Niveles de los instrumentos, del más grave al más leve. */
-    private const GRAVE = ['Grave', 'Moderadamente grave', 'Riesgo Agudo'];
+    private const GRAVE = ['Grave', 'Moderadamente grave'];
 
     /**
-     * "Evaluación Adicional" es el nombre que tuvo el positivo del ASQ antes y
-     * ya no se asigna. Se conserva solo aquí, como color: si quedara algún
-     * registro histórico con ese valor, se pinta bien en vez de salir en gris.
-     * Como categoría del desglose ya no se dibuja —ver
-     * ResponderTamizaje::NIVELES_SUICIDIO—.
+     * "Evaluación Adicional", "Positivo: requiere valoración posterior" y
+     * "Riesgo Agudo" son nombres que tuvo el resultado del ASQ antes y ya no
+     * se asignan; la migración del 22/08/2026 los dejó en "Positivo". Se
+     * conservan solo aquí, como color, por si algún registro se escapó: se
+     * pintan bien en vez de salir en gris. Como categorías del desglose ya no
+     * se dibujan —ver ResponderTamizaje::NIVELES_SUICIDIO—.
      */
-    private const INTERMEDIO = ['Moderada', 'Evaluación Adicional', 'Positivo: requiere valoración posterior'];
+    private const INTERMEDIO = [
+        'Moderada',
+        'Positivo',
+        'Evaluación Adicional',
+        'Positivo: requiere valoración posterior',
+        'Riesgo Agudo',
+    ];
 
     private const LEVE = ['Leve', 'Mínima o sin ansiedad', 'Mínima o ausente', 'Negativo'];
 

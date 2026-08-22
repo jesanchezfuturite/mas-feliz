@@ -255,7 +255,7 @@ class ResponderTamizajeTest extends TestCase
             'riesgo_ansiedad' => 0,
             'riesgo_depresion' => 0,
             'riesgo_conducta_suicida' => 1,
-            'nivel_suicidio' => 'Positivo: requiere valoración posterior',
+            'nivel_suicidio' => 'Positivo',
             'nivel_riesgo_general' => 'Alta',
         ]);
     }
@@ -329,19 +329,24 @@ class ResponderTamizajeTest extends TestCase
             'empresa_id' => $this->empresa->id,
             'nivel_ansiedad' => 'Mínima o sin ansiedad',
             'nivel_depresion' => 'Mínima o ausente',
-            'nivel_suicidio' => 'Positivo: requiere valoración posterior',
+            'nivel_suicidio' => 'Positivo',
             'nivel_riesgo_general' => 'Alta',
         ]);
     }
 
-    public function test_la_pregunta_cinco_es_la_unica_que_establece_riesgo_agudo(): void
+    /**
+     * La agudeza no cambia el resultado del ASQ —el recuadro de Angélica solo
+     * define "Negativo" y "Positivo"—: lo que hace la pregunta 5 en "Sí" es
+     * subir la prioridad de atención a "Urgente".
+     */
+    public function test_la_pregunta_cinco_sube_la_prioridad_sin_cambiar_el_resultado(): void
     {
         $this->responder(['suicidio_4' => '1', 'suicidio_4_ultimo_intento' => 'Menos de 12 meses', 'suicidio_5' => '1'])
             ->assertHasNoErrors();
 
         $this->assertDatabaseHas('tamizajes', [
             'empresa_id' => $this->empresa->id,
-            'nivel_suicidio' => 'Riesgo Agudo',
+            'nivel_suicidio' => 'Positivo',
             'nivel_riesgo_general' => 'Urgente',
         ]);
     }

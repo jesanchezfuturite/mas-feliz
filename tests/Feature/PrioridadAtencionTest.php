@@ -114,18 +114,18 @@ class PrioridadAtencionTest extends TestCase
     }
 
     /**
-     * Angélica reportó el 21/08/2026 que el desglose por instrumento mostraba
-     * "Positivo: requiere valoración posterior" y "Evaluación Adicional" como
-     * dos categorías, la segunda siempre en cero. "Evaluación Adicional" es el
-     * nombre que tuvo el positivo antes de la corrección; el ASQ tiene tres
-     * resultados, no cuatro.
+     * El desglose por instrumento arrastró durante semanas categorías que no
+     * existen en el recuadro "PARA LA REVISIÓN" de Angélica: primero
+     * "Evaluación Adicional" (el nombre que tuvo el positivo antes) y luego
+     * "Riesgo Agudo", que agregamos nosotros para que se notara la pregunta 5.
+     * Su documento define dos resultados y solo esos deben dibujarse.
      */
-    public function test_el_desglose_del_asq_solo_muestra_los_tres_resultados(): void
+    public function test_el_desglose_del_asq_solo_muestra_los_dos_resultados(): void
     {
         // El desglose se destraba cuando la empresa ya envió su autoevaluación.
         $this->empresa->autoevaluaciones()->create(['estatus' => 'En revisión']);
 
-        foreach ([['Negativo', 0], ['Positivo: requiere valoración posterior', 1], ['Riesgo Agudo', 2]] as $i => [$nivelSuicidio, $puntaje]) {
+        foreach ([['Negativo', 0], ['Positivo', 1]] as $i => [$nivelSuicidio, $puntaje]) {
             Tamizaje::create([
                 'empresa_id' => $this->empresa->id,
                 'nombre_completo' => 'Persona '.$i,
@@ -147,15 +147,16 @@ class PrioridadAtencionTest extends TestCase
 
         $widget->assertSee('Riesgo suicida')
             ->assertSee('Negativo')
-            ->assertSee('Riesgo Agudo')
-            // El cuarto nivel ya no se dibuja.
-            ->assertDontSee('Evaluación Adicional');
+            ->assertSee('Positivo')
+            // Los nombres que tuvo antes ya no se dibujan.
+            ->assertDontSee('Evaluación Adicional')
+            ->assertDontSee('Riesgo Agudo');
     }
 
-    public function test_los_niveles_del_asq_son_exactamente_tres(): void
+    public function test_los_niveles_del_asq_son_exactamente_dos(): void
     {
         $this->assertSame(
-            ['Negativo', 'Positivo: requiere valoración posterior', 'Riesgo Agudo'],
+            ['Negativo', 'Positivo'],
             ResponderTamizaje::NIVELES_SUICIDIO
         );
     }

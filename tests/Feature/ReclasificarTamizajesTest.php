@@ -55,7 +55,7 @@ class ReclasificarTamizajesTest extends TestCase
         $this->artisan('tamizajes:reclasificar --aplicar')->assertSuccessful();
 
         $tamizaje->refresh();
-        $this->assertSame('Positivo: requiere valoración posterior', $tamizaje->nivel_suicidio);
+        $this->assertSame('Positivo', $tamizaje->nivel_suicidio);
         // Sin respuesta a la pregunta 5 no se puede afirmar que no sea agudo.
         $this->assertSame('Agudeza pendiente de confirmar', $tamizaje->nivel_riesgo_general);
     }
@@ -131,10 +131,12 @@ class ReclasificarTamizajesTest extends TestCase
     }
 
     /**
-     * Los tamizajes nuevos ya traen la pregunta de agudeza contestada; el
-     * comando debe respetarla en vez de tratarlos como históricos.
+     * Los tamizajes nuevos ya traen la pregunta de agudeza contestada. El
+     * resultado del ASQ es el mismo para ambos —"Positivo", que es lo único
+     * que define el recuadro de Angélica—; lo que los distingue es la
+     * prioridad de atención.
      */
-    public function test_respeta_la_agudeza_ya_capturada(): void
+    public function test_la_agudeza_ya_capturada_separa_la_prioridad_no_el_resultado(): void
     {
         $agudo = $this->tamizaje([
             'riesgo_conducta_suicida' => 1,
@@ -152,10 +154,10 @@ class ReclasificarTamizajesTest extends TestCase
 
         $this->artisan('tamizajes:reclasificar --aplicar')->assertSuccessful();
 
-        $this->assertSame('Riesgo Agudo', $agudo->refresh()->nivel_suicidio);
+        $this->assertSame('Positivo', $agudo->refresh()->nivel_suicidio);
         $this->assertSame('Urgente', $agudo->nivel_riesgo_general);
 
-        $this->assertSame('Positivo: requiere valoración posterior', $noAgudo->refresh()->nivel_suicidio);
+        $this->assertSame('Positivo', $noAgudo->refresh()->nivel_suicidio);
         $this->assertSame('Alta', $noAgudo->nivel_riesgo_general);
     }
 
