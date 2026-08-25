@@ -3,6 +3,7 @@
 namespace App\Filament\Widgets;
 
 use App\Models\Empresa;
+use App\Support\PrioridadAtencion;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 use Filament\Widgets\TableWidget as BaseWidget;
@@ -43,9 +44,9 @@ class AvancePorEmpresa extends BaseWidget
                     ->when($this->empresaIds() !== null, fn (Builder $q) => $q->whereIn('id', $this->empresaIds()))
                     ->withCount([
                         'tamizajes',
-                        'tamizajes as participaron_count' => fn (Builder $q) => $q->where('nivel_riesgo_general', '!=', 'No participó'),
-                        'tamizajes as declinaron_count' => fn (Builder $q) => $q->where('nivel_riesgo_general', 'No participó'),
-                        'tamizajes as en_riesgo_count' => fn (Builder $q) => $q->whereIn('nivel_riesgo_general', ['Moderado', 'Urgente']),
+                        'tamizajes as participaron_count' => fn (Builder $q) => $q->where('nivel_riesgo_general', '!=', PrioridadAtencion::NO_PARTICIPO),
+                        'tamizajes as declinaron_count' => fn (Builder $q) => $q->where('nivel_riesgo_general', PrioridadAtencion::NO_PARTICIPO),
+                        'tamizajes as en_riesgo_count' => fn (Builder $q) => $q->whereIn('nivel_riesgo_general', PrioridadAtencion::REQUIEREN_ATENCION),
                         'casosSeguimiento as casos_abiertos_count' => fn (Builder $q) => $q->where('estatus_atencion', 'En seguimiento'),
                         'casosSeguimiento as casos_canalizados_count' => fn (Builder $q) => $q->where('estatus_atencion', 'Canalizado'),
                         'solicitudesReferencia as referencias_count',

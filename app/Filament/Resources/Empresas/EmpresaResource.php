@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\Empresas;
 
+use App\Support\PrioridadAtencion;
 use App\Filament\Resources\Empresas\Pages\CreateEmpresa;
 use App\Filament\Resources\Empresas\Pages\EditEmpresa;
 use App\Filament\Resources\Empresas\Pages\ListEmpresas;
@@ -178,9 +179,9 @@ class EmpresaResource extends Resource
                                 TextEntry::make('riesgos_urgentes')
                                     ->label('Riesgos Urgentes')
                                     ->state(function ($record) {
-                                        $enLinea = $record->tamizajes()->where('nivel_riesgo_general', 'Urgente')->count();
+                                        $enLinea = $record->tamizajes()->where('nivel_riesgo_general', PrioridadAtencion::URGENTE)->count();
                                         $manuales = $record->casosSeguimiento()
-                                            ->where('nivel_riesgo_detectado', 'Urgente')
+                                            ->where('nivel_riesgo_detectado', PrioridadAtencion::URGENTE)
                                             ->whereNotIn('identificador_empleado', function ($query) use ($record) {
                                                 $query->select('nombre_completo')
                                                     ->from('tamizajes')
@@ -191,7 +192,7 @@ class EmpresaResource extends Resource
                                     ->badge()
                                     ->color('danger'),
                                 TextEntry::make('distribucion_riesgos')
-                                    ->label('Distribución General de Riesgos')
+                                    ->label('Distribución por prioridad de atención')
                                     ->state(function ($record) {
                                         $counts = $record->tamizajes()
                                             ->selectRaw('nivel_riesgo_general, count(*) as total')
@@ -210,10 +211,18 @@ class EmpresaResource extends Resource
                                             ->pluck('total', 'nivel_riesgo_detectado')
                                             ->toArray();
 
-                                        $leve = ($counts['Leve'] ?? 0) + ($manualCounts['Leve'] ?? 0);
-                                        $moderado = ($counts['Moderado'] ?? 0) + ($manualCounts['Moderado'] ?? 0);
-                                        $urgente = ($counts['Urgente'] ?? 0) + ($manualCounts['Urgente'] ?? 0);
-                                        return "Leve: {$leve} | Moderado: {$moderado} | Urgente: {$urgente}";
+                                        $partes = [];
+                                        foreach (PrioridadAtencion::ESCALA as $nivel) {
+                                            $total = ($counts[$nivel] ?? 0) + ($manualCounts[$nivel] ?? 0);
+
+                                            // La agudeza pendiente solo se menciona si hay
+                                            // registros: es un estado de los históricos, no
+                                            // un nivel al que lleguen los tamizajes nuevos.
+                                            if ($total > 0 || $nivel !== PrioridadAtencion::AGUDEZA_PENDIENTE) {
+                                                $partes[] = "{$nivel}: {$total}";
+                                            }
+                                        }
+                                        return implode(' | ', $partes);
                                     }),
                             ])
                             ->columns(2),

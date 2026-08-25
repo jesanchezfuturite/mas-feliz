@@ -8,6 +8,10 @@ class Tamizaje extends Model
 {
     protected $guarded = [];
 
+    protected $casts = [
+        'respuestas' => 'array',
+    ];
+
     /**
      * Get the company that owns the screening.
      */

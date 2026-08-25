@@ -21,14 +21,9 @@ class CasosSeguimientoRelationManager extends RelationManager
                 \Filament\Infolists\Components\TextEntry::make('identificador_empleado')
                     ->label('Identificador del Empleado'),
                 \Filament\Infolists\Components\TextEntry::make('nivel_riesgo_detectado')
-                    ->label('Nivel de Riesgo')
+                    ->label(\App\Support\PrioridadAtencion::ETIQUETA)
                     ->badge()
-                    ->color(fn (string $state): string => match ($state) {
-                        'Leve' => 'success',
-                        'Moderado' => 'warning',
-                        'Urgente' => 'danger',
-                        default => 'gray',
-                    }),
+                    ->color(fn (string $state): string => \App\Support\ColorNivel::badge($state)),
                 \Filament\Infolists\Components\TextEntry::make('estatus_atencion')
                     ->label('Estatus de Atención')
                     ->badge()
@@ -80,14 +75,9 @@ class CasosSeguimientoRelationManager extends RelationManager
                     ->alignCenter(),
 
                 TextColumn::make('nivel_riesgo_detectado')
-                    ->label('Riesgo Detectado')
+                    ->label(\App\Support\PrioridadAtencion::ETIQUETA)
                     ->badge()
-                    ->color(fn (string $state): string => match ($state) {
-                        'Leve' => 'success',
-                        'Moderado' => 'warning',
-                        'Urgente' => 'danger',
-                        default => 'gray',
-                    })
+                    ->color(fn (string $state): string => \App\Support\ColorNivel::badge($state))
                     ->sortable(),
 
                 TextColumn::make('estatus_atencion')
@@ -143,12 +133,7 @@ class CasosSeguimientoRelationManager extends RelationManager
                                     ->content(function ($record) {
                                         $tamizaje = \App\Models\Tamizaje::where('empresa_id', $record->empresa_id)->where('nombre_completo', $record->identificador_empleado)->first();
                                         $value = $tamizaje->nivel_ansiedad ?? 'N/A';
-                                        $color = match($value) {
-                                            'Grave', 'Moderadamente grave', 'Riesgo Agudo', 'Urgente' => '#ef4444',
-                                            'Moderada', 'Evaluación Adicional', 'Moderado' => '#f59e0b',
-                                            'Leve', 'Mínima o sin ansiedad', 'Mínima o ausente', 'Negativo' => '#22c55e',
-                                            default => '#6b7280',
-                                        };
+                                        $color = \App\Support\ColorNivel::hex($value);
                                         return new \Illuminate\Support\HtmlString("<span style=\"background-color: {$color}; color: white; padding: 8px 16px; border-radius: 9999px; font-size: 0.875rem; font-weight: 600; display: inline-block; width: 100%; text-align: center;\">Ansiedad: {$value}</span>");
                                     }),
                                 \Filament\Forms\Components\Placeholder::make('nivel_depresion')
@@ -156,12 +141,7 @@ class CasosSeguimientoRelationManager extends RelationManager
                                     ->content(function ($record) {
                                         $tamizaje = \App\Models\Tamizaje::where('empresa_id', $record->empresa_id)->where('nombre_completo', $record->identificador_empleado)->first();
                                         $value = $tamizaje->nivel_depresion ?? 'N/A';
-                                        $color = match($value) {
-                                            'Grave', 'Moderadamente grave', 'Riesgo Agudo', 'Urgente' => '#ef4444',
-                                            'Moderada', 'Evaluación Adicional', 'Moderado' => '#f59e0b',
-                                            'Leve', 'Mínima o sin ansiedad', 'Mínima o ausente', 'Negativo' => '#22c55e',
-                                            default => '#6b7280',
-                                        };
+                                        $color = \App\Support\ColorNivel::hex($value);
                                         return new \Illuminate\Support\HtmlString("<span style=\"background-color: {$color}; color: white; padding: 8px 16px; border-radius: 9999px; font-size: 0.875rem; font-weight: 600; display: inline-block; width: 100%; text-align: center;\">Depresión: {$value}</span>");
                                     }),
                                 \Filament\Forms\Components\Placeholder::make('nivel_suicidio')
@@ -169,12 +149,7 @@ class CasosSeguimientoRelationManager extends RelationManager
                                     ->content(function ($record) {
                                         $tamizaje = \App\Models\Tamizaje::where('empresa_id', $record->empresa_id)->where('nombre_completo', $record->identificador_empleado)->first();
                                         $value = $tamizaje->nivel_suicidio ?? 'N/A';
-                                        $color = match($value) {
-                                            'Grave', 'Moderadamente grave', 'Riesgo Agudo', 'Urgente' => '#ef4444',
-                                            'Moderada', 'Evaluación Adicional', 'Moderado' => '#f59e0b',
-                                            'Leve', 'Mínima o sin ansiedad', 'Mínima o ausente', 'Negativo' => '#22c55e',
-                                            default => '#6b7280',
-                                        };
+                                        $color = \App\Support\ColorNivel::hex($value);
                                         return new \Illuminate\Support\HtmlString("<span style=\"background-color: {$color}; color: white; padding: 8px 16px; border-radius: 9999px; font-size: 0.875rem; font-weight: 600; display: inline-block; width: 100%; text-align: center;\">Riesgo Suicida: {$value}</span>");
                                     }),
                             ]),

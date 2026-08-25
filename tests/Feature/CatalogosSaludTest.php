@@ -195,14 +195,14 @@ class CatalogosSaludTest extends TestCase
             'riesgo_ansiedad' => 5,
             'riesgo_depresion' => 5,
             'riesgo_conducta_suicida' => 0,
-            'nivel_riesgo_general' => 'Moderado',
+            'nivel_riesgo_general' => 'Moderada',
         ]);
 
         // El caso trae un valor viejo distinto al del cuestionario.
         $caso = CasoSeguimiento::create([
             'empresa_id' => $this->empresa->id,
             'identificador_empleado' => 'Colaborador Tamizado',
-            'nivel_riesgo_detectado' => 'Moderado',
+            'nivel_riesgo_detectado' => 'Moderada',
             'estatus_atencion' => 'En seguimiento',
             'genero' => 'Hombre',
             'edad' => '45 a 54 años',

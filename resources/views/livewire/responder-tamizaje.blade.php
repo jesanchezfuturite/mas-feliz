@@ -18,7 +18,28 @@
                 </p>
             </div>
 
+            {{-- Línea de Vida. Va en la pantalla de confirmación de todos, incluso de
+                 quien declina participar: es la única pantalla que ve al terminar. --}}
+            <div class="rounded-2xl border border-[#29BFE0]/40 bg-[#29BFE0]/5 dark:bg-[#29BFE0]/10 p-6 space-y-3">
+                <p class="text-base font-bold text-slate-900 dark:text-white">
+                    ¿Necesitas hablar con alguien?
+                </p>
+                <p class="text-sm text-slate-600 dark:text-slate-300 max-w-md mx-auto leading-relaxed">
+                    <strong class="font-semibold text-slate-800 dark:text-slate-100">Línea de la Vida</strong> está disponible para brindarte orientación y apoyo emocional.
+                </p>
+                <a href="tel:8009536453" class="inline-flex items-center gap-2 text-2xl sm:text-3xl font-extrabold text-[#1a8fab] dark:text-[#5fd3ec] tracking-tight hover:underline focus:outline-none focus:ring-2 focus:ring-[#29BFE0] focus:ring-offset-2 rounded-lg px-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 6.75c0 8.284 6.716 15 15 15h2.25a2.25 2.25 0 002.25-2.25v-1.372c0-.516-.351-.966-.852-1.091l-4.423-1.106c-.44-.11-.902.055-1.173.417l-.97 1.293c-.282.376-.769.542-1.21.38a12.035 12.035 0 01-7.143-7.143c-.162-.441.004-.928.38-1.21l1.293-.97c.363-.271.527-.734.417-1.173L6.963 3.102a1.125 1.125 0 00-1.091-.852H4.5A2.25 2.25 0 002.25 4.5v2.25z" />
+                    </svg>
+                    800 953 6453
+                </a>
+            </div>
+
             <div class="h-px bg-slate-100 dark:bg-slate-800 my-4"></div>
+
+            <p class="text-[11px] italic text-slate-400 dark:text-slate-500 max-w-md mx-auto leading-relaxed">
+                Nota: Ninguno de estos cuestionarios reemplaza un diagnóstico médico formal o una entrevista clínica.
+            </p>
 
             <p class="text-xs text-slate-400 dark:text-slate-500 max-w-xs mx-auto">
                 Este cuestionario nos ayuda a evaluar y mejorar el clima de bienestar y salud emocional dentro de <strong class="font-semibold text-slate-600 dark:text-slate-300">{{ $empresa->nombre_empresa }}</strong>.
@@ -323,6 +344,9 @@
                         <h2 class="text-lg font-bold">Módulo 1: Ansiedad</h2>
                     </div>
                     <div class="p-8 space-y-8">
+                        <p class="rounded-xl bg-slate-50 dark:bg-slate-800/40 border border-slate-100 dark:border-slate-800 px-5 py-4 text-sm font-medium text-slate-700 dark:text-slate-300 leading-relaxed">
+                            Responda, en las últimas dos semanas, ¿con qué frecuencia le han molestado los siguientes problemas?
+                        </p>
                         @foreach([
                             1 => '¿Te has sentido nervioso(a), ansioso(a) o con los nervios de punta?',
                             2 => '¿No has sido capaz de detener o controlar tus preocupaciones?',
@@ -356,6 +380,9 @@
                         <h2 class="text-lg font-bold">Módulo 2: Depresión</h2>
                     </div>
                     <div class="p-8 space-y-8">
+                        <p class="rounded-xl bg-slate-50 dark:bg-slate-800/40 border border-slate-100 dark:border-slate-800 px-5 py-4 text-sm font-medium text-slate-700 dark:text-slate-300 leading-relaxed">
+                            Responda, en las últimas dos semanas, ¿con qué frecuencia le han molestado los siguientes problemas?
+                        </p>
                         @foreach([
                             1 => '¿Has tenido poco interés o placer en hacer cosas?',
                             2 => '¿Te has sentido desanimado(a), deprimido(a) o sin esperanza?',
@@ -412,6 +439,26 @@
                             @error('suicidio_'.$index) <span class="text-xs text-red-500 block font-medium mt-1">{{ $message }}</span> @enderror
                         </div>
                         @endforeach
+
+                        {{-- Pregunta de agudeza. Solo se formula a quien contestó "Sí" en
+                             alguna de las cuatro anteriores; es la única que establece
+                             riesgo agudo y la que decide la canalización a Salud. --}}
+                        @if($this->requiereAgudeza())
+                        <div class="space-y-3 rounded-2xl border border-orange-200 dark:border-orange-900/60 bg-orange-50/40 dark:bg-orange-950/10 p-5">
+                            <label class="block text-sm font-semibold text-slate-800 dark:text-slate-200">
+                                5. ¿Estás pensando en quitarte la vida en este momento?
+                            </label>
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                @foreach(['0' => 'No', '1' => 'Sí'] as $val => $label)
+                                    <label class="flex items-center justify-center py-3 px-4 border rounded-xl cursor-pointer transition-all duration-200 {{ $suicidio_5 == $val && $suicidio_5 !== null ? 'border-orange-600 bg-orange-50/50 dark:bg-orange-950/20 text-orange-700 dark:text-orange-300 ring-2 ring-orange-500/20 font-semibold' : 'border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 hover:bg-slate-50 dark:hover:bg-slate-800/40 text-slate-600 dark:text-slate-400' }}">
+                                        <input type="radio" wire:model.live="suicidio_5" value="{{ $val }}" class="sr-only" />
+                                        <span class="text-sm font-medium text-center leading-tight">{{ $label }}</span>
+                                    </label>
+                                @endforeach
+                            </div>
+                            @error('suicidio_5') <span class="text-xs text-red-500 block font-medium mt-1">{{ $message }}</span> @enderror
+                        </div>
+                        @endif
                     </div>
                 </div>
 

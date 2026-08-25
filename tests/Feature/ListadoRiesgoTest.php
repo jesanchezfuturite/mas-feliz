@@ -2,12 +2,16 @@
 
 namespace Tests\Feature;
 
+use App\Filament\Empresa\Resources\CasoSeguimientos\Pages\ListCasoSeguimientos;
+use App\Filament\Empresa\Resources\CasoSeguimientos\Tables\Columnas;
 use App\Models\CasoSeguimiento;
 use App\Models\Empresa;
 use App\Models\Setting;
 use App\Models\SolicitudReferencia;
 use App\Models\Tamizaje;
+use Filament\Facades\Filament;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Livewire\Livewire;
 use Tests\TestCase;
 
 /**
@@ -48,7 +52,7 @@ class ListadoRiesgoTest extends TestCase
         return CasoSeguimiento::create(array_merge([
             'empresa_id' => $this->empresa->id,
             'identificador_empleado' => 'Juan Pérez',
-            'nivel_riesgo_detectado' => 'Moderado',
+            'nivel_riesgo_detectado' => 'Moderada',
             'estatus_atencion' => 'En seguimiento',
         ], $extra));
     }
@@ -57,7 +61,7 @@ class ListadoRiesgoTest extends TestCase
     {
         $etiquetas = array_map(
             fn ($columna) => $columna->getLabel(),
-            \App\Filament\Empresa\Resources\CasoSeguimientos\Tables\Columnas::definicion(),
+            Columnas::definicion(),
         );
 
         // Orden exacto del documento "ATENCIÓN EMPRESAS +FELIZ": identificación,
@@ -65,7 +69,7 @@ class ListadoRiesgoTest extends TestCase
         $esperado = [
             'Nombre', 'Rango de edad', 'Sexo', 'Funciones', '¿Cuál función?',
             'Tiempo trabajando en la empresa', 'Correo', 'Celular',
-            'Ansiedad', 'Depresión', 'Ideación y riesgo suicida', 'Nivel de riesgo',
+            'Ansiedad', 'Depresión', 'Ideación y riesgo suicida', 'Prioridad de atención',
             'Consentimiento', 'Estatus de atención',
             'Medicina', 'Psicología', 'Psiquiatría', 'Otro', '¿Cuál servicio?',
             'Secretaría de Salud', 'Institución de canalización',
@@ -154,6 +158,46 @@ class ListadoRiesgoTest extends TestCase
             ->assertSee('Grave');
     }
 
+    /**
+     * Reporte de Angélica del 21/08/2026: en Atención/Casos en seguimiento
+     * salían vacías las columnas de función, correo y celular. El caso guarda
+     * copias que nunca se llenan; el dato vive en el tamizaje.
+     */
+    public function test_la_funcion_el_correo_y_el_celular_se_arrastran_del_tamizaje(): void
+    {
+        Tamizaje::create([
+            'empresa_id' => $this->empresa->id,
+            'nombre_completo' => 'Juan Pérez',
+            'consentimiento_otorgado' => true,
+            'actividad_trabajo' => 'Otra',
+            'actividad_trabajo_otra' => 'Almacén',
+            'correo' => 'juan@empresa.test',
+            'telefono' => '8441234567',
+            'riesgo_ansiedad' => 0,
+            'riesgo_depresion' => 0,
+            'riesgo_conducta_suicida' => 0,
+            'nivel_riesgo_general' => 'Leve',
+        ]);
+
+        $this->crearCaso();
+
+        $caso = CasoSeguimiento::where('identificador_empleado', 'Juan Pérez')->sole();
+
+        Filament::setCurrentPanel(Filament::getPanel('empresa'));
+
+        $tabla = Livewire::test(ListCasoSeguimientos::class);
+
+        $tabla->assertTableColumnStateSet('actividad_trabajo_otra', 'Almacén', $caso)
+            ->assertTableColumnStateSet('correo', 'juan@empresa.test', $caso)
+            // El tamizaje lo captura como `telefono`.
+            ->assertTableColumnStateSet('celular', '8441234567', $caso);
+
+        $this->get('/tablero/caso-seguimientos')
+            ->assertSuccessful()
+            ->assertSee('juan@empresa.test')
+            ->assertSee('8441234567');
+    }
+
     public function test_un_caso_manual_no_se_marca_como_proveniente_de_tamizaje(): void
     {
         $this->assertFalse($this->crearCaso(['identificador_empleado' => 'Sin Tamizaje'])->es_de_tamizaje);
@@ -183,7 +227,7 @@ class ListadoRiesgoTest extends TestCase
         $this->get('/tablero/caso-seguimientos')
             ->assertSuccessful()
             ->assertSee('📅 Cita', false)
-            ->assertSee(now()->addDays(3)->format('d/m/Y') . ' 09:30', false)
+            ->assertSee(now()->addDays(3)->format('d/m/Y').' 09:30', false)
             ->assertSee('CESAME');
     }
 
