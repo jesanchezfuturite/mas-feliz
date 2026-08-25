@@ -115,8 +115,11 @@ class TamizajeResource extends Resource
                                 return new HtmlString("<div style=\"color: #374151; font-size: 0.95rem;\">{$accion}</div>");
                             }),
 
-                        // Solo aparece si la persona reportó un intento previo:
-                        // es la pregunta que se despliega desde la 4.
+                        // La pregunta ya no se formula: Angélica la retiró el 25/08/2026
+                        // porque a esas alturas de la aplicación la habrían contestado
+                        // muy pocos. El dato se sigue mostrando en los tamizajes que la
+                        // alcanzaron a contestar, y en los demás el placeholder no
+                        // aparece porque la llave viene vacía.
                         Placeholder::make('ultimo_intento')
                             ->label('¿Cuándo fue el último intento?')
                             ->visible(fn ($record) => filled(data_get($record?->respuestas, 'conducta_suicida.ultimo_intento')))

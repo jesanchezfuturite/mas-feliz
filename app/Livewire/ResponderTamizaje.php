@@ -87,12 +87,6 @@ class ResponderTamizaje extends Component
 
     public $suicidio_4 = null;
 
-    // Pregunta que se deriva de la 4: solo se formula a quien reporta un
-    // intento previo. No puntúa ni cambia la prioridad —Angélica no la mapeó a
-    // ningún nivel—; sirve para que la valoración clínica sepa si el intento
-    // fue reciente. Se guarda dentro de `respuestas`.
-    public $suicidio_4_ultimo_intento = null;
-
     // Pregunta de agudeza (ASQ). Solo se formula a quien contestó "Sí" en
     // alguna de las cuatro anteriores, y es la única que establece riesgo
     // agudo. Ver comentario en `rules()`.
@@ -144,12 +138,6 @@ class ResponderTamizaje extends Component
         self::SUICIDIO_POSITIVO => 'Valoración psicológica adicional para confirmar o descartar riesgo y agudeza',
     ];
 
-    /** Opciones de "¿Cuándo fue el último intento?". */
-    public const ULTIMO_INTENTO = [
-        'Menos de 12 meses',
-        'Más de 12 meses',
-    ];
-
     /**
      * `suicidio_5` solo es obligatoria si hubo al menos un "Sí" en las cuatro
      * anteriores: es la exploración de agudeza del instrumento, no una
@@ -162,9 +150,6 @@ class ResponderTamizaje extends Component
             'suicidio_5' => $this->requiereAgudeza()
                 ? 'required|in:0,1'
                 : 'nullable|in:0,1',
-            'suicidio_4_ultimo_intento' => $this->reportaIntentoPrevio()
-                ? 'required|in:'.implode(',', self::ULTIMO_INTENTO)
-                : 'nullable|in:'.implode(',', self::ULTIMO_INTENTO),
         ]);
     }
 
@@ -175,12 +160,6 @@ class ResponderTamizaje extends Component
             || (int) $this->suicidio_2 === 1
             || (int) $this->suicidio_3 === 1
             || (int) $this->suicidio_4 === 1;
-    }
-
-    /** ¿Reportó un intento previo? Es lo que despliega la pregunta derivada. */
-    public function reportaIntentoPrevio(): bool
-    {
-        return (int) $this->suicidio_4 === 1;
     }
 
     protected $reglasBase = [
@@ -397,10 +376,7 @@ class ResponderTamizaje extends Component
         return [
             'ansiedad' => $recoger('ansiedad', 7),
             'depresion' => $recoger('depresion', 9),
-            'conducta_suicida' => $recoger('suicidio', 4) + [
-                5 => $s5,
-                'ultimo_intento' => $this->reportaIntentoPrevio() ? $this->suicidio_4_ultimo_intento : null,
-            ],
+            'conducta_suicida' => $recoger('suicidio', 4) + [5 => $s5],
         ];
     }
 
@@ -417,11 +393,6 @@ class ResponderTamizaje extends Component
         if (! $this->requiereAgudeza()) {
             $this->suicidio_5 = null;
             $this->resetValidation('suicidio_5');
-        }
-
-        if (! $this->reportaIntentoPrevio()) {
-            $this->suicidio_4_ultimo_intento = null;
-            $this->resetValidation('suicidio_4_ultimo_intento');
         }
     }
 

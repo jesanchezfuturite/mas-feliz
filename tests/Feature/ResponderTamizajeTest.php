@@ -321,7 +321,7 @@ class ResponderTamizajeTest extends TestCase
      */
     public function test_intento_en_el_pasado_sin_agudeza_no_es_urgente(): void
     {
-        $this->responder(['suicidio_4' => '1', 'suicidio_4_ultimo_intento' => 'Más de 12 meses', 'suicidio_5' => '0'])
+        $this->responder(['suicidio_4' => '1', 'suicidio_5' => '0'])
             ->assertHasNoErrors()
             ->assertSet('success', true);
 
@@ -341,7 +341,7 @@ class ResponderTamizajeTest extends TestCase
      */
     public function test_la_pregunta_cinco_sube_la_prioridad_sin_cambiar_el_resultado(): void
     {
-        $this->responder(['suicidio_4' => '1', 'suicidio_4_ultimo_intento' => 'Menos de 12 meses', 'suicidio_5' => '1'])
+        $this->responder(['suicidio_4' => '1', 'suicidio_5' => '1'])
             ->assertHasNoErrors();
 
         $this->assertDatabaseHas('tamizajes', [
@@ -486,50 +486,19 @@ class ResponderTamizajeTest extends TestCase
     }
 
     /**
-     * La pregunta que Angélica pidió derivar de la 4 el 21/08/2026. No cambia la
-     * prioridad —eso lo decide la 5—, pero sin ella la valoración clínica no
-     * sabe si el intento fue reciente.
+     * Angélica retiró el 25/08/2026 la pregunta que se derivaba de la 4
+     * ("¿Cuándo fue el último intento?"): a esas alturas de la aplicación la
+     * habrían contestado muy pocos y no serviría para reportar. El ASQ se queda
+     * con sus cinco preguntas, y la 5 sigue siendo la que establece la agudeza.
      */
-    public function test_el_ultimo_intento_es_obligatorio_si_reporta_un_intento_previo(): void
+    public function test_ya_no_se_pregunta_por_el_ultimo_intento(): void
     {
         $this->responder(['suicidio_4' => '1', 'suicidio_5' => '0'])
-            ->assertHasErrors(['suicidio_4_ultimo_intento' => 'required']);
-
-        $this->assertDatabaseCount('tamizajes', 0);
-    }
-
-    public function test_el_ultimo_intento_se_guarda_con_las_respuestas(): void
-    {
-        $this->responder([
-            'suicidio_4' => '1',
-            'suicidio_4_ultimo_intento' => 'Menos de 12 meses',
-            'suicidio_5' => '0',
-        ])->assertHasNoErrors();
-
-        $tamizaje = Tamizaje::where('empresa_id', $this->empresa->id)->sole();
-
-        $this->assertSame('Menos de 12 meses', $tamizaje->respuestas['conducta_suicida']['ultimo_intento']);
-    }
-
-    public function test_el_ultimo_intento_no_se_pide_si_no_hubo_intento_previo(): void
-    {
-        // Un "Sí" en la 3 despliega la pregunta de agudeza, pero no la del intento.
-        $this->responder(['suicidio_3' => '1', 'suicidio_5' => '0'])
             ->assertHasNoErrors()
             ->assertSet('success', true);
 
         $tamizaje = Tamizaje::where('empresa_id', $this->empresa->id)->sole();
 
-        $this->assertNull($tamizaje->respuestas['conducta_suicida']['ultimo_intento']);
-    }
-
-    public function test_el_ultimo_intento_se_limpia_si_la_persona_se_retracta(): void
-    {
-        Livewire::test(ResponderTamizaje::class, ['token' => $this->empresa->token_tamizaje])
-            ->set('suicidio_4', '1')
-            ->set('suicidio_4_ultimo_intento', 'Menos de 12 meses')
-            ->assertSet('suicidio_4_ultimo_intento', 'Menos de 12 meses')
-            ->set('suicidio_4', '0')
-            ->assertSet('suicidio_4_ultimo_intento', null);
+        $this->assertArrayNotHasKey('ultimo_intento', $tamizaje->respuestas['conducta_suicida']);
     }
 }

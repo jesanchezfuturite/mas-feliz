@@ -440,26 +440,6 @@
                         </div>
                         @endforeach
 
-                        {{-- Pregunta derivada de la 4. Solo se formula a quien reporta un
-                             intento previo; no cambia la prioridad de atención, ubica el
-                             intento en el tiempo para la valoración clínica. --}}
-                        @if($this->reportaIntentoPrevio())
-                        <div class="space-y-3 rounded-2xl border border-slate-200 dark:border-slate-800 bg-slate-50/60 dark:bg-slate-800/20 p-5">
-                            <label class="block text-sm font-semibold text-slate-800 dark:text-slate-200">
-                                ¿Cuándo fue el último intento?
-                            </label>
-                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                                @foreach(\App\Livewire\ResponderTamizaje::ULTIMO_INTENTO as $opcion)
-                                    <label class="flex items-center justify-center py-3 px-4 border rounded-xl cursor-pointer transition-all duration-200 {{ $suicidio_4_ultimo_intento === $opcion ? 'border-orange-600 bg-orange-50/50 dark:bg-orange-950/20 text-orange-700 dark:text-orange-300 ring-2 ring-orange-500/20 font-semibold' : 'border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 hover:bg-slate-50 dark:hover:bg-slate-800/40 text-slate-600 dark:text-slate-400' }}">
-                                        <input type="radio" wire:model.live="suicidio_4_ultimo_intento" value="{{ $opcion }}" class="sr-only" />
-                                        <span class="text-sm font-medium text-center leading-tight">{{ $opcion }}</span>
-                                    </label>
-                                @endforeach
-                            </div>
-                            @error('suicidio_4_ultimo_intento') <span class="text-xs text-red-500 block font-medium mt-1">{{ $message }}</span> @enderror
-                        </div>
-                        @endif
-
                         {{-- Pregunta de agudeza. Solo se formula a quien contestó "Sí" en
                              alguna de las cuatro anteriores; es la única que establece
                              riesgo agudo y la que decide la canalización a Salud. --}}
