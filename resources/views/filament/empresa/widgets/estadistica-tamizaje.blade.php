@@ -1,3 +1,7 @@
+{{-- El envoltorio de Filament es el que carga las clases de columna del
+     grid de widgets: sin él, el `columnSpan = 'full'` del widget no se
+     aplica y el grid lo encajona en una sola columna. --}}
+<x-filament-widgets::widget>
 <div style="width: 100%; background-color: #ffffff; border: 1px solid #f1f5f9; border-radius: 1rem; box-shadow: 0 1px 3px 0 rgba(0,0,0,0.06); padding: 1.5rem;">
 
     <div style="margin-bottom: 1.25rem;">
@@ -10,17 +14,20 @@
             Aún no hay tamizajes respondidos con resultado de riesgo para mostrar estadísticas.
         </div>
     @else
+        {{-- Las columnas se deciden por el ancho DISPONIBLE, no por el del
+             viewport: una media query metía dos columnas aunque el widget
+             estuviera encajonado en 440px y las barras se salían de la
+             tarjeta. minmax(0, 1fr) permite a cada columna encogerse. --}}
         <style>
-            @media (min-width: 900px) {
-                .estad-grid-2 { grid-template-columns: repeat(2, 1fr) !important; }
-                .estad-grid-3 { grid-template-columns: repeat(3, 1fr) !important; }
-            }
+            .estad-grid-2 { display: grid; gap: 1.75rem; grid-template-columns: repeat(auto-fit, minmax(min(24rem, 100%), 1fr)); }
+            .estad-grid-3 { display: grid; gap: 1.25rem; grid-template-columns: repeat(auto-fit, minmax(min(15rem, 100%), 1fr)); }
+            .estad-grid-2 > div, .estad-grid-3 > div { min-width: 0; }
         </style>
 
         {{-- Sección 1: Resultados por instrumento --}}
         <h4 style="font-size: 0.8rem; font-weight: 700; color: #334155; text-transform: uppercase; letter-spacing: 0.05em; margin: 0 0 1rem; padding-bottom: 0.4rem; border-bottom: 1px solid #f1f5f9;">Resultados por instrumento</h4>
 
-        <div class="estad-grid-3" style="display: grid; grid-template-columns: 1fr; gap: 1.25rem; margin-bottom: 2rem;">
+        <div class="estad-grid-3" style="margin-bottom: 2rem;">
             @foreach ($instrumentos as $inst)
                 <div style="border: 1px solid #f1f5f9; border-radius: 0.75rem; padding: 1rem 1.1rem; background-color: #fcfdfe;">
                     {{-- Título y total en bloque: lado a lado se estrujaban y el
@@ -72,7 +79,7 @@
             <p style="font-size: 0.72rem; color: #94a3b8; margin: -0.5rem 0 1rem; line-height: 1.4;"><strong>Nota:</strong> {{ $nota }}</p>
         @endif
 
-        <div class="estad-grid-2" style="display: grid; grid-template-columns: 1fr; gap: 1.75rem;">
+        <div class="estad-grid-2">
             @foreach ($dimensiones as $dim)
                 <div>
                     <h5 style="font-size: 0.78rem; font-weight: 700; color: #475569; margin: 0 0 0.85rem;">{{ $dim['titulo'] }}</h5>
@@ -115,3 +122,4 @@
     @endif
 
 </div>
+</x-filament-widgets::widget>
