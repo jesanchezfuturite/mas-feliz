@@ -91,9 +91,9 @@ class TamizajeResource extends Resource
             ->components([
                 Grid::make(3)
                     ->schema([
-                        $makeBadge('nivel_ansiedad', 'Ansiedad'),
-                        $makeBadge('nivel_depresion', 'Depresión'),
-                        $makeBadge('nivel_suicidio', 'Riesgo Suicida'),
+                        $makeBadge('nivel_ansiedad', 'Síntomas de Ansiedad'),
+                        $makeBadge('nivel_depresion', 'Síntomas de Depresión'),
+                        $makeBadge('nivel_suicidio', 'Indicadores de Conducta suicida'),
                     ]),
 
                 // La prioridad y la conducta que le corresponde no estaban en el
