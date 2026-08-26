@@ -149,8 +149,11 @@ class EstadisticaTamizajeWidget extends Widget
             $visible = [];
             foreach ($datos as $categoria => $conteos) {
                 $clave = mb_strtolower(trim((string) $categoria));
+                // Como nombre visible gana la variante con más personas.
+                if (! isset($visible[$clave]) || $conteos['total'] > $visible[$clave]['n']) {
+                    $visible[$clave] = ['texto' => trim((string) $categoria), 'n' => $conteos['total']];
+                }
                 if (! isset($porClave[$clave])) {
-                    $visible[$clave] = trim((string) $categoria);
                     $porClave[$clave] = $conteos;
 
                     continue;
@@ -161,7 +164,7 @@ class EstadisticaTamizajeWidget extends Widget
             }
 
             return array_combine(
-                array_map(fn ($clave) => $visible[$clave], array_keys($porClave)),
+                array_map(fn ($clave) => $visible[$clave]['texto'], array_keys($porClave)),
                 array_values($porClave)
             );
         };
