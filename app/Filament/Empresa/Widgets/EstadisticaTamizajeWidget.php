@@ -127,9 +127,9 @@ class EstadisticaTamizajeWidget extends Widget
             ),
             'nota' => PrioridadAtencion::NOTA,
             'instrumentos' => [
-                ['titulo' => 'Ansiedad (GAD-7)'] + $instrumento($rows, 'nivel_ansiedad', ['Mínima o sin ansiedad', 'Leve', 'Moderada', 'Grave']),
-                ['titulo' => 'Depresión (PHQ-9)'] + $instrumento($rows, 'nivel_depresion', ['Mínima o ausente', 'Leve', 'Moderada', 'Moderadamente grave', 'Grave']),
-                ['titulo' => 'Riesgo suicida'] + $instrumento($rows, 'nivel_suicidio', ResponderTamizaje::NIVELES_SUICIDIO),
+                ['titulo' => 'Síntomas de Ansiedad (GAD-7)'] + $instrumento($rows, 'nivel_ansiedad', ['Mínima o sin ansiedad', 'Leve', 'Moderada', 'Grave']),
+                ['titulo' => 'Síntomas de Depresión (PHQ-9)'] + $instrumento($rows, 'nivel_depresion', ['Mínima o ausente', 'Leve', 'Moderada', 'Moderadamente grave', 'Grave']),
+                ['titulo' => 'Indicadores de Conducta suicida'] + $instrumento($rows, 'nivel_suicidio', ResponderTamizaje::NIVELES_SUICIDIO),
             ],
             'dimensiones' => [
                 [

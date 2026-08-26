@@ -11,10 +11,12 @@ namespace App\Support;
  * plataforma muestra es una prioridad operativa del Distintivo, no un
  * diagnóstico: la nota de `NOTA` va junto a la escala en todos los listados.
  *
- * La tabla que definió es esta:
+ * La tabla que definió es esta (con la corrección que mandó el 26/08/2026:
+ * "cuando depresión o ansiedad es leve + ASQ negativo, debe de ser Leve" —
+ * su tabla original ponía los leves en Moderada y le inflaba ese nivel):
  *
- *   Ansiedad mínima + depresión mínima + ASQ negativo ............... Leve
- *   Ansiedad/depresión leve o moderada + ASQ negativo .............. Moderada
+ *   Ansiedad y depresión hasta leve + ASQ negativo .................. Leve
+ *   Ansiedad y/o depresión moderada + ASQ negativo ................. Moderada
  *   Ansiedad grave y/o depresión mod. grave/grave + ASQ negativo ... Alta
  *   ASQ positivo no agudo + ansiedad/depresión en cualquier nivel .. Alta
  *   ASQ positivo con pregunta 5 = "Sí" ............................ Urgente
@@ -124,7 +126,7 @@ class PrioridadAtencion
             return self::ALTA;
         }
 
-        if (in_array($nivelAnsiedad, ['Leve', 'Moderada'], true) || in_array($nivelDepresion, ['Leve', 'Moderada'], true)) {
+        if ($nivelAnsiedad === 'Moderada' || $nivelDepresion === 'Moderada') {
             return self::MODERADA;
         }
 

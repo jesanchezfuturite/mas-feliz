@@ -2,6 +2,7 @@
 
 namespace App\Filament\Empresa\Resources\CasoSeguimientos\Tables;
 
+use App\Models\CasoSeguimiento;
 use App\Support\ColorNivel;
 use App\Support\PrioridadAtencion;
 use Filament\Tables\Columns\CheckboxColumn;
@@ -96,9 +97,9 @@ class Columnas
                 ->rules(['nullable', 'max:20']),
 
             // --- RESULTADOS (provienen del tamizaje, solo lectura) ---
-            self::resultado('ansiedad', 'Ansiedad', fn ($t) => $t?->nivel_ansiedad),
-            self::resultado('depresion', 'Depresión', fn ($t) => $t?->nivel_depresion),
-            self::resultado('suicidio', 'Ideación y riesgo suicida', fn ($t) => $t?->nivel_suicidio),
+            self::resultado('ansiedad', 'Síntomas de Ansiedad', fn ($t) => $t?->nivel_ansiedad),
+            self::resultado('depresion', 'Síntomas de Depresión', fn ($t) => $t?->nivel_depresion),
+            self::resultado('suicidio', 'Indicadores de Conducta suicida', fn ($t) => $t?->nivel_suicidio),
 
             SelectColumn::make('nivel_riesgo_detectado')
                 ->label(PrioridadAtencion::ETIQUETA)
@@ -116,7 +117,7 @@ class Columnas
             // --- ESTATUS DE ATENCIÓN ---
             SelectColumn::make('estatus_atencion')
                 ->label('Estatus de atención')
-                ->options(\App\Models\CasoSeguimiento::ESTATUS_ATENCION)
+                ->options(CasoSeguimiento::ESTATUS_ATENCION)
                 ->selectablePlaceholder(false),
 
             // --- SERVICIO ---
@@ -168,9 +169,9 @@ class Columnas
 
                 return new HtmlString(
                     '<span style="display: inline-flex; align-items: center; gap: 0.25rem; background-color: #dcfce7; color: #15803d; padding: 0.15rem 0.5rem; border-radius: 9999px; font-size: 0.7rem; font-weight: 700; white-space: nowrap;">'
-                    . '📅 Cita ' . $solicitud->fecha_cita->format('d/m/Y H:i')
-                    . ($unidad ? ' · ' . e($unidad) : '')
-                    . '</span>'
+                    .'📅 Cita '.$solicitud->fecha_cita->format('d/m/Y H:i')
+                    .($unidad ? ' · '.e($unidad) : '')
+                    .'</span>'
                 );
             });
     }

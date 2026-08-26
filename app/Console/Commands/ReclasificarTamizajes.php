@@ -10,7 +10,7 @@ use Illuminate\Console\Command;
 /**
  * Reclasifica los tamizajes ya aplicados con la escala vigente.
  *
- * Va en dos pasadas, cada una con su marca en `respuestas`:
+ * Va por pasadas, cada una con su marca en `respuestas`:
  *
  * - `reclasificacion_18_08_2026`: hasta esa fecha un "Sí" en la pregunta 4
  *   —"¿Alguna vez has intentado quitarte la vida?", que abarca toda la vida—
@@ -24,6 +24,11 @@ use Illuminate\Console\Command;
  *   pregunta de agudeza no pueden clasificarse como "Alta" (que supone ASQ
  *   positivo no agudo) ni como "Urgente": quedan en "Agudeza pendiente de
  *   confirmar", que es el estado que ella pidió agregar para ellos.
+ *
+ * - `prioridad_leve_26_08_2026`: Angélica corrigió su propia tabla — los
+ *   niveles Leve de ansiedad/depresión (con ASQ negativo) le estaban inflando
+ *   la prioridad Moderada, cuando deben quedar en Leve. Esta pasada solo baja
+ *   registros de Moderada a Leve; ningún otro renglón de la escala cambió.
  *
  * Ninguna pasada eleva un registro histórico a riesgo agudo: esa determinación
  * corresponde a la valoración clínica, no a un recálculo.
@@ -39,7 +44,7 @@ class ReclasificarTamizajes extends Command
     protected $description = 'Recalcula la prioridad de atención de los tamizajes ya aplicados';
 
     /** Marca de la pasada vigente. Deja constancia y hace el comando idempotente. */
-    private const MARCA = 'prioridad_atencion_21_08_2026';
+    private const MARCA = 'prioridad_leve_26_08_2026';
 
     public function handle(): int
     {
