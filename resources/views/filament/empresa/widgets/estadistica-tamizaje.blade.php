@@ -23,9 +23,11 @@
         <div class="estad-grid-3" style="display: grid; grid-template-columns: 1fr; gap: 1.25rem; margin-bottom: 2rem;">
             @foreach ($instrumentos as $inst)
                 <div style="border: 1px solid #f1f5f9; border-radius: 0.75rem; padding: 1rem 1.1rem; background-color: #fcfdfe;">
-                    <div style="display: flex; align-items: baseline; justify-content: space-between; margin-bottom: 0.85rem;">
-                        <span style="font-size: 0.92rem; font-weight: 700; color: #1e293b;">{{ $inst['titulo'] }}</span>
-                        <span style="font-size: 0.72rem; color: #94a3b8;">{{ $inst['total'] }} evaluados</span>
+                    {{-- Título y total en bloque: lado a lado se estrujaban y el
+                         título se partía palabra por palabra. --}}
+                    <div style="margin-bottom: 0.85rem;">
+                        <span style="display: block; font-size: 0.92rem; font-weight: 700; color: #1e293b; line-height: 1.3;">{{ $inst['titulo'] }}</span>
+                        <span style="font-size: 0.72rem; color: #94a3b8;">{{ $inst['total'] }} personas evaluadas</span>
                     </div>
 
                     @php $ti = max($inst['total'], 1); @endphp
@@ -78,24 +80,28 @@
                     @forelse ($dim['datos'] as $categoria => $c)
                         @php $t = max($c['total'], 1); @endphp
                         <div style="margin-bottom: 0.9rem;">
+                            {{-- Línea 1: categoría y total. Los conteos van
+                                 DEBAJO de la barra, donde pueden envolver: en
+                                 la misma línea empujaban la fila fuera de la
+                                 tarjeta en pantallas medianas. --}}
                             <div style="display: flex; align-items: baseline; justify-content: space-between; gap: 0.75rem; margin-bottom: 0.3rem;">
-                                <span style="font-size: 0.85rem; color: #1e293b; font-weight: 500; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="{{ $categoria }}">{{ $categoria }}</span>
-                                <span style="display: inline-flex; align-items: baseline; gap: 0.55rem; font-size: 0.78rem; color: #64748b; flex-shrink: 0;">
-                                    {{-- Solo los niveles con personas: los ceros son ruido. --}}
-                                    @foreach ($escala as $nivel)
-                                        @if ($c[$nivel['label']] > 0)
-                                            <span style="display: inline-flex; align-items: center; gap: 0.25rem; font-weight: 600; color: #334155;" title="{{ $nivel['label'] }}: {{ $c[$nivel['label']] }} ({{ round($c[$nivel['label']] / $t * 100) }}%)">
-                                                <span style="height:0.5rem;width:0.5rem;border-radius:2px;background:{{ $nivel['color'] }};display:inline-block;"></span>{{ $c[$nivel['label']] }}
-                                            </span>
-                                        @endif
-                                    @endforeach
-                                    <span style="color:#94a3b8;">Total: {{ $c['total'] }}</span>
-                                </span>
+                                <span style="font-size: 0.85rem; color: #1e293b; font-weight: 500; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="{{ $categoria }}">{{ $categoria }}</span>
+                                <span style="font-size: 0.78rem; color: #64748b; white-space: nowrap; flex-shrink: 0;">{{ $c['total'] }} {{ $c['total'] === 1 ? 'persona' : 'personas' }}</span>
                             </div>
                             <div style="display: flex; height: 0.6rem; width: 100%; border-radius: 9999px; overflow: hidden; background-color: #f1f5f9;">
                                 @foreach ($escala as $nivel)
                                     @if ($c[$nivel['label']] > 0)
                                         <div style="width: {{ $c[$nivel['label']] / $t * 100 }}%; background-color: {{ $nivel['color'] }};" title="{{ $nivel['label'] }}: {{ $c[$nivel['label']] }}"></div>
+                                    @endif
+                                @endforeach
+                            </div>
+                            <div style="display: flex; flex-wrap: wrap; align-items: center; gap: 0.3rem 0.75rem; margin-top: 0.3rem; font-size: 0.75rem; color: #475569;">
+                                {{-- Solo los niveles con personas: los ceros son ruido. --}}
+                                @foreach ($escala as $nivel)
+                                    @if ($c[$nivel['label']] > 0)
+                                        <span style="display: inline-flex; align-items: center; gap: 0.25rem;" title="{{ $nivel['label'] }}: {{ $c[$nivel['label']] }} ({{ round($c[$nivel['label']] / $t * 100) }}%)">
+                                            <span style="height:0.5rem;width:0.5rem;border-radius:2px;background:{{ $nivel['color'] }};display:inline-block;"></span>{{ $c[$nivel['label']] }} <span style="color:#94a3b8;">({{ round($c[$nivel['label']] / $t * 100) }}%)</span>
+                                        </span>
                                     @endif
                                 @endforeach
                             </div>
