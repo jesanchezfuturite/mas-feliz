@@ -15,6 +15,43 @@ class EstadisticaTamizajeWidget extends Widget
     protected int|string|array $columnSpan = 'full';
 
     /**
+     * Instrumento por el que se cruzan los perfiles demográficos. Es la
+     * petición de fondo de Angélica (21/08/2026): la empresa debe ver
+     * tendencias de sintomatología —niveles de ansiedad, depresión y ASQ por
+     * sexo, edad, antigüedad y función—, no solo la prioridad de atención.
+     * La prioridad se conserva como una opción más del selector.
+     */
+    public string $instrumento = 'ansiedad';
+
+    /**
+     * Las escalas seleccionables. `campo` es la columna del tamizaje y
+     * `niveles` su orden de severidad; los colores salen de ColorNivel para
+     * cualquiera de ellas.
+     */
+    public const INSTRUMENTOS = [
+        'ansiedad' => [
+            'titulo' => 'Síntomas de Ansiedad (GAD-7)',
+            'campo' => 'nivel_ansiedad',
+            'niveles' => ['Mínima o sin ansiedad', 'Leve', 'Moderada', 'Grave'],
+        ],
+        'depresion' => [
+            'titulo' => 'Síntomas de Depresión (PHQ-9)',
+            'campo' => 'nivel_depresion',
+            'niveles' => ['Mínima o ausente', 'Leve', 'Moderada', 'Moderadamente grave', 'Grave'],
+        ],
+        'suicidio' => [
+            'titulo' => 'Indicadores de Conducta suicida',
+            'campo' => 'nivel_suicidio',
+            'niveles' => ResponderTamizaje::NIVELES_SUICIDIO,
+        ],
+        'prioridad' => [
+            'titulo' => PrioridadAtencion::ETIQUETA,
+            'campo' => 'nivel_riesgo_general',
+            'niveles' => PrioridadAtencion::ESCALA,
+        ],
+    ];
+
+    /**
      * Mismo interruptor que el listado por individuo: este bloque desglosa los
      * niveles de cada instrumento (GAD-7, PHQ-9, conducta suicida) y es justo lo
      * que no debe leerse hasta que se aclare cómo interpretarlos.
@@ -44,6 +81,12 @@ class EstadisticaTamizajeWidget extends Widget
     protected function getViewData(): array
     {
         $empresa = auth()->user();
+
+        // La propiedad es pública de Livewire: se sanea por si llega alterada.
+        if (! isset(self::INSTRUMENTOS[$this->instrumento])) {
+            $this->instrumento = 'ansiedad';
+        }
+        $seleccion = self::INSTRUMENTOS[$this->instrumento];
 
         // Solo tamizajes con resultado de riesgo real (excluye "No participó" y nulos).
         $rows = $empresa->tamizajes()
@@ -77,18 +120,19 @@ class EstadisticaTamizajeWidget extends Widget
             return ['total' => $total, 'niveles' => $niveles];
         };
 
-        // Agrupa filas por una dimensión y cuenta por nivel de riesgo.
-        $agrupar = function ($rows, callable $keyFn): array {
+        // Agrupa filas por una dimensión y cuenta por nivel del instrumento
+        // seleccionado en el selector (sintomatología o prioridad).
+        $agrupar = function ($rows, callable $keyFn) use ($seleccion): array {
             $out = [];
             foreach ($rows as $r) {
                 $key = $keyFn($r);
                 $key = ($key === null || $key === '') ? 'Sin especificar' : $key;
                 if (! isset($out[$key])) {
-                    // Un contador por nivel de la escala vigente, más el total.
-                    $out[$key] = array_fill_keys(PrioridadAtencion::ESCALA, 0) + ['total' => 0];
+                    // Un contador por nivel de la escala seleccionada, más el total.
+                    $out[$key] = array_fill_keys($seleccion['niveles'], 0) + ['total' => 0];
                 }
-                $nivel = $r->nivel_riesgo_general;
-                if (isset($out[$key][$nivel])) {
+                $nivel = $r->{$seleccion['campo']};
+                if ($nivel !== null && isset($out[$key][$nivel])) {
                     $out[$key][$nivel]++;
                     $out[$key]['total']++;
                 }
@@ -119,13 +163,18 @@ class EstadisticaTamizajeWidget extends Widget
 
         return [
             'total' => $rows->count(),
-            // La escala se pasa a la vista en vez de repetirla ahí: pasó de
-            // tres niveles a cinco el 21/08/2026 y volverá a cambiar.
+            // La escala del instrumento seleccionado se pasa a la vista en vez
+            // de repetirla ahí: los niveles cambian con el selector (y ya
+            // cambiaron de fondo una vez, el 21/08/2026).
             'escala' => array_map(
-                fn (string $nivel) => ['label' => $nivel, 'color' => PrioridadAtencion::HEX[$nivel]],
-                PrioridadAtencion::ESCALA
+                fn (string $nivel) => ['label' => $nivel, 'color' => ColorNivel::hex($nivel)],
+                $seleccion['niveles']
             ),
-            'nota' => PrioridadAtencion::NOTA,
+            'tituloPerfil' => $seleccion['titulo'],
+            'opcionesInstrumento' => array_map(fn (array $i) => $i['titulo'], self::INSTRUMENTOS),
+            // La nota legal acompaña solo a la prioridad de atención: es una
+            // aclaración sobre esa escala, no sobre los instrumentos clínicos.
+            'nota' => $this->instrumento === 'prioridad' ? PrioridadAtencion::NOTA : null,
             'instrumentos' => [
                 ['titulo' => 'Síntomas de Ansiedad (GAD-7)'] + $instrumento($rows, 'nivel_ansiedad', ['Mínima o sin ansiedad', 'Leve', 'Moderada', 'Grave']),
                 ['titulo' => 'Síntomas de Depresión (PHQ-9)'] + $instrumento($rows, 'nivel_depresion', ['Mínima o ausente', 'Leve', 'Moderada', 'Moderadamente grave', 'Grave']),

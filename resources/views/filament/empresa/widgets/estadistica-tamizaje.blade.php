@@ -49,9 +49,16 @@
             @endforeach
         </div>
 
-        {{-- Sección 2: Riesgo general por perfil --}}
+        {{-- Sección 2: sintomatología (o prioridad) por perfil, con selector de instrumento --}}
         <div style="display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 0.5rem; margin-bottom: 1rem; padding-bottom: 0.4rem; border-bottom: 1px solid #f1f5f9;">
-            <h4 style="font-size: 0.8rem; font-weight: 700; color: #334155; text-transform: uppercase; letter-spacing: 0.05em; margin: 0;">Prioridad de atención por perfil</h4>
+            <div style="display: flex; flex-wrap: wrap; align-items: center; gap: 0.75rem;">
+                <h4 style="font-size: 0.8rem; font-weight: 700; color: #334155; text-transform: uppercase; letter-spacing: 0.05em; margin: 0;">{{ $tituloPerfil }} por perfil</h4>
+                <select wire:model.live="instrumento" style="font-size: 0.78rem; color: #334155; border: 1px solid #e2e8f0; border-radius: 0.5rem; padding: 0.25rem 1.75rem 0.25rem 0.6rem; background-color: #ffffff;">
+                    @foreach ($opcionesInstrumento as $valor => $titulo)
+                        <option value="{{ $valor }}">{{ $titulo }}</option>
+                    @endforeach
+                </select>
+            </div>
             <div style="display: flex; flex-wrap: wrap; align-items: center; gap: 0.85rem; font-size: 0.72rem; color: #475569;">
                 @foreach ($escala as $nivel)
                     <span style="display: inline-flex; align-items: center; gap: 0.35rem;"><span style="height:0.65rem;width:0.65rem;border-radius:2px;background:{{ $nivel['color'] }};display:inline-block;"></span>{{ $nivel['label'] }}</span>
@@ -59,7 +66,9 @@
             </div>
         </div>
 
-        <p style="font-size: 0.72rem; color: #94a3b8; margin: -0.5rem 0 1rem; line-height: 1.4;"><strong>Nota:</strong> {{ $nota }}</p>
+        @if ($nota)
+            <p style="font-size: 0.72rem; color: #94a3b8; margin: -0.5rem 0 1rem; line-height: 1.4;"><strong>Nota:</strong> {{ $nota }}</p>
+        @endif
 
         <div class="estad-grid-2" style="display: grid; grid-template-columns: 1fr; gap: 1.75rem;">
             @foreach ($dimensiones as $dim)
