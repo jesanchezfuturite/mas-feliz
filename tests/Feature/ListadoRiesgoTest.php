@@ -66,10 +66,12 @@ class ListadoRiesgoTest extends TestCase
 
         // Orden exacto del documento "ATENCIÓN EMPRESAS +FELIZ": identificación,
         // resultados, consentimiento, estatus, servicio y solicitud de referencia.
+        // Los nombres de los tres resultados son los que Angélica pidió el
+        // 26/08/2026: "Síntomas de..." e "Indicadores de Conducta suicida".
         $esperado = [
             'Nombre', 'Rango de edad', 'Sexo', 'Funciones', '¿Cuál función?',
             'Tiempo trabajando en la empresa', 'Correo', 'Celular',
-            'Ansiedad', 'Depresión', 'Ideación y riesgo suicida', 'Prioridad de atención',
+            'Síntomas de Ansiedad', 'Síntomas de Depresión', 'Indicadores de Conducta suicida', 'Prioridad de atención',
             'Consentimiento', 'Estatus de atención',
             'Medicina', 'Psicología', 'Psiquiatría', 'Otro', '¿Cuál servicio?',
             'Secretaría de Salud', 'Institución de canalización',
@@ -85,7 +87,7 @@ class ListadoRiesgoTest extends TestCase
         $this->get('/tablero/caso-seguimientos')
             ->assertSuccessful()
             ->assertSee('Rango de edad')
-            ->assertSee('Ideación y riesgo suicida')
+            ->assertSee('Indicadores de Conducta suicida')
             ->assertSee('Secretaría de Salud');
     }
 

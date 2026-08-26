@@ -341,7 +341,7 @@
                 <!-- Section 1: Ansiedad -->
                 <div class="bg-white dark:bg-slate-900 shadow-xl shadow-slate-200/40 dark:shadow-none border border-slate-100 dark:border-slate-800 rounded-3xl overflow-hidden">
                     <div class="bg-[#8CC63F] px-8 py-5 text-white">
-                        <h2 class="text-lg font-bold">Módulo 1: Ansiedad</h2>
+                        <h2 class="text-lg font-bold">Módulo 1: Síntomas de Ansiedad</h2>
                     </div>
                     <div class="p-8 space-y-8">
                         <p class="rounded-xl bg-slate-50 dark:bg-slate-800/40 border border-slate-100 dark:border-slate-800 px-5 py-4 text-sm font-medium text-slate-700 dark:text-slate-300 leading-relaxed">
@@ -377,7 +377,7 @@
                 <!-- Section 2: Depresión -->
                 <div class="bg-white dark:bg-slate-900 shadow-xl shadow-slate-200/40 dark:shadow-none border border-slate-100 dark:border-slate-800 rounded-3xl overflow-hidden">
                     <div class="bg-[#2AB288] px-8 py-5 text-white">
-                        <h2 class="text-lg font-bold">Módulo 2: Depresión</h2>
+                        <h2 class="text-lg font-bold">Módulo 2: Síntomas de Depresión</h2>
                     </div>
                     <div class="p-8 space-y-8">
                         <p class="rounded-xl bg-slate-50 dark:bg-slate-800/40 border border-slate-100 dark:border-slate-800 px-5 py-4 text-sm font-medium text-slate-700 dark:text-slate-300 leading-relaxed">
@@ -415,7 +415,7 @@
                 <!-- Section 3: Riesgo Suicida -->
                 <div class="bg-white dark:bg-slate-900 shadow-xl shadow-slate-200/40 dark:shadow-none border border-slate-100 dark:border-slate-800 rounded-3xl overflow-hidden">
                     <div class="bg-[#29BFE0] px-8 py-5 text-white">
-                        <h2 class="text-lg font-bold">Módulo 3: Ideación y Riesgo Suicida</h2>
+                        <h2 class="text-lg font-bold">Módulo 3: Indicadores de Conducta suicida</h2>
                     </div>
                     <div class="p-8 space-y-8">
                         @foreach([
