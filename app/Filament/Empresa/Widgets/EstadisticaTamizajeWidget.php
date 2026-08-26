@@ -141,6 +141,53 @@ class EstadisticaTamizajeWidget extends Widget
             return $out;
         };
 
+        // Une categorías que solo difieren en mayúsculas o espacios. Aplica al
+        // texto libre de "¿Cuál función?": en la UAdeC, "Docente", "DOCENTE" y
+        // "docente " se dibujaban como tres barras distintas.
+        $fusionar = function (array $datos): array {
+            $porClave = [];
+            $visible = [];
+            foreach ($datos as $categoria => $conteos) {
+                $clave = mb_strtolower(trim((string) $categoria));
+                if (! isset($porClave[$clave])) {
+                    $visible[$clave] = trim((string) $categoria);
+                    $porClave[$clave] = $conteos;
+
+                    continue;
+                }
+                foreach ($conteos as $nivel => $n) {
+                    $porClave[$clave][$nivel] += $n;
+                }
+            }
+
+            return array_combine(
+                array_map(fn ($clave) => $visible[$clave], array_keys($porClave)),
+                array_values($porClave)
+            );
+        };
+
+        // Ordena por volumen y deja visibles solo las categorías más
+        // frecuentes; el resto se suma en una sola barra "Otras". Sin esto,
+        // una empresa grande convierte el cruce en cientos de barras de una
+        // persona, ilegible (y reidentificable).
+        $compactar = function (array $datos, int $tope = 8) use ($seleccion): array {
+            uasort($datos, fn (array $a, array $b) => $b['total'] <=> $a['total']);
+            if (count($datos) <= $tope) {
+                return $datos;
+            }
+            $visibles = array_slice($datos, 0, $tope, true);
+            $resto = array_slice($datos, $tope, null, true);
+            $otras = array_fill_keys($seleccion['niveles'], 0) + ['total' => 0];
+            foreach ($resto as $conteos) {
+                foreach ($conteos as $nivel => $n) {
+                    $otras[$nivel] += $n;
+                }
+            }
+            $visibles['Otras ('.count($resto).' categorías)'] = $otras;
+
+            return $visibles;
+        };
+
         // Reordena una agrupación según un orden predefinido; extras van al final.
         $ordenar = function (array $data, array $orden): array {
             $out = [];
@@ -195,7 +242,9 @@ class EstadisticaTamizajeWidget extends Widget
                 ],
                 [
                     'titulo' => 'Por tipo de funciones',
-                    'datos' => $agrupar($rows, fn ($r) => $r->actividad_trabajo === 'Otra' ? ($r->actividad_trabajo_otra ?: 'Otra') : $r->actividad_trabajo),
+                    'datos' => $compactar($fusionar(
+                        $agrupar($rows, fn ($r) => $r->actividad_trabajo === 'Otra' ? ($r->actividad_trabajo_otra ?: 'Otra') : $r->actividad_trabajo)
+                    )),
                 ],
             ],
         ];

@@ -136,6 +136,74 @@ class TableroSintomatologiaTest extends TestCase
             ->assertViewHas('tituloPerfil', 'Síntomas de Ansiedad (GAD-7)');
     }
 
+    private function tamizajeConFuncion(string $funcion, int $i): void
+    {
+        Tamizaje::create([
+            'empresa_id' => $this->empresa->id,
+            'nombre_completo' => 'Funcion '.$funcion.' '.$i,
+            'consentimiento_otorgado' => true,
+            'genero' => 'Hombre',
+            'edad' => '25 a 34 años',
+            'actividad_trabajo' => 'Otra',
+            'actividad_trabajo_otra' => $funcion,
+            'riesgo_ansiedad' => 0,
+            'riesgo_depresion' => 0,
+            'riesgo_conducta_suicida' => 0,
+            'nivel_ansiedad' => 'Leve',
+            'nivel_depresion' => 'Mínima o ausente',
+            'nivel_suicidio' => 'Negativo',
+            'nivel_riesgo_general' => PrioridadAtencion::LEVE,
+        ]);
+    }
+
+    /**
+     * El texto libre de "¿Cuál función?" venía tal cual lo tecleó la persona:
+     * en la UAdeC "Docente", "DOCENTE" y "docente " eran tres barras.
+     */
+    public function test_las_funciones_que_difieren_en_mayusculas_se_fusionan(): void
+    {
+        foreach (['Docente', 'DOCENTE', ' docente '] as $i => $variante) {
+            $this->tamizajeConFuncion($variante, $i);
+        }
+
+        Livewire::test(EstadisticaTamizajeWidget::class)
+            ->assertViewHas('dimensiones', function (array $dimensiones) {
+                $funciones = collect($dimensiones)->firstWhere('titulo', 'Por tipo de funciones')['datos'];
+                $docentes = collect($funciones)->filter(fn ($c, $k) => mb_strtolower(trim($k)) === 'docente');
+
+                return $docentes->count() === 1 && $docentes->first()['total'] === 3;
+            });
+    }
+
+    /**
+     * Una empresa grande generaba cientos de barras de una persona. Solo se
+     * dibujan las 8 categorías más frecuentes; el resto se suma en "Otras".
+     */
+    public function test_las_funciones_menos_frecuentes_se_agrupan_en_otras(): void
+    {
+        // 2 en "Docente" y 10 funciones únicas de una persona (más las
+        // "Administrativas" de las dos personas del setUp): 12 categorías.
+        $this->tamizajeConFuncion('Docente', 0);
+        $this->tamizajeConFuncion('Docente', 1);
+        foreach (range(1, 10) as $i) {
+            $this->tamizajeConFuncion('Función única '.$i, $i);
+        }
+
+        Livewire::test(EstadisticaTamizajeWidget::class)
+            ->assertViewHas('dimensiones', function (array $dimensiones) {
+                $funciones = collect($dimensiones)->firstWhere('titulo', 'Por tipo de funciones')['datos'];
+                $categorias = array_keys($funciones);
+
+                // Ordenadas por volumen; en el empate 2-2 el orden es estable
+                // (Administrativas se agrupó primero).
+                return count($funciones) === 9                             // 8 visibles + "Otras"
+                    && $categorias[0] === 'Administrativas'
+                    && $categorias[1] === 'Docente'
+                    && $funciones['Otras (4 categorías)']['total'] === 4   // 12 - 8 visibles
+                    && array_sum(array_column($funciones, 'total')) === 14; // nadie se pierde
+            });
+    }
+
     public function test_el_selector_se_dibuja_con_las_cuatro_opciones(): void
     {
         Livewire::test(EstadisticaTamizajeWidget::class)
