@@ -153,7 +153,7 @@ class PrioridadAtencionTest extends TestCase
 
         $widget = Livewire::test(EstadisticaTamizajeWidget::class);
 
-        $widget->assertSee('Riesgo suicida')
+        $widget->assertSee('Indicadores de Conducta suicida')
             ->assertSee('Negativo')
             ->assertSee('Positivo')
             // Los nombres que tuvo antes ya no se dibujan.
