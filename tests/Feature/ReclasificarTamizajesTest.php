@@ -84,7 +84,7 @@ class ReclasificarTamizajesTest extends TestCase
 
         $this->artisan('tamizajes:reclasificar --aplicar')->assertSuccessful();
 
-        $constancia = $tamizaje->refresh()->respuestas['prioridad_atencion_21_08_2026'];
+        $constancia = $tamizaje->refresh()->respuestas['prioridad_leve_26_08_2026'];
         $this->assertSame('Riesgo Agudo', $constancia['nivel_suicidio_anterior']);
         $this->assertSame('Urgente', $constancia['nivel_riesgo_general_anterior']);
     }
@@ -125,7 +125,7 @@ class ReclasificarTamizajesTest extends TestCase
         $this->artisan('tamizajes:reclasificar --aplicar')->assertSuccessful();
         $this->artisan('tamizajes:reclasificar --aplicar')->assertSuccessful();
 
-        $constancia = $tamizaje->refresh()->respuestas['prioridad_atencion_21_08_2026'];
+        $constancia = $tamizaje->refresh()->respuestas['prioridad_leve_26_08_2026'];
         $this->assertSame('Riesgo Agudo', $constancia['nivel_suicidio_anterior']);
         $this->assertSame('Agudeza pendiente de confirmar', $tamizaje->nivel_riesgo_general);
     }
@@ -180,5 +180,43 @@ class ReclasificarTamizajesTest extends TestCase
         $this->assertSame('Agudeza pendiente de confirmar', $tamizaje->nivel_riesgo_general);
         // La constancia de la pasada anterior se conserva.
         $this->assertArrayHasKey('reclasificacion_18_08_2026', $tamizaje->respuestas);
+    }
+
+    /**
+     * Corrección de Angélica del 26/08/2026: los niveles Leve con ASQ negativo
+     * le estaban inflando la prioridad Moderada; deben quedar en Leve. Incluye
+     * a los que ya pasaron por la pasada del 21/08, que los dejó en Moderada.
+     */
+    public function test_el_nivel_leve_baja_de_moderada_a_leve(): void
+    {
+        $tamizaje = $this->tamizaje([
+            'riesgo_ansiedad' => 6,
+            'nivel_ansiedad' => 'Leve',
+            'nivel_suicidio' => 'Negativo',
+            'nivel_riesgo_general' => 'Moderada',
+            'respuestas' => ['prioridad_atencion_21_08_2026' => ['nivel_riesgo_general_anterior' => 'Moderado']],
+        ]);
+
+        $this->artisan('tamizajes:reclasificar --aplicar')->assertSuccessful();
+
+        $tamizaje->refresh();
+        $this->assertSame('Leve', $tamizaje->nivel_riesgo_general);
+        $this->assertSame('Moderada', $tamizaje->respuestas['prioridad_leve_26_08_2026']['nivel_riesgo_general_anterior']);
+        // La constancia de la pasada del 21/08 se conserva.
+        $this->assertArrayHasKey('prioridad_atencion_21_08_2026', $tamizaje->respuestas);
+    }
+
+    public function test_el_nivel_moderada_real_no_baja(): void
+    {
+        $tamizaje = $this->tamizaje([
+            'riesgo_depresion' => 12,
+            'nivel_depresion' => 'Moderada',
+            'nivel_suicidio' => 'Negativo',
+            'nivel_riesgo_general' => 'Moderada',
+        ]);
+
+        $this->artisan('tamizajes:reclasificar --aplicar')->assertSuccessful();
+
+        $this->assertSame('Moderada', $tamizaje->refresh()->nivel_riesgo_general);
     }
 }

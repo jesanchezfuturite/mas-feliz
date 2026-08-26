@@ -16,8 +16,9 @@ use Tests\TestCase;
 
 /**
  * Escala de prioridad de atención que Angélica definió el 21/08/2026, tabla por
- * tabla. Es la especificación del cambio: si alguien mueve un umbral, aquí se
- * ve contra qué renglón de su documento se está midiendo.
+ * tabla, con la corrección que mandó el 26/08/2026 (los niveles Leve bajan de
+ * Moderada a Leve). Es la especificación del cambio: si alguien mueve un
+ * umbral, aquí se ve contra qué renglón de su documento se está midiendo.
  */
 class PrioridadAtencionTest extends TestCase
 {
@@ -57,8 +58,15 @@ class PrioridadAtencionTest extends TestCase
     {
         return [
             'mínima + mínima + ASQ negativo' => ['Mínima o sin ansiedad', 'Mínima o ausente', 0, null, PrioridadAtencion::LEVE],
-            'ansiedad leve + ASQ negativo' => ['Leve', 'Mínima o ausente', 0, null, PrioridadAtencion::MODERADA],
+            // Corrección del 26/08/2026: "cuando depresión o ansiedad es leve
+            // + ASQ negativo, debe de ser Leve". Su tabla original los ponía
+            // en Moderada y le inflaba ese nivel.
+            'ansiedad leve + ASQ negativo' => ['Leve', 'Mínima o ausente', 0, null, PrioridadAtencion::LEVE],
+            'ansiedad leve + depresión leve' => ['Leve', 'Leve', 0, null, PrioridadAtencion::LEVE],
+            'ansiedad moderada + ASQ negativo' => ['Moderada', 'Mínima o ausente', 0, null, PrioridadAtencion::MODERADA],
             'depresión moderada + ASQ negativo' => ['Mínima o sin ansiedad', 'Moderada', 0, null, PrioridadAtencion::MODERADA],
+            // Basta un instrumento en Moderada: leve + moderada no baja a Leve.
+            'ansiedad leve + depresión moderada' => ['Leve', 'Moderada', 0, null, PrioridadAtencion::MODERADA],
             'ansiedad grave + ASQ negativo' => ['Grave', 'Mínima o ausente', 0, null, PrioridadAtencion::ALTA],
             'depresión mod. grave + ASQ negativo' => ['Mínima o sin ansiedad', 'Moderadamente grave', 0, null, PrioridadAtencion::ALTA],
             'depresión grave + ASQ negativo' => ['Mínima o sin ansiedad', 'Grave', 0, null, PrioridadAtencion::ALTA],

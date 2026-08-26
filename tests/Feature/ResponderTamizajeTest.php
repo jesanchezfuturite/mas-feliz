@@ -451,11 +451,12 @@ class ResponderTamizajeTest extends TestCase
     }
 
     /**
-     * Escala de prioridad de atención del 21/08/2026. Ansiedad o depresión
-     * leve/moderada con ASQ negativo es Moderada; la severidad de cualquiera de
-     * los dos instrumentos sube a Alta.
+     * Escala de prioridad de atención del 21/08/2026, corregida por Angélica
+     * el 26/08/2026: los niveles Leve con ASQ negativo quedan en prioridad
+     * Leve (su tabla original los ponía en Moderada y le inflaba ese nivel);
+     * la severidad de cualquiera de los dos instrumentos sube a Alta.
      */
-    public function test_ansiedad_leve_sin_asq_es_prioridad_moderada(): void
+    public function test_ansiedad_leve_sin_asq_es_prioridad_leve(): void
     {
         // 5 puntos en el GAD-7 es el umbral de "Leve".
         $this->responder(['ansiedad_1' => '2', 'ansiedad_2' => '3'])->assertHasNoErrors();
@@ -463,6 +464,24 @@ class ResponderTamizajeTest extends TestCase
         $this->assertDatabaseHas('tamizajes', [
             'empresa_id' => $this->empresa->id,
             'nivel_ansiedad' => 'Leve',
+            'nivel_suicidio' => 'Negativo',
+            'nivel_riesgo_general' => 'Leve',
+        ]);
+    }
+
+    public function test_ansiedad_moderada_sin_asq_es_prioridad_moderada(): void
+    {
+        // 10 puntos en el GAD-7 es el umbral de "Moderada".
+        $respuestas = [];
+        foreach (range(1, 4) as $i) {
+            $respuestas['ansiedad_'.$i] = '3';
+        }
+
+        $this->responder($respuestas)->assertHasNoErrors();
+
+        $this->assertDatabaseHas('tamizajes', [
+            'empresa_id' => $this->empresa->id,
+            'nivel_ansiedad' => 'Moderada',
             'nivel_suicidio' => 'Negativo',
             'nivel_riesgo_general' => 'Moderada',
         ]);
