@@ -1,3 +1,6 @@
+{{-- El envoltorio de Filament carga las clases de columna del grid de
+     widgets; sin él, el columnSpan = 'full' no se aplica. --}}
+<x-filament-widgets::widget>
 <div class="relative rounded-xl bg-white p-6 shadow-sm border border-gray-100" style="width: 100%; min-height: 280px; display: flex; flex-direction: column;">
     <div style="font-size: 1rem; font-weight: 600; color: #1e293b; margin-bottom: 1rem;">Distribución por prioridad de atención</div>
     
@@ -41,3 +44,4 @@
         </div>
     </div>
 </div>
+</x-filament-widgets::widget>
