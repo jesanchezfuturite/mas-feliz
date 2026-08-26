@@ -2,21 +2,28 @@
 
 namespace App\Providers\Filament;
 
+use App\Filament\Empresa\Pages\Capacitacion;
+use App\Filament\Empresa\Pages\Crisis;
+use App\Filament\Empresa\Pages\EditProfile;
+use App\Filament\Empresa\Pages\PrevencionPromocion;
+use App\Filament\Empresa\Resources\CasoSeguimientos\Pages\ListCasoSeguimientos;
+use App\Filament\Empresa\Widgets\CertificationTimelineWidget;
+use App\Filament\Empresa\Widgets\EmpresaInfoWidget;
+use App\Filament\Pages\Auth\Login;
 use Filament\Http\Middleware\Authenticate;
 use Filament\Http\Middleware\AuthenticateSession;
 use Filament\Http\Middleware\DisableBladeIconComponents;
 use Filament\Http\Middleware\DispatchServingFilamentEvent;
-use Filament\Pages\Dashboard;
 use Filament\Panel;
 use Filament\PanelProvider;
 use Filament\Support\Colors\Color;
-use Filament\Widgets\AccountWidget;
-use Filament\Widgets\FilamentInfoWidget;
+use Filament\View\PanelsRenderHook;
 use Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse;
 use Illuminate\Cookie\Middleware\EncryptCookies;
 use Illuminate\Foundation\Http\Middleware\PreventRequestForgery;
 use Illuminate\Routing\Middleware\SubstituteBindings;
 use Illuminate\Session\Middleware\StartSession;
+use Illuminate\Support\Facades\Blade;
 use Illuminate\View\Middleware\ShareErrorsFromSession;
 
 class EmpresaPanelProvider extends PanelProvider
@@ -26,7 +33,7 @@ class EmpresaPanelProvider extends PanelProvider
         return $panel
             ->id('empresa')
             ->path('tablero')
-            ->login(\App\Filament\Pages\Auth\Login::class)
+            ->login(Login::class)
             ->passwordReset()
             ->authGuard('empresa')
             ->authPasswordBroker('empresas')
@@ -39,19 +46,19 @@ class EmpresaPanelProvider extends PanelProvider
             ])
             ->discoverResources(in: app_path('Filament/Empresa/Resources'), for: 'App\Filament\Empresa\Resources')
             ->discoverPages(in: app_path('Filament/Empresa/Pages'), for: 'App\Filament\Empresa\Pages')
-            ->defaultAvatarProvider(\App\Providers\Filament\CustomAvatarProvider::class)
-            ->profile(\App\Filament\Empresa\Pages\EditProfile::class)
+            ->defaultAvatarProvider(CustomAvatarProvider::class)
+            ->profile(EditProfile::class)
             ->darkMode(false)
             ->pages([
                 \App\Filament\Empresa\Pages\Dashboard::class,
-                \App\Filament\Empresa\Pages\PrevencionPromocion::class,
-                \App\Filament\Empresa\Pages\Crisis::class,
-                \App\Filament\Empresa\Pages\Capacitacion::class,
+                PrevencionPromocion::class,
+                Crisis::class,
+                Capacitacion::class,
             ])
             ->discoverWidgets(in: app_path('Filament/Empresa/Widgets'), for: 'App\Filament\Empresa\Widgets')
             ->widgets([
-                \App\Filament\Empresa\Widgets\EmpresaInfoWidget::class,
-                \App\Filament\Empresa\Widgets\CertificationTimelineWidget::class,
+                EmpresaInfoWidget::class,
+                CertificationTimelineWidget::class,
             ])
             ->middleware([
                 EncryptCookies::class,
@@ -68,7 +75,11 @@ class EmpresaPanelProvider extends PanelProvider
                 Authenticate::class,
             ])
             ->renderHook(
-                \Filament\View\PanelsRenderHook::FOOTER,
+                PanelsRenderHook::BODY_START,
+                fn (): string => view('franja-ambiente-prueba')->render()
+            )
+            ->renderHook(
+                PanelsRenderHook::FOOTER,
                 fn (): string => view('filament.footer-logos')->render()
             )
             // Listado de personas en riesgo: Salud pidió una vista de captura que
@@ -76,8 +87,8 @@ class EmpresaPanelProvider extends PanelProvider
             // colaborador y los encabezados. Filament no trae columnas fijas, así
             // que se resuelve con CSS y se limita a esta pantalla.
             ->renderHook(
-                \Filament\View\PanelsRenderHook::PAGE_START,
-                fn (): string => \Illuminate\Support\Facades\Blade::render('<style>
+                PanelsRenderHook::PAGE_START,
+                fn (): string => Blade::render('<style>
                     .fi-ta-ctn { max-height: 72vh; overflow: auto !important; }
 
                     .fi-ta-table thead th {
@@ -105,11 +116,11 @@ class EmpresaPanelProvider extends PanelProvider
                     /* La captura en línea necesita celdas que no se aplasten. */
                     .fi-ta-table td .fi-input-wrp, .fi-ta-table td .fi-select { min-width: 9rem; }
                 </style>'),
-                scopes: \App\Filament\Empresa\Resources\CasoSeguimientos\Pages\ListCasoSeguimientos::class,
+                scopes: ListCasoSeguimientos::class,
             )
             ->renderHook(
-                \Filament\View\PanelsRenderHook::HEAD_END,
-                fn (): string => \Illuminate\Support\Facades\Blade::render('<style>
+                PanelsRenderHook::HEAD_END,
+                fn (): string => Blade::render('<style>
                     .fi-sidebar-item-label {
                         font-size: 0.825rem !important;
                         line-height: 1.25 !important;
