@@ -24,7 +24,8 @@
     </style>
 </head>
 <body class="bg-slate-50 dark:bg-slate-950 text-slate-800 dark:text-slate-200 min-h-screen antialiased">
-    
+    @include('franja-ambiente-prueba')
+
     <!-- Header -->
     <header class="bg-white/80 dark:bg-slate-900/80 backdrop-blur-md border-b border-slate-100 dark:border-slate-800/80 sticky top-0 z-40">
         <div class="max-w-4xl mx-auto px-4 py-4 flex items-center justify-between">

@@ -30,6 +30,20 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | Franja de ambiente de prueba
+    |--------------------------------------------------------------------------
+    |
+    | Solo el .env del servidor de PRUEBA la enciende. Dibuja la franja
+    | "AMBIENTE DE PRUEBA" en todos los paneles y vistas públicas para que
+    | nadie vuelva a confundir ese servidor con producción (pasó el 25/08/2026
+    | y costó cuatro días). Ver resources/views/franja-ambiente-prueba.blade.php.
+    |
+    */
+
+    'ambiente_prueba' => (bool) env('AMBIENTE_PRUEBA', false),
+
+    /*
+    |--------------------------------------------------------------------------
     | Application Debug Mode
     |--------------------------------------------------------------------------
     |

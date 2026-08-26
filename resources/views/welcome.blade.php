@@ -25,6 +25,7 @@
     </style>
 </head>
 <body class="bg-slate-50 text-slate-800 min-h-screen flex flex-col antialiased">
+    @include('franja-ambiente-prueba')
 
     <!-- Navigation Bar -->
     <header class="sticky top-0 z-40 bg-white/80 backdrop-blur-md border-b border-slate-100 transition-all duration-300">

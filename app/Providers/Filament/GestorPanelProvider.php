@@ -11,15 +11,15 @@ use Filament\Pages;
 use Filament\Panel;
 use Filament\PanelProvider;
 use Filament\Support\Colors\Color;
+use Filament\View\PanelsRenderHook;
 use Filament\Widgets;
 use Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse;
 use Illuminate\Cookie\Middleware\EncryptCookies;
 use Illuminate\Foundation\Http\Middleware\PreventRequestForgery;
 use Illuminate\Routing\Middleware\SubstituteBindings;
 use Illuminate\Session\Middleware\StartSession;
-use Illuminate\View\Middleware\ShareErrorsFromSession;
-use Filament\View\PanelsRenderHook;
 use Illuminate\Support\Facades\Blade;
+use Illuminate\View\Middleware\ShareErrorsFromSession;
 
 /**
  * Panel del Gestor: trabajador social que da seguimiento a las gestiones de
@@ -49,7 +49,7 @@ class GestorPanelProvider extends PanelProvider
             ->widgets([
                 Widgets\AccountWidget::class,
             ])
-            ->defaultAvatarProvider(\App\Providers\Filament\CustomAvatarProvider::class)
+            ->defaultAvatarProvider(CustomAvatarProvider::class)
             ->darkMode(false)
             ->middleware([
                 EncryptCookies::class,
@@ -64,8 +64,12 @@ class GestorPanelProvider extends PanelProvider
             ])
             ->authMiddleware([
                 Authenticate::class,
-                CheckRole::class . ':gestor',
+                CheckRole::class.':gestor',
             ])
+            ->renderHook(
+                PanelsRenderHook::BODY_START,
+                fn (): string => view('franja-ambiente-prueba')->render()
+            )
             ->renderHook(
                 PanelsRenderHook::USER_MENU_BEFORE,
                 fn (): string => Blade::render('<div class="mr-3 font-medium text-sm text-gray-700 dark:text-gray-200">{{ auth()->user()->name }} {{ auth()->user()->apellidos }}</div>')
