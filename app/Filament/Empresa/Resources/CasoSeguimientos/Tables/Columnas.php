@@ -7,6 +7,7 @@ use App\Support\ColorNivel;
 use App\Support\PrioridadAtencion;
 use App\Support\ResultadoAsq;
 use Filament\Tables\Columns\CheckboxColumn;
+use Filament\Tables\Columns\ColumnGroup;
 use Filament\Tables\Columns\SelectColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Columns\TextInputColumn;
@@ -69,91 +70,125 @@ class Columnas
         return PrioridadAtencion::opciones();
     }
 
+    /**
+     * Las columnas van agrupadas bajo los títulos de sección de la fila 1 de
+     * la hoja de Drive "ATENCIÓN EMPRESAS +FELIZ" (Angélica, 27/08/2026):
+     * Datos de identificación, Resultados, Consentimiento, Estatus de
+     * atención, Servicio y Solicitud de referencia complementaria.
+     */
     public static function definicion(): array
     {
         return [
-            // --- DATOS DE IDENTIFICACIÓN ---
-            self::nombre(),
+            ColumnGroup::make('Datos de identificación', [
+                self::nombre(),
 
-            self::selectDeTamizaje('edad', 'Rango de edad', self::RANGOS_EDAD),
-            self::selectDeTamizaje('genero', 'Sexo', self::SEXO),
-            self::selectDeTamizaje('actividad_trabajo', 'Funciones', self::FUNCIONES),
+                self::selectDeTamizaje('edad', 'Rango de edad', self::RANGOS_EDAD),
+                self::selectDeTamizaje('genero', 'Sexo', self::SEXO),
+                self::selectDeTamizaje('actividad_trabajo', 'Funciones', self::FUNCIONES),
 
-            // Angélica reportó el 21/08/2026 que estas tres columnas salían
-            // vacías en los casos que vienen del tamizaje: se mostraban solo
-            // desde la copia del caso, que nunca se llena. Van por el tamizaje
-            // igual que edad, sexo y tiempo, así se arrastra lo que contestó
-            // la persona.
-            self::textoDeTamizaje('actividad_trabajo_otra', '¿Cuál función?')
-                ->toggleable(),
+                // Angélica reportó el 21/08/2026 que estas tres columnas salían
+                // vacías en los casos que vienen del tamizaje: se mostraban solo
+                // desde la copia del caso, que nunca se llena. Van por el tamizaje
+                // igual que edad, sexo y tiempo, así se arrastra lo que contestó
+                // la persona.
+                self::textoDeTamizaje('actividad_trabajo_otra', '¿Cuál función?')
+                    ->toggleable(),
 
-            self::selectDeTamizaje('tiempo_trabajando', 'Tiempo trabajando en la empresa', self::TIEMPO_TRABAJANDO),
+                self::selectDeTamizaje('tiempo_trabajando', 'Tiempo trabajando en la empresa', self::TIEMPO_TRABAJANDO),
 
-            self::textoDeTamizaje('correo', 'Correo')
-                ->rules(['nullable', 'email', 'max:255']),
+                self::textoDeTamizaje('correo', 'Correo')
+                    ->rules(['nullable', 'email', 'max:255']),
 
-            // El tamizaje lo captura como `telefono`; el caso lo llama
-            // `celular`, así que el origen se indica aparte.
-            self::textoDeTamizaje('celular', 'Celular', 'telefono')
-                ->rules(['nullable', 'max:20']),
+                // El tamizaje lo captura como `telefono`; el caso lo llama
+                // `celular`, así que el origen se indica aparte.
+                self::textoDeTamizaje('celular', 'Celular', 'telefono')
+                    ->rules(['nullable', 'max:20']),
+            ]),
 
-            // --- RESULTADOS (provienen del tamizaje, solo lectura) ---
-            self::resultado('ansiedad', 'Síntomas de Ansiedad', fn ($t) => $t?->nivel_ansiedad),
-            self::resultado('depresion', 'Síntomas de Depresión', fn ($t) => $t?->nivel_depresion),
+            // Provienen del tamizaje, solo lectura.
+            ColumnGroup::make('Resultados', [
+                self::resultado('ansiedad', 'Síntomas de Ansiedad', fn ($t) => $t?->nivel_ansiedad),
+                self::resultado('depresion', 'Síntomas de Depresión', fn ($t) => $t?->nivel_depresion),
 
-            // El resultado del ASQ va completo (Angélica, 27/08/2026): el
-            // título distingue la agudeza y la acción va en letra chica
-            // debajo. Es despliegue — la columna del tamizaje sigue en dos
-            // valores; el título agudo sale de ResultadoAsq.
-            TextColumn::make('suicidio')
-                ->label('Indicadores de Conducta suicida')
-                ->badge()
-                ->getStateUsing(fn ($record) => $record->tamizaje ? ResultadoAsq::titulo($record->tamizaje) : 'N/A')
-                ->color(fn (string $state): string => $state === ResultadoAsq::TITULO_AGUDO
-                    ? 'danger'
-                    : ColorNivel::badge($state))
-                ->description(fn ($record) => $record->tamizaje ? ResultadoAsq::accion($record->tamizaje) : null),
+                // El resultado del ASQ va completo (Angélica, 27/08/2026): el
+                // título distingue la agudeza y la acción va en letra chica
+                // debajo. Es despliegue — la columna del tamizaje sigue en dos
+                // valores; el título agudo sale de ResultadoAsq.
+                TextColumn::make('suicidio')
+                    ->label('Indicadores de Conducta suicida')
+                    ->badge()
+                    ->getStateUsing(fn ($record) => $record->tamizaje ? ResultadoAsq::titulo($record->tamizaje) : 'N/A')
+                    ->color(fn (string $state): string => $state === ResultadoAsq::TITULO_AGUDO
+                        ? 'danger'
+                        : ColorNivel::badge($state))
+                    ->description(fn ($record) => $record->tamizaje ? ResultadoAsq::accion($record->tamizaje) : null),
 
-            SelectColumn::make('nivel_riesgo_detectado')
-                ->label(PrioridadAtencion::ETIQUETA)
-                ->options(self::nivelesRiesgo())
-                ->selectablePlaceholder(false),
+                // El select se pinta con el color oficial de la prioridad, la
+                // misma escala que colorea badges y gráficas.
+                SelectColumn::make('nivel_riesgo_detectado')
+                    ->label(PrioridadAtencion::ETIQUETA)
+                    ->options(self::nivelesRiesgo())
+                    ->selectablePlaceholder(false)
+                    ->extraInputAttributes(fn ($record) => self::chipPrioridad($record->nivel_riesgo_detectado)),
+            ]),
 
-            // --- CONSENTIMIENTO ---
-            SelectColumn::make('consentimiento')
-                ->label('Consentimiento')
-                ->options([
-                    1 => 'Sí',
-                    0 => 'No',
-                ]),
+            ColumnGroup::make('Consentimiento', [
+                SelectColumn::make('consentimiento')
+                    ->label('Consentimiento')
+                    ->options([
+                        1 => 'Sí',
+                        0 => 'No',
+                    ]),
+            ]),
 
-            // --- ESTATUS DE ATENCIÓN ---
-            SelectColumn::make('estatus_atencion')
-                ->label('Estatus de atención')
-                ->options(CasoSeguimiento::ESTATUS_ATENCION)
-                ->selectablePlaceholder(false),
+            ColumnGroup::make('Estatus de atención', [
+                // El select se pinta como el chip del Drive de Angélica
+                // (amarillo en seguimiento, verde cerrado atendido, rojo
+                // cerrado no atendido...). Los colores viven en el modelo.
+                SelectColumn::make('estatus_atencion')
+                    ->label('Estatus de atención')
+                    ->options(CasoSeguimiento::ESTATUS_ATENCION)
+                    ->selectablePlaceholder(false)
+                    ->extraInputAttributes(fn ($record) => array_filter([
+                        'style' => CasoSeguimiento::estiloChipEstatus($record->estatus_atencion),
+                    ])),
+            ]),
 
-            // --- SERVICIO ---
-            CheckboxColumn::make('servicio_medicina')->label('Medicina'),
-            CheckboxColumn::make('servicio_psicologia')->label('Psicología'),
-            CheckboxColumn::make('servicio_psiquiatria')->label('Psiquiatría'),
-            CheckboxColumn::make('servicio_otro_activo')->label('Otro'),
+            ColumnGroup::make('Servicio', [
+                CheckboxColumn::make('servicio_medicina')->label('Medicina'),
+                CheckboxColumn::make('servicio_psicologia')->label('Psicología'),
+                CheckboxColumn::make('servicio_psiquiatria')->label('Psiquiatría'),
+                CheckboxColumn::make('servicio_otro_activo')->label('Otro'),
 
-            TextInputColumn::make('servicio_otro')
-                ->label('¿Cuál servicio?')
-                ->toggleable(),
+                TextInputColumn::make('servicio_otro')
+                    ->label('¿Cuál servicio?')
+                    ->toggleable(),
+            ]),
 
-            // --- SOLICITUD DE REFERENCIA COMPLEMENTARIA ---
-            CheckboxColumn::make('referencia_secretaria_salud')
-                ->label('Secretaría de Salud'),
+            ColumnGroup::make('Solicitud de referencia complementaria', [
+                CheckboxColumn::make('referencia_secretaria_salud')
+                    ->label('Secretaría de Salud'),
 
-            // No está en el documento de Salud, pero existe desde antes y hay
-            // casos con el dato capturado: se conserva oculta y se puede
-            // mostrar desde el selector de columnas.
-            TextInputColumn::make('institucion_canalizacion')
-                ->label('Institución de canalización')
-                ->toggleable(isToggledHiddenByDefault: true),
+                // No está en el documento de Salud, pero existe desde antes y hay
+                // casos con el dato capturado: se conserva oculta y se puede
+                // mostrar desde el selector de columnas.
+                TextInputColumn::make('institucion_canalizacion')
+                    ->label('Institución de canalización')
+                    ->toggleable(isToggledHiddenByDefault: true),
+            ]),
         ];
+    }
+
+    /** Estilo del select de prioridad: el color oficial del nivel, en chip. */
+    private static function chipPrioridad(?string $nivel): array
+    {
+        $hex = PrioridadAtencion::HEX[$nivel] ?? null;
+
+        if (! $hex) {
+            return [];
+        }
+
+        return ['style' => "background-color: {$hex}; color: #ffffff; border-color: {$hex}; border-radius: 9999px; font-weight: 600;"];
     }
 
     /**
