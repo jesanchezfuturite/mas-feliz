@@ -204,6 +204,63 @@ class TableroSintomatologiaTest extends TestCase
             });
     }
 
+    /**
+     * La tarjeta del ASQ separa el positivo agudo (pregunta 5 en "Sí") como
+     * renglón de despliegue, con la acción de cada resultado (Angélica,
+     * 27/08/2026). La columna sigue guardando solo Negativo/Positivo.
+     */
+    public function test_la_tarjeta_del_asq_separa_el_positivo_agudo(): void
+    {
+        // Un positivo agudo además de los dos tamizajes del setUp (negativos).
+        Tamizaje::create([
+            'empresa_id' => $this->empresa->id,
+            'nombre_completo' => 'Persona aguda',
+            'consentimiento_otorgado' => true,
+            'genero' => 'Mujer',
+            'edad' => '25 a 34 años',
+            'actividad_trabajo' => 'Administrativas',
+            'riesgo_ansiedad' => 0,
+            'riesgo_depresion' => 0,
+            'riesgo_conducta_suicida' => 1,
+            'nivel_ansiedad' => 'Mínima o sin ansiedad',
+            'nivel_depresion' => 'Mínima o ausente',
+            'nivel_suicidio' => 'Positivo',
+            'nivel_riesgo_general' => PrioridadAtencion::URGENTE,
+            'respuestas' => ['conducta_suicida' => [1 => 1, 2 => 0, 3 => 0, 4 => 0, 5 => 1]],
+        ]);
+
+        Livewire::test(EstadisticaTamizajeWidget::class)
+            ->assertViewHas('instrumentos', function (array $instrumentos) {
+                $asq = collect($instrumentos)->firstWhere('titulo', 'Indicadores de Conducta suicida');
+                $porLabel = collect($asq['niveles'])->keyBy('label');
+
+                return array_keys($porLabel->all()) === ['Negativo', 'Positivo', 'Positivo: Riesgo Agudo']
+                    && $porLabel['Negativo']['count'] === 2
+                    && $porLabel['Positivo']['count'] === 0
+                    && $porLabel['Positivo: Riesgo Agudo']['count'] === 1
+                    && $porLabel['Positivo: Riesgo Agudo']['accion'] === 'Valoración/ Atención Especializada prioritaria'
+                    && $porLabel['Negativo']['accion'] === 'Prevención/ Promoción/ Psicoeducación';
+            });
+    }
+
+    /**
+     * El universo que participó, sin cruce con resultados (Angélica,
+     * 27/08/2026): "cuántos hombres, mujeres, de qué rango de edad,
+     * funciones, tiempo en la empresa".
+     */
+    public function test_el_universo_cuenta_sin_cruzar_con_resultados(): void
+    {
+        Livewire::test(EstadisticaTamizajeWidget::class)
+            ->assertSee('¿Quiénes fueron evaluados?')
+            ->assertViewHas('universo', function (array $universo) {
+                $titulos = array_column($universo, 'titulo');
+                $porSexo = collect($universo)->firstWhere('titulo', 'Por sexo')['datos'];
+
+                return $titulos === ['Por sexo', 'Por rango de edad', 'Por tiempo en la empresa', 'Por tipo de funciones']
+                    && $porSexo === ['Hombre' => 1, 'Mujer' => 1];
+            });
+    }
+
     public function test_el_selector_se_dibuja_con_las_cuatro_opciones(): void
     {
         Livewire::test(EstadisticaTamizajeWidget::class)

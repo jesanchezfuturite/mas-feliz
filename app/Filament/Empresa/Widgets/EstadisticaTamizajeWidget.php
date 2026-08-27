@@ -6,6 +6,7 @@ use App\Livewire\ResponderTamizaje;
 use App\Models\Setting;
 use App\Support\ColorNivel;
 use App\Support\PrioridadAtencion;
+use App\Support\ResultadoAsq;
 use Filament\Widgets\Widget;
 
 class EstadisticaTamizajeWidget extends Widget
@@ -89,9 +90,11 @@ class EstadisticaTamizajeWidget extends Widget
         $seleccion = self::INSTRUMENTOS[$this->instrumento];
 
         // Solo tamizajes con resultado de riesgo real (excluye "No participó" y nulos).
+        // `respuestas` viene por la pregunta 5 del ASQ: la tarjeta del
+        // instrumento separa el positivo agudo, y la agudeza vive en ese JSON.
         $rows = $empresa->tamizajes()
             ->whereIn('nivel_riesgo_general', PrioridadAtencion::ESCALA)
-            ->get(['genero', 'edad', 'tiempo_trabajando', 'actividad_trabajo', 'actividad_trabajo_otra', 'nivel_riesgo_general', 'nivel_ansiedad', 'nivel_depresion', 'nivel_suicidio']);
+            ->get(['genero', 'edad', 'tiempo_trabajando', 'actividad_trabajo', 'actividad_trabajo_otra', 'nivel_riesgo_general', 'nivel_ansiedad', 'nivel_depresion', 'nivel_suicidio', 'respuestas']);
 
         // Color por severidad del nivel (consistente con el resto del sistema).
         $color = fn ($nivel) => ColorNivel::hex($nivel);
@@ -139,6 +142,92 @@ class EstadisticaTamizajeWidget extends Widget
             }
 
             return $out;
+        };
+
+        // La tarjeta del ASQ va aparte: Angélica pidió el 27/08/2026 que la
+        // gráfica también muestre el resultado completo, con el positivo agudo
+        // como renglón propio y la acción de cada resultado en letra chica.
+        // Es despliegue: la columna sigue guardando Negativo/Positivo, y la
+        // agudeza sale de la pregunta 5 vía ResultadoAsq, igual que el badge
+        // del detalle.
+        $asq = function ($rows): array {
+            $acciones = ResponderTamizaje::ACCIONES_SUICIDIO
+                + [ResultadoAsq::TITULO_AGUDO => ResponderTamizaje::ACCION_SUICIDIO_AGUDO];
+            // El agudo en rojo: es la misma condición que pone la prioridad en
+            // Urgente. Los otros dos conservan el color de su resultado.
+            $colores = [
+                ResponderTamizaje::SUICIDIO_NEGATIVO => ColorNivel::hex(ResponderTamizaje::SUICIDIO_NEGATIVO),
+                ResponderTamizaje::SUICIDIO_POSITIVO => ColorNivel::hex(ResponderTamizaje::SUICIDIO_POSITIVO),
+                ResultadoAsq::TITULO_AGUDO => PrioridadAtencion::HEX[PrioridadAtencion::URGENTE],
+            ];
+
+            $conteos = array_fill_keys(array_keys($acciones), 0);
+            $total = 0;
+            foreach ($rows as $r) {
+                if (! in_array($r->nivel_suicidio, ResponderTamizaje::NIVELES_SUICIDIO, true)) {
+                    continue;
+                }
+                $conteos[ResultadoAsq::titulo($r)]++;
+                $total++;
+            }
+
+            $niveles = [];
+            foreach ($conteos as $titulo => $n) {
+                $niveles[] = [
+                    'label' => $titulo,
+                    'count' => $n,
+                    'color' => $colores[$titulo],
+                    'accion' => $acciones[$titulo],
+                ];
+            }
+
+            return ['total' => $total, 'niveles' => $niveles];
+        };
+
+        // Conteo simple por categoría, sin cruzar con ningún resultado. Es la
+        // sección "¿Quiénes fueron evaluados?" que Angélica pidió el
+        // 27/08/2026: el universo que participó, tal cual.
+        $conteo = function ($rows, callable $keyFn): array {
+            $out = [];
+            foreach ($rows as $r) {
+                $key = $keyFn($r);
+                $key = ($key === null || $key === '') ? 'Sin especificar' : $key;
+                $out[$key] = ($out[$key] ?? 0) + 1;
+            }
+
+            return $out;
+        };
+
+        // Variantes para conteos simples de las de abajo, que operan sobre
+        // arreglos de niveles: mismo criterio (fusionar mayúsculas/espacios,
+        // top 8 + "Otras") para que el universo y el cruce cuenten igual.
+        $fusionarConteo = function (array $datos): array {
+            $porClave = [];
+            $visible = [];
+            foreach ($datos as $categoria => $n) {
+                $clave = mb_strtolower(trim((string) $categoria));
+                if (! isset($visible[$clave]) || $n > $visible[$clave]['n']) {
+                    $visible[$clave] = ['texto' => trim((string) $categoria), 'n' => $n];
+                }
+                $porClave[$clave] = ($porClave[$clave] ?? 0) + $n;
+            }
+
+            return array_combine(
+                array_map(fn ($clave) => $visible[$clave]['texto'], array_keys($porClave)),
+                array_values($porClave)
+            );
+        };
+
+        $compactarConteo = function (array $datos, int $tope = 8): array {
+            arsort($datos);
+            if (count($datos) <= $tope) {
+                return $datos;
+            }
+            $visibles = array_slice($datos, 0, $tope, true);
+            $resto = array_slice($datos, $tope, null, true);
+            $visibles['Otras ('.count($resto).' categorías)'] = array_sum($resto);
+
+            return $visibles;
         };
 
         // Une categorías que solo difieren en mayúsculas o espacios. Aplica al
@@ -228,7 +317,30 @@ class EstadisticaTamizajeWidget extends Widget
             'instrumentos' => [
                 ['titulo' => 'Síntomas de Ansiedad (GAD-7)'] + $instrumento($rows, 'nivel_ansiedad', ['Mínima o sin ansiedad', 'Leve', 'Moderada', 'Grave']),
                 ['titulo' => 'Síntomas de Depresión (PHQ-9)'] + $instrumento($rows, 'nivel_depresion', ['Mínima o ausente', 'Leve', 'Moderada', 'Moderadamente grave', 'Grave']),
-                ['titulo' => 'Indicadores de Conducta suicida'] + $instrumento($rows, 'nivel_suicidio', ResponderTamizaje::NIVELES_SUICIDIO),
+                ['titulo' => 'Indicadores de Conducta suicida'] + $asq($rows),
+            ],
+            // El universo que participó, sin cruce con resultados. Los
+            // decliners no entran: quien no consiente no llega a la sección
+            // de datos demográficos, así que no hay qué contar de ellos.
+            'universo' => [
+                [
+                    'titulo' => 'Por sexo',
+                    'datos' => $conteo($rows, fn ($r) => $r->genero),
+                ],
+                [
+                    'titulo' => 'Por rango de edad',
+                    'datos' => $ordenar($conteo($rows, fn ($r) => $r->edad), $ordenEdad),
+                ],
+                [
+                    'titulo' => 'Por tiempo en la empresa',
+                    'datos' => $ordenar($conteo($rows, fn ($r) => $r->tiempo_trabajando), $ordenTiempo),
+                ],
+                [
+                    'titulo' => 'Por tipo de funciones',
+                    'datos' => $compactarConteo($fusionarConteo(
+                        $conteo($rows, fn ($r) => $r->actividad_trabajo === 'Otra' ? ($r->actividad_trabajo_otra ?: 'Otra') : $r->actividad_trabajo)
+                    )),
+                ],
             ],
             'dimensiones' => [
                 [
