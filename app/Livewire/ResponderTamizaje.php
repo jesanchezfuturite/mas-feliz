@@ -5,6 +5,7 @@ namespace App\Livewire;
 use App\Models\Empresa;
 use App\Models\Tamizaje;
 use App\Support\PrioridadAtencion;
+use App\Support\ResultadoAsq;
 use Livewire\Component;
 
 class ResponderTamizaje extends Component
@@ -129,14 +130,24 @@ class ResponderTamizaje extends Component
     ];
 
     /**
-     * Conducta que sigue a cada resultado, tal como la redactó Angélica en
-     * "PARA LA REVISIÓN". El resultado dice qué se encontró; esto, qué hacer.
-     * Se muestra junto al resultado en el detalle del tamizaje.
+     * Conducta que sigue a cada resultado, con la redacción literal del
+     * mensaje de Angélica del 27/08/2026. El resultado dice qué se encontró;
+     * esto, qué hacer. Se muestra junto al resultado —"en letras más
+     * chiquitas", pidió— para que la reacción ante un Positivo no sea "uf,
+     * muchos positivos" sino leer qué corresponde hacer.
+     *
+     * El positivo con agudeza confirmada (pregunta 5 en "Sí") tiene su propia
+     * acción y su propio título de despliegue en {@see ResultadoAsq}:
+     * son TEXTO DE PANTALLA, no un tercer valor de `nivel_suicidio` — esa
+     * columna sigue siendo Negativo/Positivo.
      */
     public const ACCIONES_SUICIDIO = [
-        self::SUICIDIO_NEGATIVO => 'Prevención / Promoción / Psicoeducación',
-        self::SUICIDIO_POSITIVO => 'Valoración psicológica adicional para confirmar o descartar riesgo y agudeza',
+        self::SUICIDIO_NEGATIVO => 'Prevención/ Promoción/ Psicoeducación',
+        self::SUICIDIO_POSITIVO => 'Valoración psicológica adicional para confirmar/ descartar riesgo/agudeza',
     ];
+
+    /** Acción del positivo agudo (pregunta 5 en "Sí"), redacción de Angélica. */
+    public const ACCION_SUICIDIO_AGUDO = 'Valoración/ Atención Especializada prioritaria';
 
     /**
      * `suicidio_5` solo es obligatoria si hubo al menos un "Sí" en las cuatro

@@ -41,13 +41,19 @@
                     <div style="display: flex; flex-direction: column; gap: 0.6rem;">
                         @foreach ($inst['niveles'] as $nivel)
                             <div>
-                                <div style="display: flex; align-items: baseline; justify-content: space-between; margin-bottom: 0.2rem;">
+                                <div style="display: flex; align-items: baseline; justify-content: space-between; gap: 0.5rem; margin-bottom: 0.2rem;">
                                     <span style="display: inline-flex; align-items: center; gap: 0.4rem; font-size: 0.8rem; color: #334155;">
-                                        <span style="height: 0.65rem; width: 0.65rem; border-radius: 2px; background-color: {{ $nivel['color'] }}; display: inline-block;"></span>
+                                        <span style="height: 0.65rem; width: 0.65rem; border-radius: 2px; background-color: {{ $nivel['color'] }}; display: inline-block; flex-shrink: 0;"></span>
                                         {{ $nivel['label'] }}
                                     </span>
                                     <span style="font-size: 0.8rem; font-weight: 600; color: #1e293b;">{{ $nivel['count'] }}</span>
                                 </div>
+                                {{-- La acción que corresponde, "en letras más
+                                     chiquitas" (Angélica, 27/08/2026). Solo el
+                                     ASQ la trae. --}}
+                                @if (! empty($nivel['accion']))
+                                    <div style="font-size: 0.7rem; color: #64748b; margin: 0 0 0.25rem 1.05rem; line-height: 1.35;">{{ $nivel['accion'] }}</div>
+                                @endif
                                 <div style="height: 0.45rem; width: 100%; border-radius: 9999px; background-color: #f1f5f9; overflow: hidden;">
                                     <div style="height: 100%; width: {{ $nivel['count'] / $ti * 100 }}%; background-color: {{ $nivel['color'] }};"></div>
                                 </div>
@@ -58,7 +64,35 @@
             @endforeach
         </div>
 
-        {{-- Sección 2: sintomatología (o prioridad) por perfil, con selector de instrumento --}}
+        {{-- Sección 2: el universo que participó, sin cruce con resultados.
+             Lo pidió Angélica el 27/08/2026: "cuántos hombres, mujeres, de qué
+             rango de edad, funciones, tiempo en la empresa". --}}
+        <h4 style="font-size: 0.8rem; font-weight: 700; color: #334155; text-transform: uppercase; letter-spacing: 0.05em; margin: 0 0 1rem; padding-bottom: 0.4rem; border-bottom: 1px solid #f1f5f9;">¿Quiénes fueron evaluados?</h4>
+        <p style="font-size: 0.75rem; color: #94a3b8; margin: -0.5rem 0 1rem;">{{ $total }} personas participaron. Conteos sin cruzar con resultados.</p>
+
+        <div class="estad-grid-2" style="margin-bottom: 2rem;">
+            @foreach ($universo as $dim)
+                <div>
+                    <h5 style="font-size: 0.78rem; font-weight: 700; color: #475569; margin: 0 0 0.85rem;">{{ $dim['titulo'] }}</h5>
+
+                    @forelse ($dim['datos'] as $categoria => $n)
+                        <div style="margin-bottom: 0.7rem;">
+                            <div style="display: flex; align-items: baseline; justify-content: space-between; gap: 0.75rem; margin-bottom: 0.25rem;">
+                                <span style="font-size: 0.85rem; color: #1e293b; font-weight: 500; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="{{ $categoria }}">{{ $categoria }}</span>
+                                <span style="font-size: 0.78rem; color: #64748b; white-space: nowrap; flex-shrink: 0;">{{ $n }} <span style="color:#94a3b8;">({{ $total > 0 ? round($n / $total * 100) : 0 }}%)</span></span>
+                            </div>
+                            <div style="height: 0.45rem; width: 100%; border-radius: 9999px; background-color: #f1f5f9; overflow: hidden;">
+                                <div style="height: 100%; width: {{ $total > 0 ? $n / $total * 100 : 0 }}%; background-color: #556ee6;"></div>
+                            </div>
+                        </div>
+                    @empty
+                        <p style="font-size: 0.82rem; color: #94a3b8; margin: 0;">Sin datos para esta categoría.</p>
+                    @endforelse
+                </div>
+            @endforeach
+        </div>
+
+        {{-- Sección 3: sintomatología (o prioridad) por perfil, con selector de instrumento --}}
         <div style="display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 0.5rem; margin-bottom: 1rem; padding-bottom: 0.4rem; border-bottom: 1px solid #f1f5f9;">
             <div style="display: flex; flex-wrap: wrap; align-items: center; gap: 0.75rem;">
                 <h4 style="font-size: 0.8rem; font-weight: 700; color: #334155; text-transform: uppercase; letter-spacing: 0.05em; margin: 0;">{{ $tituloPerfil }} por perfil</h4>
