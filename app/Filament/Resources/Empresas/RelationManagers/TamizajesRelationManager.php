@@ -4,6 +4,7 @@ namespace App\Filament\Resources\Empresas\RelationManagers;
 
 use App\Support\ColorNivel;
 use App\Support\PrioridadAtencion;
+use App\Support\ResultadoAsq;
 use Filament\Actions\Action;
 use Filament\Forms\Components\Placeholder;
 use Filament\Resources\RelationManagers\RelationManager;
@@ -54,7 +55,24 @@ class TamizajesRelationManager extends RelationManager
                     ->schema([
                         $makeBadge('nivel_ansiedad', 'Síntomas de Ansiedad'),
                         $makeBadge('nivel_depresion', 'Síntomas de Depresión'),
-                        $makeBadge('nivel_suicidio', 'Indicadores de Conducta suicida'),
+                        // El ASQ va completo, con la acción en letra chica
+                        // (Angélica, 27/08/2026). Mismo bloque que en
+                        // TamizajeResource del panel empresa.
+                        Placeholder::make('nivel_suicidio')
+                            ->hiddenLabel()
+                            ->content(function ($record) use ($getColor) {
+                                if (! $record) {
+                                    return null;
+                                }
+                                $color = $getColor($record->nivel_suicidio);
+                                $titulo = e(ResultadoAsq::titulo($record));
+                                $accion = ResultadoAsq::accion($record);
+                                $lineaAccion = $accion
+                                    ? '<span style="display: block; font-size: 0.72rem; font-weight: 500; margin-top: 2px;">'.e($accion).'</span>'
+                                    : '';
+
+                                return new HtmlString("<span style=\"background-color: {$color}; color: white; padding: 8px 16px; border-radius: 1rem; font-size: 0.875rem; font-weight: 600; display: inline-block; width: 100%; text-align: center;\">Indicadores de Conducta suicida: {$titulo}{$lineaAccion}</span>");
+                            }),
                     ]),
 
                 Placeholder::make('info_title')

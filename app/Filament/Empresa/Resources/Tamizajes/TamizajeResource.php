@@ -3,12 +3,12 @@
 namespace App\Filament\Empresa\Resources\Tamizajes;
 
 use App\Filament\Empresa\Resources\Tamizajes\Pages\ManageTamizajes;
-use App\Livewire\ResponderTamizaje;
 use App\Models\CasoSeguimiento;
 use App\Models\Setting;
 use App\Models\Tamizaje;
 use App\Support\ColorNivel;
 use App\Support\PrioridadAtencion;
+use App\Support\ResultadoAsq;
 use BackedEnum;
 use Filament\Actions\Action;
 use Filament\Actions\EditAction;
@@ -86,6 +86,26 @@ class TamizajeResource extends Resource
                 });
         };
 
+        // El resultado del ASQ va completo: título ("Positivo: Riesgo Agudo"
+        // cuando la pregunta 5 fue "Sí") y la acción en letra más chica dentro
+        // del mismo badge. Lo pidió Angélica el 27/08/2026 para que la
+        // reacción ante un Positivo no sea "uf, muchos positivos".
+        $badgeAsq = Placeholder::make('nivel_suicidio')
+            ->hiddenLabel()
+            ->content(function ($record) use ($getColor) {
+                if (! $record) {
+                    return null;
+                }
+                $color = $getColor($record->nivel_suicidio);
+                $titulo = e(ResultadoAsq::titulo($record));
+                $accion = ResultadoAsq::accion($record);
+                $lineaAccion = $accion
+                    ? '<span style="display: block; font-size: 0.72rem; font-weight: 500; margin-top: 2px;">'.e($accion).'</span>'
+                    : '';
+
+                return new HtmlString("<span style=\"background-color: {$color}; color: white; padding: 8px 16px; border-radius: 1rem; font-size: 0.875rem; font-weight: 600; display: inline-block; width: 100%; text-align: center;\">Indicadores de Conducta suicida: {$titulo}{$lineaAccion}</span>");
+            });
+
         return $schema
             ->columns(1)
             ->components([
@@ -93,7 +113,7 @@ class TamizajeResource extends Resource
                     ->schema([
                         $makeBadge('nivel_ansiedad', 'Síntomas de Ansiedad'),
                         $makeBadge('nivel_depresion', 'Síntomas de Depresión'),
-                        $makeBadge('nivel_suicidio', 'Indicadores de Conducta suicida'),
+                        $badgeAsq,
                     ]),
 
                 // La prioridad y la conducta que le corresponde no estaban en el
@@ -106,13 +126,15 @@ class TamizajeResource extends Resource
                         Placeholder::make('accion_sugerida')
                             ->label('Acción que corresponde')
                             ->content(function ($record) {
-                                $accion = ResponderTamizaje::ACCIONES_SUICIDIO[$record?->nivel_suicidio] ?? null;
+                                // Distingue la agudeza: el positivo con la 5 en "Sí"
+                                // tiene su propia acción.
+                                $accion = $record ? ResultadoAsq::accion($record) : null;
 
                                 if (! $accion) {
                                     return null;
                                 }
 
-                                return new HtmlString("<div style=\"color: #374151; font-size: 0.95rem;\">{$accion}</div>");
+                                return new HtmlString('<div style="color: #374151; font-size: 0.95rem;">'.e($accion).'</div>');
                             }),
 
                         // La pregunta ya no se formula: Angélica la retiró el 25/08/2026
