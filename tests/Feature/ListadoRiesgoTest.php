@@ -91,6 +91,34 @@ class ListadoRiesgoTest extends TestCase
             ->assertSee('Secretaría de Salud');
     }
 
+    /**
+     * El resultado del ASQ va completo en el listado (Angélica, 27/08/2026):
+     * el título distingue la agudeza y la acción acompaña en letra chica.
+     * Despliegue — la columna del tamizaje sigue en dos valores.
+     */
+    public function test_la_columna_del_asq_muestra_el_resultado_completo(): void
+    {
+        Tamizaje::create([
+            'empresa_id' => $this->empresa->id,
+            'nombre_completo' => 'Juan Pérez',
+            'consentimiento_otorgado' => true,
+            'riesgo_ansiedad' => 0,
+            'riesgo_depresion' => 0,
+            'riesgo_conducta_suicida' => 1,
+            'nivel_ansiedad' => 'Mínima o sin ansiedad',
+            'nivel_depresion' => 'Mínima o ausente',
+            'nivel_suicidio' => 'Positivo',
+            'nivel_riesgo_general' => 'Urgente',
+            'respuestas' => ['conducta_suicida' => [1 => 1, 2 => 0, 3 => 0, 4 => 0, 5 => 1]],
+        ]);
+        $this->crearCaso(['nivel_riesgo_detectado' => 'Urgente']);
+
+        $this->get('/tablero/caso-seguimientos')
+            ->assertSuccessful()
+            ->assertSee('Positivo: Riesgo Agudo')
+            ->assertSee('Valoración/ Atención Especializada prioritaria');
+    }
+
     public function test_la_columna_del_nombre_queda_inmovilizada(): void
     {
         $this->crearCaso();

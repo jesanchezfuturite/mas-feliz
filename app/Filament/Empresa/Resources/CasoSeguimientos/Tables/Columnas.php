@@ -5,6 +5,7 @@ namespace App\Filament\Empresa\Resources\CasoSeguimientos\Tables;
 use App\Models\CasoSeguimiento;
 use App\Support\ColorNivel;
 use App\Support\PrioridadAtencion;
+use App\Support\ResultadoAsq;
 use Filament\Tables\Columns\CheckboxColumn;
 use Filament\Tables\Columns\SelectColumn;
 use Filament\Tables\Columns\TextColumn;
@@ -99,7 +100,19 @@ class Columnas
             // --- RESULTADOS (provienen del tamizaje, solo lectura) ---
             self::resultado('ansiedad', 'Síntomas de Ansiedad', fn ($t) => $t?->nivel_ansiedad),
             self::resultado('depresion', 'Síntomas de Depresión', fn ($t) => $t?->nivel_depresion),
-            self::resultado('suicidio', 'Indicadores de Conducta suicida', fn ($t) => $t?->nivel_suicidio),
+
+            // El resultado del ASQ va completo (Angélica, 27/08/2026): el
+            // título distingue la agudeza y la acción va en letra chica
+            // debajo. Es despliegue — la columna del tamizaje sigue en dos
+            // valores; el título agudo sale de ResultadoAsq.
+            TextColumn::make('suicidio')
+                ->label('Indicadores de Conducta suicida')
+                ->badge()
+                ->getStateUsing(fn ($record) => $record->tamizaje ? ResultadoAsq::titulo($record->tamizaje) : 'N/A')
+                ->color(fn (string $state): string => $state === ResultadoAsq::TITULO_AGUDO
+                    ? 'danger'
+                    : ColorNivel::badge($state))
+                ->description(fn ($record) => $record->tamizaje ? ResultadoAsq::accion($record->tamizaje) : null),
 
             SelectColumn::make('nivel_riesgo_detectado')
                 ->label(PrioridadAtencion::ETIQUETA)
