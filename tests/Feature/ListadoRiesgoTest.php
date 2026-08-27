@@ -59,25 +59,56 @@ class ListadoRiesgoTest extends TestCase
 
     public function test_las_columnas_siguen_la_jerarquia_del_documento_de_salud(): void
     {
-        $etiquetas = array_map(
-            fn ($columna) => $columna->getLabel(),
-            Columnas::definicion(),
-        );
+        // Desde el 27/08/2026 las columnas van agrupadas bajo los títulos de
+        // sección de la fila 1 de la hoja de Drive de Angélica. Los nombres de
+        // los tres resultados son los que pidió el 26/08: "Síntomas de..." e
+        // "Indicadores de Conducta suicida".
+        $estructura = [];
+        foreach (Columnas::definicion() as $grupo) {
+            $estructura[$grupo->getLabel()] = array_values(array_map(
+                fn ($columna) => $columna->getLabel(),
+                $grupo->getColumns(),
+            ));
+        }
 
-        // Orden exacto del documento "ATENCIÓN EMPRESAS +FELIZ": identificación,
-        // resultados, consentimiento, estatus, servicio y solicitud de referencia.
-        // Los nombres de los tres resultados son los que Angélica pidió el
-        // 26/08/2026: "Síntomas de..." e "Indicadores de Conducta suicida".
         $esperado = [
-            'Nombre', 'Rango de edad', 'Sexo', 'Funciones', '¿Cuál función?',
-            'Tiempo trabajando en la empresa', 'Correo', 'Celular',
-            'Síntomas de Ansiedad', 'Síntomas de Depresión', 'Indicadores de Conducta suicida', 'Prioridad de atención',
-            'Consentimiento', 'Estatus de atención',
-            'Medicina', 'Psicología', 'Psiquiatría', 'Otro', '¿Cuál servicio?',
-            'Secretaría de Salud', 'Institución de canalización',
+            'Datos de identificación' => [
+                'Nombre', 'Rango de edad', 'Sexo', 'Funciones', '¿Cuál función?',
+                'Tiempo trabajando en la empresa', 'Correo', 'Celular',
+            ],
+            'Resultados' => [
+                'Síntomas de Ansiedad', 'Síntomas de Depresión', 'Indicadores de Conducta suicida', 'Prioridad de atención',
+            ],
+            'Consentimiento' => ['Consentimiento'],
+            'Estatus de atención' => ['Estatus de atención'],
+            'Servicio' => ['Medicina', 'Psicología', 'Psiquiatría', 'Otro', '¿Cuál servicio?'],
+            'Solicitud de referencia complementaria' => ['Secretaría de Salud', 'Institución de canalización'],
         ];
 
-        $this->assertSame($esperado, $etiquetas);
+        $this->assertSame($esperado, $estructura);
+    }
+
+    /**
+     * Los desplegables del listado se pintan: el estatus con los chips del
+     * Drive de Angélica (27/08/2026) y la prioridad con su color oficial.
+     */
+    public function test_los_desplegables_llevan_los_colores_del_drive(): void
+    {
+        $this->assertStringContainsString('#FFE5A0', CasoSeguimiento::estiloChipEstatus('En seguimiento'));
+        $this->assertStringContainsString('#D4EDBC', CasoSeguimiento::estiloChipEstatus('Cerrado satisfactorio'));
+        $this->assertStringContainsString('#B10202', CasoSeguimiento::estiloChipEstatus('Cerrado no atendido'));
+        // Un valor desconocido no pinta nada (ni revienta).
+        $this->assertSame('', CasoSeguimiento::estiloChipEstatus(null));
+
+        $this->crearCaso(['estatus_atencion' => 'En seguimiento']);
+
+        $this->get('/tablero/caso-seguimientos')
+            ->assertSuccessful()
+            // Los títulos de sección de la fila 1 del Drive se dibujan.
+            ->assertSee('Datos de identificación')
+            ->assertSee('Solicitud de referencia complementaria')
+            // El select del estatus lleva el chip amarillo del Drive.
+            ->assertSee('#FFE5A0', false);
     }
 
     public function test_el_listado_se_muestra_con_las_columnas_nuevas(): void
@@ -89,6 +120,34 @@ class ListadoRiesgoTest extends TestCase
             ->assertSee('Rango de edad')
             ->assertSee('Indicadores de Conducta suicida')
             ->assertSee('Secretaría de Salud');
+    }
+
+    /**
+     * El resultado del ASQ va completo en el listado (Angélica, 27/08/2026):
+     * el título distingue la agudeza y la acción acompaña en letra chica.
+     * Despliegue — la columna del tamizaje sigue en dos valores.
+     */
+    public function test_la_columna_del_asq_muestra_el_resultado_completo(): void
+    {
+        Tamizaje::create([
+            'empresa_id' => $this->empresa->id,
+            'nombre_completo' => 'Juan Pérez',
+            'consentimiento_otorgado' => true,
+            'riesgo_ansiedad' => 0,
+            'riesgo_depresion' => 0,
+            'riesgo_conducta_suicida' => 1,
+            'nivel_ansiedad' => 'Mínima o sin ansiedad',
+            'nivel_depresion' => 'Mínima o ausente',
+            'nivel_suicidio' => 'Positivo',
+            'nivel_riesgo_general' => 'Urgente',
+            'respuestas' => ['conducta_suicida' => [1 => 1, 2 => 0, 3 => 0, 4 => 0, 5 => 1]],
+        ]);
+        $this->crearCaso(['nivel_riesgo_detectado' => 'Urgente']);
+
+        $this->get('/tablero/caso-seguimientos')
+            ->assertSuccessful()
+            ->assertSee('Positivo: Riesgo Agudo')
+            ->assertSee('Valoración/ Atención Especializada prioritaria');
     }
 
     public function test_la_columna_del_nombre_queda_inmovilizada(): void

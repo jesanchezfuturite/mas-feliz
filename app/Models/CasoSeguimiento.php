@@ -22,14 +22,47 @@ class CasoSeguimiento extends Model
         'Abandonó' => 'Abandonó',
     ];
 
-    /** Color con el que se distingue cada estatus en los listados. */
+    /**
+     * Color con el que se distingue cada estatus en los listados (badges de
+     * Filament). Alineado a los chips del Drive de Angélica el 27/08/2026:
+     * "En seguimiento" es amarillo en su hoja (antes lo pintábamos azul) y a
+     * "Canalizado" —que no existe en su hoja— le toca el azul.
+     */
     public const COLORES_ESTATUS = [
-        'En seguimiento' => 'info',
-        'Canalizado' => 'warning',
+        'En seguimiento' => 'warning',
+        'Canalizado' => 'info',
         'Cerrado satisfactorio' => 'success',
         'Cerrado no atendido' => 'danger',
         'Abandonó' => 'gray',
     ];
+
+    /**
+     * Los colores exactos de los chips del desplegable de estatus en la hoja
+     * de Drive "ATENCIÓN EMPRESAS +FELIZ" (Angélica pidió respetarlos el
+     * 27/08/2026). Su hoja trae 4 estatus y la plataforma 5: "Cerrado
+     * atendido" ≈ "Cerrado satisfactorio"; "Canalizado" (azul) y "Abandonó"
+     * (gris) no existen en su hoja, y su "Pendiente de atención" (rojo claro)
+     * no existe en la plataforma.
+     */
+    public const CHIPS_ESTATUS = [
+        'En seguimiento' => ['fondo' => '#FFE5A0', 'texto' => '#473821'],
+        'Canalizado' => ['fondo' => '#BFE1F6', 'texto' => '#0A53A8'],
+        'Cerrado satisfactorio' => ['fondo' => '#D4EDBC', 'texto' => '#11734B'],
+        'Cerrado no atendido' => ['fondo' => '#B10202', 'texto' => '#FFFFFF'],
+        'Abandonó' => ['fondo' => '#E6E6E6', 'texto' => '#3F3F3F'],
+    ];
+
+    /** Estilo inline del chip para el `<select>` del listado. */
+    public static function estiloChipEstatus(?string $estatus): string
+    {
+        $chip = self::CHIPS_ESTATUS[$estatus] ?? null;
+
+        if (! $chip) {
+            return '';
+        }
+
+        return "background-color: {$chip['fondo']}; color: {$chip['texto']}; border-color: {$chip['fondo']}; border-radius: 9999px; font-weight: 600;";
+    }
 
     protected $guarded = [];
 
