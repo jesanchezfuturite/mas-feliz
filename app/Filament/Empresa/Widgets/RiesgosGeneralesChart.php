@@ -2,6 +2,7 @@
 
 namespace App\Filament\Empresa\Widgets;
 
+use App\Models\Empresa;
 use App\Models\Setting;
 use App\Support\PrioridadAtencion;
 use Filament\Widgets\ChartWidget;
@@ -17,7 +18,9 @@ class RiesgosGeneralesChart extends ChartWidget
      */
     public static function canView(): bool
     {
-        return Setting::resultadosTamizajeVisibles();
+        $empresa = auth()->user();
+
+        return Setting::resultadosTamizajeVisibles($empresa instanceof Empresa ? $empresa : null);
     }
 
     public function getView(): string

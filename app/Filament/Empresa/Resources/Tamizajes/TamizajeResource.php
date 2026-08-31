@@ -4,6 +4,7 @@ namespace App\Filament\Empresa\Resources\Tamizajes;
 
 use App\Filament\Empresa\Resources\Tamizajes\Pages\ManageTamizajes;
 use App\Models\CasoSeguimiento;
+use App\Models\Empresa;
 use App\Models\Setting;
 use App\Models\Tamizaje;
 use App\Support\ColorNivel;
@@ -37,7 +38,9 @@ class TamizajeResource extends Resource
     {
         $herramientasActivas = Setting::where('key', 'global_config')->first()?->herramientas_empresa_activas ?? false;
 
-        return $herramientasActivas && Setting::resultadosTamizajeVisibles();
+        $empresa = auth()->user();
+
+        return $herramientasActivas && Setting::resultadosTamizajeVisibles($empresa instanceof Empresa ? $empresa : null);
     }
 
     protected static ?string $model = Tamizaje::class;
