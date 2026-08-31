@@ -95,7 +95,9 @@ class CatalogosSaludTest extends TestCase
         $this->assertCount(8, Formato::JURISDICCIONES);
         // PHP convierte las claves numéricas en enteros; el valor se guarda como texto.
         $this->assertSame([1, 2, 3, 4, 5, 6, 7, 8], array_keys(Formato::JURISDICCIONES));
-        $this->assertSame('Jurisdicción 8', Formato::JURISDICCIONES[8]);
+        // Angélica pidió (31/08/2026) que la etiqueta lleve el municipio sede.
+        $this->assertSame('Jurisdicción 1: Piedras Negras', Formato::JURISDICCIONES[1]);
+        $this->assertSame('Jurisdicción 8: Saltillo', Formato::JURISDICCIONES[8]);
     }
 
     public function test_el_estatus_de_la_cita_tiene_las_cinco_opciones_con_color(): void

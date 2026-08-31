@@ -49,7 +49,9 @@ class SolicitudReferenciasTable
                 TextColumn::make('municipio')
                     ->label('Municipio')
                     ->searchable()
-                    ->description(fn ($record) => $record->jurisdiccion ? 'Jurisdicción '.$record->jurisdiccion : null)
+                    ->description(fn ($record) => $record->jurisdiccion
+                        ? (SolicitudReferenciaForm::JURISDICCIONES[$record->jurisdiccion] ?? 'Jurisdicción '.$record->jurisdiccion)
+                        : null)
                     ->sortable(),
 
                 TextColumn::make('nivel_riesgo')

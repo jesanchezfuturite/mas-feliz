@@ -19,9 +19,16 @@ class Setting extends Model
      * Se resuelve aquí y no repitiendo la consulta en cada recurso para que el
      * valor por omisión sea uno solo: si todavía no existe la fila de
      * `global_config`, se muestran, que es como se comportó siempre.
+     *
+     * El interruptor global manda; el de la empresa (columna
+     * `empresas.resultados_tamizaje_visibles`, apagable desde el listado de
+     * Empresas del admin) solo puede restringir. Es para las instituciones que
+     * pidieron no tener visibilidad de sus resultados aunque el resto sí la tenga.
      */
-    public static function resultadosTamizajeVisibles(): bool
+    public static function resultadosTamizajeVisibles(?Empresa $empresa = null): bool
     {
-        return (bool) (static::where('key', 'global_config')->first()?->resultados_tamizaje_visibles ?? true);
+        $global = (bool) (static::where('key', 'global_config')->first()?->resultados_tamizaje_visibles ?? true);
+
+        return $global && ($empresa?->resultados_tamizaje_visibles ?? true);
     }
 }

@@ -133,12 +133,29 @@ class Columnas
             ]),
 
             ColumnGroup::make('Consentimiento', [
+                // `consentimiento` es booleano en el modelo, pero el select
+                // nativo compara su estado contra los valores '1'/'0' de las
+                // opciones COMO TEXTO. Con el estado en true/false ningún
+                // <option> coincidía y el campo oculto con el que Filament
+                // resincroniza toda la tabla tras cada guardado imprimía
+                // e(false) = '': al capturar una fila, los "Sí/No" de las
+                // demás parecían borrarse o cambiar (Angélica, 31/08/2026).
+                // Por eso el estado se expone como texto y se guarda de
+                // vuelta como booleano (o null si se limpia la celda).
                 SelectColumn::make('consentimiento')
                     ->label('Consentimiento')
                     ->options([
-                        1 => 'Sí',
-                        0 => 'No',
-                    ]),
+                        '1' => 'Sí',
+                        '0' => 'No',
+                    ])
+                    ->getStateUsing(fn ($record) => is_null($record->consentimiento)
+                        ? null
+                        : ($record->consentimiento ? '1' : '0'))
+                    ->updateStateUsing(function ($record, $state) {
+                        $record->update([
+                            'consentimiento' => is_null($state) ? null : (bool) $state,
+                        ]);
+                    }),
             ]),
 
             ColumnGroup::make('Estatus de atención', [

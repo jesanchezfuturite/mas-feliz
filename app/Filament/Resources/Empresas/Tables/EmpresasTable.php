@@ -2,14 +2,22 @@
 
 namespace App\Filament\Resources\Empresas\Tables;
 
+use App\Filament\Resources\AutoevaluacionResource;
+use App\Mail\VisitaAgendadaMail;
 use App\Models\Empresa;
+use Filament\Actions\Action;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
 use Filament\Actions\ViewAction;
+use Filament\Forms\Components\DateTimePicker;
+use Filament\Forms\Components\Select;
+use Filament\Notifications\Notification;
 use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Columns\ToggleColumn;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
+use Illuminate\Support\Facades\Mail;
 
 class EmpresasTable
 {
@@ -43,6 +51,13 @@ class EmpresasTable
                     ->numeric()
                     ->sortable()
                     ->alignCenter(),
+                // Algunas instituciones pidieron no ver sus resultados: este
+                // apagador restringe solo a esa empresa. El interruptor global de
+                // Configuración General sigue mandando por encima de todos.
+                ToggleColumn::make('resultados_tamizaje_visibles')
+                    ->label('Resultados visibles')
+                    ->tooltip('Si se apaga, esta empresa deja de ver el listado de resultados del tamizaje y las gráficas de riesgo, aunque el interruptor global esté encendido.')
+                    ->alignCenter(),
             ])
             ->filters([
                 SelectFilter::make('municipio')
@@ -53,28 +68,28 @@ class EmpresasTable
                     ->options(fn () => Empresa::query()->distinct()->pluck('rubro', 'rubro')->filter()->toArray()),
             ])
             ->recordActions([
-                \Filament\Actions\Action::make('autoevaluacion')
+                Action::make('autoevaluacion')
                     ->icon('heroicon-o-clipboard-document-check')
                     ->iconButton()
                     ->color(fn ($record) => optional($record->autoevaluaciones()->latest()->first())->estatus === 'Validado' ? 'success' : 'warning')
                     ->tooltip('Ver Autoevaluación')
-                    ->url(fn ($record) => optional($record->autoevaluaciones()->latest()->first())->id ? \App\Filament\Resources\AutoevaluacionResource::getUrl('view', ['record' => $record->autoevaluaciones()->latest()->first()->id]) : null)
-                    ->hidden(fn ($record) => !in_array(optional($record->autoevaluaciones()->latest()->first())->estatus, ['En revisión', 'Validado'])),
-                \Filament\Actions\Action::make('descargar_distintivo')
+                    ->url(fn ($record) => optional($record->autoevaluaciones()->latest()->first())->id ? AutoevaluacionResource::getUrl('view', ['record' => $record->autoevaluaciones()->latest()->first()->id]) : null)
+                    ->hidden(fn ($record) => ! in_array(optional($record->autoevaluaciones()->latest()->first())->estatus, ['En revisión', 'Validado'])),
+                Action::make('descargar_distintivo')
                     ->label('Ver Distintivo')
                     ->icon('heroicon-o-document-arrow-down')
                     ->color('success')
                     ->iconButton()
                     ->tooltip('Ver Distintivo')
-                    ->visible(fn ($record) => !empty($record?->ruta_pdf) && $record?->estatus === 'Dictaminado')
-                    ->url(fn ($record) => !empty($record?->ruta_pdf) ? '/storage/' . $record->ruta_pdf : null)
+                    ->visible(fn ($record) => ! empty($record?->ruta_pdf) && $record?->estatus === 'Dictaminado')
+                    ->url(fn ($record) => ! empty($record?->ruta_pdf) ? '/storage/'.$record->ruta_pdf : null)
                     ->openUrlInNewTab(),
-                \Filament\Actions\Action::make('certificarFase')
+                Action::make('certificarFase')
                     ->label('Certificar Fase')
                     ->icon('heroicon-o-check-badge')
                     ->color('success')
                     ->form([
-                        \Filament\Forms\Components\Select::make('paso_certificacion')
+                        Select::make('paso_certificacion')
                             ->label('Fase Actual de Certificación')
                             ->options(Empresa::opcionesPasoCertificacion())
                             ->required()
@@ -85,19 +100,19 @@ class EmpresasTable
                             'paso_certificacion' => $data['paso_certificacion'],
                         ]);
 
-                        \Filament\Notifications\Notification::make()
+                        Notification::make()
                             ->title('Fase actualizada correctamente')
                             ->success()
                             ->send();
                     })
                     ->iconButton()
                     ->tooltip('Actualizar Fase Oficial'),
-                \Filament\Actions\Action::make('agendarVisita')
+                Action::make('agendarVisita')
                     ->label('Agendar Visita')
                     ->icon('heroicon-o-calendar-days')
                     ->color('info')
                     ->form([
-                        \Filament\Forms\Components\DateTimePicker::make('fecha_visita_presencial')
+                        DateTimePicker::make('fecha_visita_presencial')
                             ->label('Fecha y Hora de la Visita')
                             ->required()
                             ->seconds(false)
@@ -110,18 +125,18 @@ class EmpresasTable
                         ]);
 
                         try {
-                            \Illuminate\Support\Facades\Mail::to($record->correo)
-                                ->send(new \App\Mail\VisitaAgendadaMail($record));
+                            Mail::to($record->correo)
+                                ->send(new VisitaAgendadaMail($record));
 
-                            \Filament\Notifications\Notification::make()
+                            Notification::make()
                                 ->title('Visita agendada y correo enviado')
                                 ->success()
                                 ->send();
                         } catch (\Exception $e) {
-                            \Filament\Notifications\Notification::make()
+                            Notification::make()
                                 ->title('Visita agendada pero el correo falló')
                                 ->warning()
-                                ->body('Error: ' . $e->getMessage())
+                                ->body('Error: '.$e->getMessage())
                                 ->send();
                         }
                     })

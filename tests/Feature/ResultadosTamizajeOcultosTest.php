@@ -6,6 +6,7 @@ use App\Filament\Empresa\Resources\Tamizajes\TamizajeResource;
 use App\Filament\Empresa\Widgets\DashboardStatsOverview;
 use App\Filament\Empresa\Widgets\EstadisticaTamizajeWidget;
 use App\Filament\Empresa\Widgets\RiesgosGeneralesChart;
+use App\Models\Empresa;
 use App\Models\Setting;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
@@ -82,6 +83,71 @@ class ResultadosTamizajeOcultosTest extends TestCase
         $this->configurar(herramientas: false, resultados: true);
 
         $this->assertFalse(TamizajeResource::canAccess());
+    }
+
+    private function empresa(string $correo, bool $resultadosVisibles = true): Empresa
+    {
+        return Empresa::create([
+            'nombre_empresa' => 'Empresa '.$correo,
+            'municipio' => 'Saltillo',
+            'dias_horario_servicio' => 'Lunes a viernes',
+            'nombre_director' => 'Director Test',
+            'nombre_responsable' => 'Responsable Test',
+            'correo' => $correo,
+            'password' => bcrypt('secret'),
+            'telefono' => '1234567890',
+            'rubro' => 'Gobierno',
+            'numero_trabajadores' => 100,
+            'resultados_tamizaje_visibles' => $resultadosVisibles,
+        ]);
+    }
+
+    /**
+     * Algunas instituciones pidieron no ver sus resultados: el admin enciende el
+     * interruptor global y lo apaga solo a esas empresas desde el listado de
+     * Empresas. El apagador por empresa solo restringe a esa empresa.
+     */
+    public function test_con_el_global_encendido_se_puede_apagar_una_sola_empresa(): void
+    {
+        $this->configurar(herramientas: true, resultados: true);
+
+        $oculta = $this->empresa('oculta@gobierno.test', resultadosVisibles: false);
+        $visible = $this->empresa('visible@empresa.test');
+
+        $this->assertFalse(Setting::resultadosTamizajeVisibles($oculta));
+        $this->assertTrue(Setting::resultadosTamizajeVisibles($visible));
+    }
+
+    public function test_la_empresa_apagada_pierde_el_listado_y_los_widgets(): void
+    {
+        $this->configurar(herramientas: true, resultados: true);
+
+        $this->actingAs($this->empresa('oculta@gobierno.test', resultadosVisibles: false), 'empresa');
+
+        $this->assertFalse(TamizajeResource::canAccess());
+        $this->assertFalse(RiesgosGeneralesChart::canView());
+        $this->assertFalse(EstadisticaTamizajeWidget::canView());
+    }
+
+    public function test_la_empresa_encendida_conserva_el_listado_y_los_widgets(): void
+    {
+        $this->configurar(herramientas: true, resultados: true);
+
+        $this->actingAs($this->empresa('visible@empresa.test'), 'empresa');
+
+        $this->assertTrue(TamizajeResource::canAccess());
+        $this->assertTrue(RiesgosGeneralesChart::canView());
+        $this->assertTrue(EstadisticaTamizajeWidget::canView());
+    }
+
+    /** El global sigue mandando: apagado, oculta aunque la empresa esté encendida. */
+    public function test_el_global_apagado_manda_sobre_la_empresa_encendida(): void
+    {
+        $this->configurar(herramientas: true, resultados: false);
+
+        $encendida = $this->empresa('encendida@empresa.test');
+
+        $this->assertFalse(Setting::resultadosTamizajeVisibles($encendida));
     }
 
     /**

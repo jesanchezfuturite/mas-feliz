@@ -37,6 +37,10 @@ class CasoSeguimientosTable
                 </div>
             '))
             ->columns(Columnas::definicion())
+            // La captura en línea re-renderiza la tabla en cada guardado; sin
+            // un orden explícito el motor puede devolver las filas en otro
+            // orden y los renglones "se mueven" bajo el cursor.
+            ->defaultSort('id')
             ->filters([
                 SelectFilter::make('nivel_riesgo_detectado')
                     ->label(PrioridadAtencion::ETIQUETA)
