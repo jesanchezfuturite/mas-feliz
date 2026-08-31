@@ -41,16 +41,21 @@ class SolicitudReferenciaForm
         return CatalogoUnidadesAtencion::opciones();
     }
 
-    /** Las ocho jurisdicciones sanitarias del estado. */
+    /**
+     * Las ocho jurisdicciones sanitarias del estado, con su municipio sede
+     * (hoja de Angélica, 31/08/2026). Se guarda solo el número; el municipio
+     * es parte de la etiqueta para que quien llena el formato no tenga que
+     * saberse el mapa de jurisdicciones.
+     */
     public const JURISDICCIONES = [
-        '1' => 'Jurisdicción 1',
-        '2' => 'Jurisdicción 2',
-        '3' => 'Jurisdicción 3',
-        '4' => 'Jurisdicción 4',
-        '5' => 'Jurisdicción 5',
-        '6' => 'Jurisdicción 6',
-        '7' => 'Jurisdicción 7',
-        '8' => 'Jurisdicción 8',
+        '1' => 'Jurisdicción 1: Piedras Negras',
+        '2' => 'Jurisdicción 2: Acuña',
+        '3' => 'Jurisdicción 3: Sabinas',
+        '4' => 'Jurisdicción 4: Monclova',
+        '5' => 'Jurisdicción 5: Cuatrociénegas',
+        '6' => 'Jurisdicción 6: Torreón',
+        '7' => 'Jurisdicción 7: Francisco I. Madero',
+        '8' => 'Jurisdicción 8: Saltillo',
     ];
 
     /** Avance de la cita. Antes se llamaba "Estatus SOMOS+". */
