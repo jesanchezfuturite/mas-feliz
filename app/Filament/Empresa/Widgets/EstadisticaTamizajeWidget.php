@@ -3,6 +3,7 @@
 namespace App\Filament\Empresa\Widgets;
 
 use App\Livewire\ResponderTamizaje;
+use App\Models\Empresa;
 use App\Models\Setting;
 use App\Support\ColorNivel;
 use App\Support\PrioridadAtencion;
@@ -59,7 +60,9 @@ class EstadisticaTamizajeWidget extends Widget
      */
     public static function canView(): bool
     {
-        return Setting::resultadosTamizajeVisibles();
+        $empresa = auth()->user();
+
+        return Setting::resultadosTamizajeVisibles($empresa instanceof Empresa ? $empresa : null);
     }
 
     /**

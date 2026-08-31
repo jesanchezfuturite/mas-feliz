@@ -85,7 +85,7 @@ class ConfiguradorLanding extends Page implements HasForms
 
                         Toggle::make('resultados_tamizaje_visibles')
                             ->label('Mostrar resultados del tamizaje a las empresas')
-                            ->helperText('Si está inactivo, la empresa deja de ver el listado de resultados colaborador por colaborador y también, dentro de "Diagnóstico y Tamizaje", la distribución de niveles de riesgo y el desglose de resultados. Conserva la liga del diagnóstico y su porcentaje de participación.'),
+                            ->helperText('Si está inactivo, la empresa deja de ver el listado de resultados colaborador por colaborador y también, dentro de "Diagnóstico y Tamizaje", la distribución de niveles de riesgo y el desglose de resultados. Conserva la liga del diagnóstico y su porcentaje de participación. Este interruptor manda sobre todas las empresas; para ocultar los resultados solo a una en particular, usa la columna "Resultados visibles" del listado de Empresas.'),
                     ]),
 
                 Actions::make([

@@ -2,19 +2,23 @@
 
 namespace App\Models;
 
-use Filament\Models\Contracts\HasName;
+use App\Notifications\ResetPasswordNotificationEs;
 use Filament\Models\Contracts\FilamentUser;
+use Filament\Models\Contracts\HasName;
 use Filament\Panel;
 use Illuminate\Auth\Authenticatable as AuthenticatableTrait;
+use Illuminate\Auth\Passwords\CanResetPassword as CanResetPasswordTrait;
 use Illuminate\Contracts\Auth\Authenticatable;
 use Illuminate\Contracts\Auth\CanResetPassword;
-use Illuminate\Auth\Passwords\CanResetPassword as CanResetPasswordTrait;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Query\Builder;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Support\Str;
 
-class Empresa extends Model implements Authenticatable, HasName, CanResetPassword, FilamentUser
+class Empresa extends Model implements Authenticatable, CanResetPassword, FilamentUser, HasName
 {
-    use AuthenticatableTrait, Notifiable, CanResetPasswordTrait;
+    use AuthenticatableTrait, CanResetPasswordTrait, Notifiable;
 
     /**
      * Fases de la Ruta Crítica de Avance. Viven aquí porque las consumen el
@@ -40,7 +44,7 @@ class Empresa extends Model implements Authenticatable, HasName, CanResetPasswor
         $opciones = [];
 
         foreach (self::PASOS_CERTIFICACION as $numero => $etiqueta) {
-            $opciones[$numero] = $numero . '. ' . $etiqueta;
+            $opciones[$numero] = $numero.'. '.$etiqueta;
         }
 
         return $opciones;
@@ -69,6 +73,7 @@ class Empresa extends Model implements Authenticatable, HasName, CanResetPasswor
         'fecha_dictamen',
         'paso_certificacion',
         'fecha_visita_presencial',
+        'resultados_tamizaje_visibles',
     ];
 
     protected $hidden = [
@@ -79,6 +84,7 @@ class Empresa extends Model implements Authenticatable, HasName, CanResetPasswor
     protected $casts = [
         'fecha_visita_presencial' => 'datetime',
         'fecha_dictamen' => 'datetime',
+        'resultados_tamizaje_visibles' => 'boolean',
     ];
 
     /**
@@ -101,8 +107,8 @@ class Empresa extends Model implements Authenticatable, HasName, CanResetPasswor
                 $nextNumber = 1;
             }
 
-            $empresa->folio = 'MF-2026-' . str_pad($nextNumber, 4, '0', STR_PAD_LEFT);
-            $empresa->token_tamizaje = \Illuminate\Support\Str::random(32);
+            $empresa->folio = 'MF-2026-'.str_pad($nextNumber, 4, '0', STR_PAD_LEFT);
+            $empresa->token_tamizaje = Str::random(32);
         });
     }
 
@@ -154,23 +160,25 @@ class Empresa extends Model implements Authenticatable, HasName, CanResetPasswor
      */
     public function sendPasswordResetNotification($token)
     {
-        $this->notify(new \App\Notifications\ResetPasswordNotificationEs($token));
+        $this->notify(new ResetPasswordNotificationEs($token));
     }
 
     /**
      * Create a new Eloquent query builder for the model.
      *
-     * @param  \Illuminate\Database\Query\Builder  $query
+     * @param  Builder  $query
      * @return \Illuminate\Database\Eloquent\Builder|static
      */
     public function newEloquentBuilder($query)
     {
-        return new class($query) extends \Illuminate\Database\Eloquent\Builder {
+        return new class($query) extends \Illuminate\Database\Eloquent\Builder
+        {
             public function where($column, $operator = null, $value = null, $boolean = 'and')
             {
                 if ($column === 'email') {
                     $column = 'correo';
                 }
+
                 return parent::where($column, $operator, $value, $boolean);
             }
         };
@@ -198,6 +206,7 @@ class Empresa extends Model implements Authenticatable, HasName, CanResetPasswor
     public function getRutaPdfAttribute(): ?string
     {
         $latest = $this->autoevaluaciones()->latest()->first();
+
         return $latest ? ($latest->respuestas['pdf_distintivo'] ?? null) : null;
     }
 
@@ -209,6 +218,7 @@ class Empresa extends Model implements Authenticatable, HasName, CanResetPasswor
         if (in_array($this->estatus_distintivo, ['Validado', 'Aprobado'])) {
             return 'Dictaminado';
         }
+
         return $this->estatus_distintivo;
     }
 
@@ -217,7 +227,7 @@ class Empresa extends Model implements Authenticatable, HasName, CanResetPasswor
         return $panel->getId() === 'empresa';
     }
 
-    public function evaluadores(): \Illuminate\Database\Eloquent\Relations\BelongsToMany
+    public function evaluadores(): BelongsToMany
     {
         return $this->belongsToMany(User::class);
     }
