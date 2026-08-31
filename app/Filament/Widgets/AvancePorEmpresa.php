@@ -8,6 +8,7 @@ use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 use Filament\Widgets\TableWidget as BaseWidget;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Str;
 
 /**
  * Avance por organización, para dar seguimiento sin abrir empresa por empresa.
@@ -34,11 +35,35 @@ class AvancePorEmpresa extends BaseWidget
         return null;
     }
 
+    /**
+     * Alias de conteo por nivel de prioridad ('prioridad_urgente' =>
+     * 'Urgente', …). Sale de PrioridadAtencion::ESCALA para no duplicar la
+     * tabla: si la escala cambia, las columnas cambian solas.
+     *
+     * @return array<string, string>
+     */
+    public static function conteosPorPrioridad(): array
+    {
+        $aliases = [];
+
+        foreach (PrioridadAtencion::ESCALA as $nivel) {
+            $aliases['prioridad_'.Str::slug($nivel, '_')] = $nivel;
+        }
+
+        return $aliases;
+    }
+
     public function table(Table $table): Table
     {
+        $conteosPrioridad = [];
+
+        foreach (self::conteosPorPrioridad() as $alias => $nivel) {
+            $conteosPrioridad['tamizajes as '.$alias] = fn (Builder $q) => $q->where('nivel_riesgo_general', $nivel);
+        }
+
         return $table
             ->heading('Avance por organización')
-            ->description('Cifras de seguimiento. No incluye datos personales de los colaboradores.')
+            ->description('Cifras de seguimiento. No incluye datos personales de los colaboradores. '.PrioridadAtencion::NOTA)
             ->query(
                 Empresa::query()
                     ->when($this->empresaIds() !== null, fn (Builder $q) => $q->whereIn('id', $this->empresaIds()))
@@ -46,7 +71,10 @@ class AvancePorEmpresa extends BaseWidget
                         'tamizajes',
                         'tamizajes as participaron_count' => fn (Builder $q) => $q->where('nivel_riesgo_general', '!=', PrioridadAtencion::NO_PARTICIPO),
                         'tamizajes as declinaron_count' => fn (Builder $q) => $q->where('nivel_riesgo_general', PrioridadAtencion::NO_PARTICIPO),
+                        // Ya no se muestra como columna, pero sigue ordenando el
+                        // listado: primero quien concentra más gente por atender.
                         'tamizajes as en_riesgo_count' => fn (Builder $q) => $q->whereIn('nivel_riesgo_general', PrioridadAtencion::REQUIEREN_ATENCION),
+                        ...$conteosPrioridad,
                         'casosSeguimiento as casos_abiertos_count' => fn (Builder $q) => $q->where('estatus_atencion', 'En seguimiento'),
                         'casosSeguimiento as casos_canalizados_count' => fn (Builder $q) => $q->where('estatus_atencion', 'Canalizado'),
                         'solicitudesReferencia as referencias_count',
@@ -93,12 +121,11 @@ class AvancePorEmpresa extends BaseWidget
                     ->sortable()
                     ->description(fn ($record) => $record->declinaron_count.' declinaron'),
 
-                TextColumn::make('en_riesgo_count')
-                    ->label('En riesgo')
-                    ->alignCenter()
-                    ->sortable()
-                    ->badge()
-                    ->color(fn ($state) => $state > 0 ? 'warning' : 'gray'),
+                // Angélica (31/08/2026): el bulto "En riesgo" (que sumaba
+                // Moderada + Alta + Urgente + agudeza pendiente) se leía como
+                // dato inflado. En su lugar, el desglose por prioridad de
+                // atención, con los colores de la escala.
+                ...$this->columnasPorPrioridad(),
 
                 TextColumn::make('casos_abiertos_count')
                     ->label('Casos en seguimiento')
@@ -130,5 +157,28 @@ class AvancePorEmpresa extends BaseWidget
             ])
             ->defaultSort('en_riesgo_count', 'desc')
             ->paginated([10, 25, 50]);
+    }
+
+    /**
+     * Una columna por nivel de la escala, cada una con su color y ordenable,
+     * para ver de un vistazo cuántos Urgente, Alta, etc. tiene cada
+     * organización.
+     *
+     * @return array<TextColumn>
+     */
+    protected function columnasPorPrioridad(): array
+    {
+        $columnas = [];
+
+        foreach (self::conteosPorPrioridad() as $alias => $nivel) {
+            $columnas[] = TextColumn::make($alias)
+                ->label($nivel)
+                ->alignCenter()
+                ->sortable()
+                ->badge()
+                ->color(fn ($state) => $state > 0 ? PrioridadAtencion::COLORES[$nivel] : 'gray');
+        }
+
+        return $columnas;
     }
 }
