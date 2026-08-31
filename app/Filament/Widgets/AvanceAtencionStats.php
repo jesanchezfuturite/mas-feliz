@@ -67,8 +67,11 @@ class AvanceAtencionStats extends BaseWidget
                 ->descriptionIcon('heroicon-m-hand-raised')
                 ->color('info'),
 
+            // La cifra suma los niveles de REQUIEREN_ATENCION; la descripción
+            // los enumera para que no se lea como dato inflado (Angélica,
+            // 31/08/2026: "me siguen saliendo muchos en riesgo").
             Stat::make('Personas detectadas en riesgo', $metricas->detectadosEnRiesgo())
-                ->description('Tamizajes con riesgo moderado o urgente')
+                ->description('Prioridad Moderada, Alta o Urgente, o agudeza pendiente de confirmar')
                 ->descriptionIcon('heroicon-m-exclamation-triangle')
                 ->color('warning'),
 
