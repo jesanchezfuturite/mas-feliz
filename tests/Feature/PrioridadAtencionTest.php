@@ -125,10 +125,13 @@ class PrioridadAtencionTest extends TestCase
      * El desglose por instrumento arrastró durante semanas categorías que no
      * existen en el recuadro "PARA LA REVISIÓN" de Angélica: primero
      * "Evaluación Adicional" (el nombre que tuvo el positivo antes) y luego
-     * "Riesgo Agudo", que agregamos nosotros para que se notara la pregunta 5.
-     * Su documento define dos resultados y solo esos deben dibujarse.
+     * "Riesgo Agudo" como valor propio de la columna; ella reportó ambas. El
+     * 27/08/2026 pidió que la gráfica muestre el resultado COMPLETO: cada
+     * renglón con su acción en letra chica, y el positivo agudo (pregunta 5
+     * en "Sí") como renglón de DESPLIEGUE — la columna sigue guardando solo
+     * dos valores (ver test de abajo y ResultadoAsqTest).
      */
-    public function test_el_desglose_del_asq_solo_muestra_los_dos_resultados(): void
+    public function test_el_desglose_del_asq_muestra_los_resultados_completos(): void
     {
         // El desglose se destraba cuando la empresa ya envió su autoevaluación.
         $this->empresa->autoevaluaciones()->create(['estatus' => 'En revisión']);
@@ -156,9 +159,11 @@ class PrioridadAtencionTest extends TestCase
         $widget->assertSee('Indicadores de Conducta suicida')
             ->assertSee('Negativo')
             ->assertSee('Positivo')
-            // Los nombres que tuvo antes ya no se dibujan.
-            ->assertDontSee('Evaluación Adicional')
-            ->assertDontSee('Riesgo Agudo');
+            ->assertSee('Positivo: Riesgo Agudo')
+            ->assertSee('Prevención/ Promoción/ Psicoeducación')
+            ->assertSee('Valoración/ Atención Especializada prioritaria')
+            // El nombre que tuvo antes el positivo ya no se dibuja.
+            ->assertDontSee('Evaluación Adicional');
     }
 
     public function test_los_niveles_del_asq_son_exactamente_dos(): void

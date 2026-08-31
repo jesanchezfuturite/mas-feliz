@@ -7,6 +7,7 @@ use App\Models\CasoSeguimiento;
 use App\Models\Tamizaje;
 use App\Support\ColorNivel;
 use App\Support\PrioridadAtencion;
+use App\Support\ResultadoAsq;
 use Filament\Actions\Action;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
@@ -79,10 +80,18 @@ class CasoSeguimientosTable
                                     ->hiddenLabel()
                                     ->content(function ($record) {
                                         $tamizaje = Tamizaje::where('empresa_id', $record->empresa_id)->where('nombre_completo', $record->identificador_empleado)->first();
-                                        $value = $tamizaje->nivel_suicidio ?? 'N/A';
-                                        $color = ColorNivel::hex($value);
+                                        // El resultado del ASQ va completo, con la
+                                        // agudeza y su acción en letra chica
+                                        // (Angélica, 27/08/2026). Despliegue: la
+                                        // columna sigue en dos valores.
+                                        $color = ColorNivel::hex($tamizaje->nivel_suicidio ?? null);
+                                        $titulo = $tamizaje ? e(ResultadoAsq::titulo($tamizaje)) : 'N/A';
+                                        $accion = $tamizaje ? ResultadoAsq::accion($tamizaje) : null;
+                                        $lineaAccion = $accion
+                                            ? '<span style="display: block; font-size: 0.72rem; font-weight: 500; margin-top: 2px;">'.e($accion).'</span>'
+                                            : '';
 
-                                        return new HtmlString("<span style=\"background-color: {$color}; color: white; padding: 8px 16px; border-radius: 9999px; font-size: 0.875rem; font-weight: 600; display: inline-block; width: 100%; text-align: center;\">Indicadores de Conducta suicida: {$value}</span>");
+                                        return new HtmlString("<span style=\"background-color: {$color}; color: white; padding: 8px 16px; border-radius: 1rem; font-size: 0.875rem; font-weight: 600; display: inline-block; width: 100%; text-align: center;\">Indicadores de Conducta suicida: {$titulo}{$lineaAccion}</span>");
                                     }),
                             ]),
 
