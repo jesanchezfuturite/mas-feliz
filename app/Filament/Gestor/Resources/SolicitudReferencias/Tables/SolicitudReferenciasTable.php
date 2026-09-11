@@ -65,6 +65,17 @@ class SolicitudReferenciasTable
                     ->wrap()
                     ->placeholder('N/A'),
 
+                // Columna propia y no descripción de "Servicio": cuando el
+                // servicio viene vacío Filament pinta solo el placeholder y
+                // descarta descripción y tooltip, y el motivo se perdería.
+                TextColumn::make('motivo_referencia')
+                    ->label('Motivo de referencia')
+                    ->wrap()
+                    ->limit(90)
+                    ->tooltip(fn ($record) => $record->motivo_referencia)
+                    ->searchable()
+                    ->placeholder('Sin registrar'),
+
                 TextColumn::make('fecha_solicitud')
                     ->label('Solicitud')
                     ->dateTime('d/m/Y')

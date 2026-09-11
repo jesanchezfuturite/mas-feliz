@@ -184,6 +184,54 @@ class CatalogosSaludTest extends TestCase
             ->assertDontSee('SOMOS+');
     }
 
+    /**
+     * Campo abierto que pidió Angélica el 10/09/2026: el motivo viaja con la
+     * solicitud, se recupera al reabrir el formato y lo lee quien agenda.
+     */
+    public function test_el_motivo_de_referencia_se_captura_y_lo_ve_quien_agenda(): void
+    {
+        $this->assertTrue(Schema::hasColumn('solicitudes_referencia', 'motivo_referencia'));
+
+        $motivo = 'Crisis de ansiedad recurrentes en el turno nocturno; pide valoración.';
+
+        $caso = CasoSeguimiento::create([
+            'empresa_id' => $this->empresa->id,
+            'identificador_empleado' => 'Persona Referida',
+            'nivel_riesgo_detectado' => 'Alta',
+            'estatus_atencion' => 'Canalizado',
+        ]);
+
+        $solicitud = SolicitudReferencia::create([
+            'caso_seguimiento_id' => $caso->id,
+            'empresa_id' => $this->empresa->id,
+            'municipio' => 'Torreón',
+            'nombre_usuario' => 'Persona Referida',
+            'motivo_referencia' => $motivo,
+        ]);
+
+        $this->assertSame($motivo, $solicitud->fresh()->motivo_referencia);
+
+        // Al reabrir el formato la empresa vuelve a ver lo que escribió.
+        $this->assertSame($motivo, Formato::valoresIniciales($caso->fresh())['motivo_referencia']);
+
+        $gestor = User::create([
+            'name' => 'Gestor',
+            'apellidos' => 'Motivo',
+            'email' => 'gestor.motivo@test.com',
+            'password' => bcrypt('secret'),
+            'estatus' => true,
+            'role' => 'gestor',
+        ]);
+
+        $this->actingAs($gestor, 'web');
+
+        // Sin fecha de cita entra en la bandeja de pendientes, que es el filtro
+        // que el listado aplica por omisión.
+        $this->get('/gestor/referencias')
+            ->assertSuccessful()
+            ->assertSee('Crisis de ansiedad recurrentes en el turno nocturno');
+    }
+
     public function test_los_datos_de_identificacion_los_manda_el_tamizaje(): void
     {
         Tamizaje::create([

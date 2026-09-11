@@ -10,6 +10,7 @@ use Filament\Forms\Components\DateTimePicker;
 use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Placeholder;
 use Filament\Forms\Components\Select;
+use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Schemas\Components\Grid;
 use Filament\Schemas\Components\Section;
@@ -197,6 +198,16 @@ class SolicitudReferenciaForm
                         ->disabled($ro)
                         ->columnSpanFull(),
 
+                    // Campo abierto que pidió Angélica el 10/09/2026: el
+                    // catálogo de servicios no alcanza a explicar el contexto.
+                    Textarea::make('motivo_referencia')
+                        ->label('Motivo de referencia')
+                        ->helperText('Descripción general de la situación o necesidad.')
+                        ->rows(4)
+                        ->maxLength(65535)
+                        ->disabled($ro)
+                        ->columnSpanFull(),
+
                     Grid::make(2)->schema([
                         FileUpload::make('ine_path')
                             ->label('INE')
@@ -272,6 +283,7 @@ class SolicitudReferenciaForm
                 'fecha_solicitud', 'municipio', 'jurisdiccion', 'nivel_riesgo',
                 'nombre_usuario', 'sexo', 'edad', 'curp', 'telefono_contacto',
                 'ine_path', 'domicilio', 'derechohabiencia', 'servicio_solicitado',
+                'motivo_referencia',
                 'informe_valoracion_path', 'estatus_cita', 'fecha_cita',
                 'unidad_atencion', 'unidad_atencion_otra',
             ]);
