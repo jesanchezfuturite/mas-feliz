@@ -52,6 +52,21 @@ class ExportacionTamizajes
         'Comentarios',
     ];
 
+    /**
+     * Encabezados del archivo. Cuando el archivo cruza organizaciones —el
+     * admin exportando varias empresas— se antepone la columna
+     * "Organización", porque si no, no hay forma de saber de quién es cada
+     * renglón.
+     *
+     * @return list<string>
+     */
+    public static function encabezados(?Empresa $empresa): array
+    {
+        return $empresa
+            ? self::ENCABEZADOS
+            : array_merge(['Organización'], self::ENCABEZADOS);
+    }
+
     /** Tipo con el que Excel reconoce el archivo al abrirlo. */
     public const TIPO_MIME = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
 
@@ -59,11 +74,11 @@ class ExportacionTamizajes
     private const COLUMNA_FECHA = 7;
 
     /**
-     * Un renglón de la hoja, en el orden de ENCABEZADOS.
+     * Un renglón de la hoja, en el orden de {@see encabezados()}.
      *
      * @return list<string|int|\DateTimeInterface>
      */
-    public static function fila(Tamizaje $tamizaje): array
+    public static function fila(Tamizaje $tamizaje, ?string $organizacion = null): array
     {
         $participo = (bool) $tamizaje->consentimiento_otorgado;
 
@@ -77,7 +92,7 @@ class ExportacionTamizajes
             ? $tamizaje->actividad_trabajo_otra
             : $tamizaje->actividad_trabajo;
 
-        return [
+        $fila = [
             (string) $tamizaje->nombre_completo,
             (string) $tamizaje->genero,
             (string) $tamizaje->edad,
@@ -97,6 +112,12 @@ class ExportacionTamizajes
             $siParticipo((string) ResultadoAsq::accion($tamizaje)),
             (string) $tamizaje->comentarios,
         ];
+
+        if ($organizacion !== null) {
+            array_unshift($fila, $organizacion);
+        }
+
+        return $fila;
     }
 
     /**
@@ -107,17 +128,25 @@ class ExportacionTamizajes
      */
     public static function escribir(Builder $consulta, ?Empresa $empresa, string $ruta): int
     {
+        $encabezados = self::encabezados($empresa);
+        $desplazamiento = count($encabezados) - count(self::ENCABEZADOS);
+
+        // Los nombres de las organizaciones se traen de una sola consulta: la
+        // tabla de empresas es chica y `cursor()` no hace eager loading, así
+        // que leer `$tamizaje->empresa` por renglón serían miles de consultas.
+        $organizaciones = $empresa ? null : Empresa::pluck('nombre_empresa', 'id');
+
         $opciones = new Options;
-        $opciones->setColumnWidth(34, 1);
-        $opciones->setColumnWidthForRange(20, 2, 8);
-        $opciones->setColumnWidthForRange(24, 9, count(self::ENCABEZADOS));
+        $opciones->setColumnWidthForRange(34, 1, 1 + $desplazamiento);
+        $opciones->setColumnWidthForRange(20, 2 + $desplazamiento, 8 + $desplazamiento);
+        $opciones->setColumnWidthForRange(24, 9 + $desplazamiento, count($encabezados));
 
         $escritor = new Writer($opciones);
         $escritor->openToFile($ruta);
         $escritor->getCurrentSheet()->setName('Resultados');
 
         $escritor->addRow(Row::fromValues(
-            self::ENCABEZADOS,
+            $encabezados,
             (new Style)->setFontBold()->setShouldWrapText()->setBackgroundColor('E5E7EB'),
         ));
 
@@ -125,10 +154,14 @@ class ExportacionTamizajes
         $total = 0;
 
         foreach ($consulta->cursor() as $tamizaje) {
+            $organizacion = $organizaciones === null
+                ? null
+                : (string) ($organizaciones[$tamizaje->empresa_id] ?? '');
+
             $escritor->addRow(Row::fromValuesWithStyles(
-                self::fila($tamizaje),
+                self::fila($tamizaje, $organizacion),
                 null,
-                [self::COLUMNA_FECHA => $estiloFecha],
+                [self::COLUMNA_FECHA + $desplazamiento => $estiloFecha],
             ));
 
             $total++;
@@ -147,7 +180,7 @@ class ExportacionTamizajes
 
     public static function nombreArchivo(?Empresa $empresa): string
     {
-        $identificador = $empresa?->folio ?: 'MasFeliz';
+        $identificador = $empresa?->folio ?: 'Todas-las-organizaciones';
 
         return 'Tamizajes_'.$identificador.'_'.now()->format('Y-m-d').'.xlsx';
     }
@@ -172,6 +205,8 @@ class ExportacionTamizajes
             if ($empresa->folio) {
                 $renglones[] = ['Folio', (string) $empresa->folio];
             }
+        } else {
+            $renglones[] = ['Alcance', 'Todas las organizaciones del listado'];
         }
 
         $renglones[] = ['Registros exportados', $total];

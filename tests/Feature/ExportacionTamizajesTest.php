@@ -4,14 +4,20 @@ namespace Tests\Feature;
 
 use App\Filament\Empresa\Resources\Tamizajes\Pages\ManageTamizajes;
 use App\Filament\Empresa\Resources\Tamizajes\TamizajeResource;
+use App\Filament\Resources\Empresas\Pages\ListEmpresas;
+use App\Filament\Resources\Empresas\Pages\ViewEmpresa;
+use App\Filament\Resources\Empresas\RelationManagers\TamizajesRelationManager;
 use App\Livewire\ResponderTamizaje;
 use App\Models\Empresa;
 use App\Models\Setting;
 use App\Models\Tamizaje;
+use App\Models\User;
 use App\Support\ExportacionTamizajes;
 use App\Support\PrioridadAtencion;
+use Filament\Actions\Testing\TestAction;
 use Filament\Facades\Filament;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Str;
 use Livewire\Livewire;
 use OpenSpout\Reader\XLSX\Reader;
 use Tests\TestCase;
@@ -280,7 +286,7 @@ class ExportacionTamizajesTest extends TestCase
         Filament::setCurrentPanel(Filament::getPanel('empresa'));
 
         Livewire::test(ManageTamizajes::class)
-            ->callAction('exportarExcel')
+            ->callAction('exportarTamizajes')
             ->assertFileDownloaded(ExportacionTamizajes::nombreArchivo($this->empresa));
     }
 
@@ -310,7 +316,7 @@ class ExportacionTamizajesTest extends TestCase
 
         $componente = Livewire::test(ManageTamizajes::class)
             ->set('tableSearch', 'Buscada')
-            ->callAction('exportarExcel');
+            ->callAction('exportarTamizajes');
 
         file_put_contents($this->ruta, base64_decode($componente->effects['download']['content']));
 
@@ -327,8 +333,171 @@ class ExportacionTamizajesTest extends TestCase
         Filament::setCurrentPanel(Filament::getPanel('empresa'));
 
         Livewire::test(ManageTamizajes::class)
-            ->callAction('exportarExcel')
+            ->callAction('exportarTamizajes')
             ->assertNotified('No hay registros para exportar');
+    }
+
+    /** Crea otra organización con una persona tamizada y la devuelve. */
+    private function otraEmpresaConTamizaje(string $nombreEmpresa, string $nombrePersona): Empresa
+    {
+        $otra = Empresa::create([
+            'nombre_empresa' => $nombreEmpresa,
+            'municipio' => 'Torreón',
+            'dias_horario_servicio' => 'Lunes a viernes',
+            'nombre_director' => 'Director',
+            'nombre_responsable' => 'Responsable',
+            'correo' => Str::slug($nombreEmpresa).'@empresa.test',
+            'password' => bcrypt('secret'),
+            'telefono' => '1234567890',
+            'rubro' => 'Servicios',
+            'numero_trabajadores' => 5,
+        ]);
+
+        Tamizaje::create([
+            'empresa_id' => $otra->id,
+            'consentimiento_otorgado' => true,
+            'nombre_completo' => $nombrePersona,
+            'riesgo_ansiedad' => 2,
+            'nivel_ansiedad' => 'Mínima o sin ansiedad',
+            'riesgo_depresion' => 2,
+            'nivel_depresion' => 'Mínima o ausente',
+            'riesgo_conducta_suicida' => 0,
+            'nivel_suicidio' => ResponderTamizaje::SUICIDIO_NEGATIVO,
+            'nivel_riesgo_general' => PrioridadAtencion::LEVE,
+        ]);
+
+        return $otra;
+    }
+
+    private function admin(): User
+    {
+        return User::create([
+            'name' => 'Admin Exporta',
+            'email' => 'admin.exporta@test.com',
+            'password' => bcrypt('secret'),
+            'estatus' => true,
+            'role' => 'admin',
+        ]);
+    }
+
+    /**
+     * Cuando el archivo cruza organizaciones —el admin exportando el listado
+     * completo— cada renglón tiene que decir de quién es.
+     */
+    public function test_el_archivo_que_cruza_organizaciones_trae_la_columna_organizacion(): void
+    {
+        Tamizaje::create([
+            'empresa_id' => $this->empresa->id,
+            'consentimiento_otorgado' => true,
+            'nombre_completo' => 'Persona Propia',
+            'riesgo_ansiedad' => 2,
+            'nivel_ansiedad' => 'Mínima o sin ansiedad',
+            'riesgo_depresion' => 2,
+            'nivel_depresion' => 'Mínima o ausente',
+            'riesgo_conducta_suicida' => 0,
+            'nivel_suicidio' => ResponderTamizaje::SUICIDIO_NEGATIVO,
+            'nivel_riesgo_general' => PrioridadAtencion::LEVE,
+        ]);
+
+        $this->otraEmpresaConTamizaje('Empresa Vecina', 'Persona Vecina');
+
+        $total = ExportacionTamizajes::escribir(
+            Tamizaje::query()->orderBy('empresa_id')->orderBy('id'),
+            null,
+            $this->ruta,
+        );
+
+        $hojas = $this->leerArchivo();
+
+        $this->assertSame(2, $total);
+        $this->assertSame('Organización', $hojas['Resultados'][0][0]);
+        $this->assertSame(ExportacionTamizajes::ENCABEZADOS, array_slice($hojas['Resultados'][0], 1));
+
+        $renglones = array_slice($hojas['Resultados'], 1);
+
+        $this->assertSame(
+            [['Empresa Exportadora', 'Persona Propia'], ['Empresa Vecina', 'Persona Vecina']],
+            array_map(fn (array $fila) => [$fila[0], $fila[1]], $renglones),
+        );
+
+        // Y la hoja de información dice que no es de una sola organización.
+        $texto = collect($hojas['Información'])
+            ->map(fn (array $renglon) => implode(' ', array_map(fn ($celda) => (string) $celda, $renglon)))
+            ->implode("\n");
+
+        $this->assertStringContainsString('Todas las organizaciones del listado', $texto);
+    }
+
+    /**
+     * El admin puede lo mismo que la empresa: exportar desde el historial de
+     * tamizajes de una organización, con las mismas columnas.
+     */
+    public function test_el_admin_exporta_el_historial_de_una_empresa(): void
+    {
+        Tamizaje::create([
+            'empresa_id' => $this->empresa->id,
+            'consentimiento_otorgado' => true,
+            'nombre_completo' => 'Persona Propia',
+            'riesgo_ansiedad' => 2,
+            'nivel_ansiedad' => 'Mínima o sin ansiedad',
+            'riesgo_depresion' => 2,
+            'nivel_depresion' => 'Mínima o ausente',
+            'riesgo_conducta_suicida' => 0,
+            'nivel_suicidio' => ResponderTamizaje::SUICIDIO_NEGATIVO,
+            'nivel_riesgo_general' => PrioridadAtencion::LEVE,
+        ]);
+
+        $this->otraEmpresaConTamizaje('Empresa Vecina', 'Persona Vecina');
+
+        $this->actingAs($this->admin(), 'web');
+        Filament::setCurrentPanel(Filament::getPanel('admin'));
+
+        $componente = Livewire::test(TamizajesRelationManager::class, [
+            'ownerRecord' => $this->empresa,
+            'pageClass' => ViewEmpresa::class,
+        ])->callAction(TestAction::make('exportarTamizajes')->table());
+
+        file_put_contents($this->ruta, base64_decode($componente->effects['download']['content']));
+
+        $hojas = $this->leerArchivo();
+
+        // Archivo de una sola organización: sin columna "Organización" y solo
+        // con la gente de esa empresa.
+        $this->assertSame(ExportacionTamizajes::ENCABEZADOS, $hojas['Resultados'][0]);
+        $this->assertSame(['Persona Propia'], array_column(array_slice($hojas['Resultados'], 1), 0));
+    }
+
+    /** Y desde el listado de empresas, todas de un jalón. */
+    public function test_el_admin_exporta_todas_las_organizaciones_desde_el_listado(): void
+    {
+        Tamizaje::create([
+            'empresa_id' => $this->empresa->id,
+            'consentimiento_otorgado' => true,
+            'nombre_completo' => 'Persona Propia',
+            'riesgo_ansiedad' => 2,
+            'nivel_ansiedad' => 'Mínima o sin ansiedad',
+            'riesgo_depresion' => 2,
+            'nivel_depresion' => 'Mínima o ausente',
+            'riesgo_conducta_suicida' => 0,
+            'nivel_suicidio' => ResponderTamizaje::SUICIDIO_NEGATIVO,
+            'nivel_riesgo_general' => PrioridadAtencion::LEVE,
+        ]);
+
+        $this->otraEmpresaConTamizaje('Empresa Vecina', 'Persona Vecina');
+
+        $this->actingAs($this->admin(), 'web');
+        Filament::setCurrentPanel(Filament::getPanel('admin'));
+
+        $componente = Livewire::test(ListEmpresas::class)
+            ->callAction('exportarTamizajes');
+
+        file_put_contents($this->ruta, base64_decode($componente->effects['download']['content']));
+
+        $hojas = $this->leerArchivo();
+        $personas = array_column(array_slice($hojas['Resultados'], 1), 1);
+
+        $this->assertSame('Organización', $hojas['Resultados'][0][0]);
+        $this->assertEqualsCanonicalizing(['Persona Propia', 'Persona Vecina'], $personas);
     }
 
     public function test_el_nombre_del_archivo_lleva_el_folio_de_la_empresa(): void
@@ -337,5 +506,8 @@ class ExportacionTamizajesTest extends TestCase
 
         $this->assertStringStartsWith('Tamizajes_'.$this->empresa->folio.'_', $nombre);
         $this->assertStringEndsWith('.xlsx', $nombre);
+
+        // Sin empresa el nombre dice que el archivo trae varias.
+        $this->assertStringStartsWith('Tamizajes_Todas-las-organizaciones_', ExportacionTamizajes::nombreArchivo(null));
     }
 }
