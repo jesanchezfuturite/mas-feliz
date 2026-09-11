@@ -2,7 +2,10 @@
 
 namespace Tests\Feature;
 
+use App\Filament\Empresa\Resources\CasoSeguimientos\Pages\ListCasoSeguimientos;
 use App\Filament\Empresa\Resources\CasoSeguimientos\Schemas\SolicitudReferenciaForm as Formato;
+use App\Filament\Gestor\Resources\SolicitudReferencias\Pages\ManageSolicitudReferencias;
+use App\Livewire\ResponderTamizaje;
 use App\Models\CasoSeguimiento;
 use App\Models\Empresa;
 use App\Models\Setting;
@@ -10,8 +13,16 @@ use App\Models\SolicitudReferencia;
 use App\Models\Tamizaje;
 use App\Models\User;
 use App\Support\CatalogoUnidadesAtencion;
+use App\Support\ColorNivel;
+use App\Support\PrioridadAtencion;
+use App\Support\ResultadoAsq;
+use Filament\Facades\Filament;
+use Filament\Forms\Components\Placeholder;
+use Filament\Schemas\Schema;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Illuminate\Support\Facades\Schema;
+use Illuminate\Support\Facades\Schema as SchemaBd;
+use Illuminate\Support\HtmlString;
+use Livewire\Livewire;
 use Tests\TestCase;
 
 /**
@@ -120,8 +131,8 @@ class CatalogosSaludTest extends TestCase
 
     public function test_la_columna_ya_no_se_llama_estatus_somos(): void
     {
-        $this->assertTrue(Schema::hasColumn('solicitudes_referencia', 'estatus_cita'));
-        $this->assertFalse(Schema::hasColumn('solicitudes_referencia', 'estatus_somos'));
+        $this->assertTrue(SchemaBd::hasColumn('solicitudes_referencia', 'estatus_cita'));
+        $this->assertFalse(SchemaBd::hasColumn('solicitudes_referencia', 'estatus_somos'));
     }
 
     public function test_el_estatus_de_la_cita_se_guarda_y_se_lee(): void
@@ -190,7 +201,7 @@ class CatalogosSaludTest extends TestCase
      */
     public function test_el_motivo_de_referencia_se_captura_y_lo_ve_quien_agenda(): void
     {
-        $this->assertTrue(Schema::hasColumn('solicitudes_referencia', 'motivo_referencia'));
+        $this->assertTrue(SchemaBd::hasColumn('solicitudes_referencia', 'motivo_referencia'));
 
         $motivo = 'Crisis de ansiedad recurrentes en el turno nocturno; pide valoración.';
 
@@ -230,6 +241,168 @@ class CatalogosSaludTest extends TestCase
         $this->get('/gestor/referencias')
             ->assertSuccessful()
             ->assertSee('Crisis de ansiedad recurrentes en el turno nocturno');
+    }
+
+    /**
+     * Texto visible del formato para un registro dado (un caso o una
+     * solicitud). Se arma el esquema en vez de montar la modal porque
+     * Filament v5 no renderiza el contenido de la modal en la respuesta de
+     * la prueba, y lo que hay que comprobar son los Placeholder.
+     */
+    private function textoDelFormato($record, string $pagina, bool $puedeAgendar = false, bool $soloLectura = false): string
+    {
+        $esquema = Schema::make(Livewire::test($pagina)->instance())
+            ->components(Formato::componentes($puedeAgendar, $soloLectura))
+            ->record($record);
+
+        return collect($esquema->getFlatComponents())
+            ->map(function ($componente) {
+                if ($componente instanceof Placeholder) {
+                    $contenido = $componente->getContent();
+
+                    return $contenido instanceof HtmlString ? $contenido->toHtml() : (string) $contenido;
+                }
+
+                return method_exists($componente, 'getLabel') ? (string) $componente->getLabel() : '';
+            })
+            ->implode("\n");
+    }
+
+    /**
+     * Angélica pidió por audio el 10/09/2026 que "me arrastre los resultados"
+     * al formato: la sintomatología de ansiedad, la de depresión y la conducta
+     * suicida. Se leen del tamizaje —no se capturan ni se copian a columnas
+     * propias— siguiendo su instrucción del 06/08/2026.
+     */
+    public function test_el_formato_arrastra_los_resultados_del_tamizaje(): void
+    {
+        Tamizaje::create([
+            'empresa_id' => $this->empresa->id,
+            'nombre_completo' => 'Persona Referida',
+            'consentimiento_otorgado' => true,
+            'genero' => 'Mujer',
+            'edad' => '25 a 34 años',
+            'riesgo_ansiedad' => 16,
+            'nivel_ansiedad' => 'Grave',
+            'riesgo_depresion' => 21,
+            'nivel_depresion' => 'Grave',
+            'riesgo_conducta_suicida' => 2,
+            'nivel_suicidio' => ResponderTamizaje::SUICIDIO_POSITIVO,
+            'nivel_riesgo_general' => PrioridadAtencion::URGENTE,
+            'respuestas' => ['conducta_suicida' => [1 => 1, 2 => 1, 3 => 0, 4 => 0, 5 => 1]],
+        ]);
+
+        $caso = CasoSeguimiento::create([
+            'empresa_id' => $this->empresa->id,
+            'identificador_empleado' => 'Persona Referida',
+            'nivel_riesgo_detectado' => PrioridadAtencion::URGENTE,
+            'estatus_atencion' => 'Canalizado',
+            'referencia_secretaria_salud' => true,
+        ]);
+
+        $this->actingAs($this->empresa, 'empresa');
+        Filament::setCurrentPanel(Filament::getPanel('empresa'));
+
+        $texto = $this->textoDelFormato($caso, ListCasoSeguimientos::class);
+
+        $this->assertStringContainsString('Síntomas de Ansiedad: Grave', $texto);
+        $this->assertStringContainsString('GAD-7: 16 de 21', $texto);
+        $this->assertStringContainsString('Síntomas de Depresión: Grave', $texto);
+        $this->assertStringContainsString('PHQ-9: 21 de 27', $texto);
+        // El ASQ va con el título completo de la pantalla y su acción debajo.
+        $this->assertStringContainsString('Indicadores de Conducta suicida: '.ResultadoAsq::TITULO_AGUDO, $texto);
+        $this->assertStringContainsString(ResponderTamizaje::ACCION_SUICIDIO_AGUDO, $texto);
+
+        // El badge del ASQ se pinta por el valor guardado ("Positivo"), no por
+        // el título de pantalla: si no, ColorNivel no lo reconoce y sale gris.
+        $this->assertStringContainsString(
+            'background-color: '.ColorNivel::hex(ResponderTamizaje::SUICIDIO_POSITIVO),
+            $texto,
+        );
+    }
+
+    /** Un caso capturado a mano no tiene de dónde arrastrar: se dice, no se finge. */
+    public function test_un_caso_sin_tamizaje_lo_avisa_en_vez_de_inventar_resultados(): void
+    {
+        $caso = CasoSeguimiento::create([
+            'empresa_id' => $this->empresa->id,
+            'identificador_empleado' => 'Capturada A Mano',
+            'nivel_riesgo_detectado' => PrioridadAtencion::MODERADA,
+            'estatus_atencion' => 'Canalizado',
+            'referencia_secretaria_salud' => true,
+        ]);
+
+        $this->actingAs($this->empresa, 'empresa');
+        Filament::setCurrentPanel(Filament::getPanel('empresa'));
+
+        $texto = $this->textoDelFormato($caso, ListCasoSeguimientos::class);
+
+        $this->assertStringContainsString('Este caso se capturó a mano', $texto);
+        $this->assertStringNotContainsString('Síntomas de Ansiedad:', $texto);
+    }
+
+    /**
+     * El Gestor y el admin llegan al formato desde la solicitud, no desde el
+     * caso: los resultados tienen que resolverse por ese camino también.
+     */
+    public function test_el_gestor_ve_los_resultados_en_el_formato(): void
+    {
+        Tamizaje::create([
+            'empresa_id' => $this->empresa->id,
+            'nombre_completo' => 'Persona Referida',
+            'consentimiento_otorgado' => true,
+            'riesgo_ansiedad' => 11,
+            'nivel_ansiedad' => 'Moderada',
+            'riesgo_depresion' => 12,
+            'nivel_depresion' => 'Moderada',
+            'riesgo_conducta_suicida' => 0,
+            'nivel_suicidio' => ResponderTamizaje::SUICIDIO_NEGATIVO,
+            'nivel_riesgo_general' => PrioridadAtencion::MODERADA,
+        ]);
+
+        $caso = CasoSeguimiento::create([
+            'empresa_id' => $this->empresa->id,
+            'identificador_empleado' => 'Persona Referida',
+            'nivel_riesgo_detectado' => PrioridadAtencion::MODERADA,
+            'estatus_atencion' => 'Canalizado',
+            'referencia_secretaria_salud' => true,
+        ]);
+
+        $solicitud = SolicitudReferencia::create([
+            'caso_seguimiento_id' => $caso->id,
+            'empresa_id' => $this->empresa->id,
+            'municipio' => 'Torreón',
+            'nombre_usuario' => 'Persona Referida',
+            'motivo_referencia' => 'Requiere valoración psicológica.',
+        ]);
+
+        $gestor = User::create([
+            'name' => 'Gestor',
+            'apellidos' => 'Resultados',
+            'email' => 'gestor.resultados@test.com',
+            'password' => bcrypt('secret'),
+            'estatus' => true,
+            'role' => 'gestor',
+        ]);
+
+        $this->actingAs($gestor, 'web');
+        Filament::setCurrentPanel(Filament::getPanel('gestor'));
+
+        // Mismo esquema, pero entrando por la solicitud y en solo lectura,
+        // como lo abren el Gestor y el admin.
+        $texto = $this->textoDelFormato(
+            $solicitud,
+            ManageSolicitudReferencias::class,
+            puedeAgendar: true,
+            soloLectura: true,
+        );
+
+        $this->assertStringContainsString('Síntomas de Ansiedad: Moderada', $texto);
+        $this->assertStringContainsString('Síntomas de Depresión: Moderada', $texto);
+        $this->assertStringContainsString(
+            'Indicadores de Conducta suicida: '.ResponderTamizaje::SUICIDIO_NEGATIVO,
+            $texto,
+        );
     }
 
     public function test_los_datos_de_identificacion_los_manda_el_tamizaje(): void

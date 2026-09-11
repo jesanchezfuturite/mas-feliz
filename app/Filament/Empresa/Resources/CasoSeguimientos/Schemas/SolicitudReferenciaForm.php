@@ -4,7 +4,9 @@ namespace App\Filament\Empresa\Resources\CasoSeguimientos\Schemas;
 
 use App\Models\Tamizaje;
 use App\Support\CatalogoUnidadesAtencion;
+use App\Support\ColorNivel;
 use App\Support\PrioridadAtencion;
+use App\Support\ResultadoAsq;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\DateTimePicker;
 use Filament\Forms\Components\FileUpload;
@@ -233,6 +235,54 @@ class SolicitudReferenciaForm
                     ]),
                 ]),
 
+            Section::make('Resultados del diagnóstico en línea')
+                // La aclaración solo aplica cuando hay resultados; si no, el
+                // aviso de más abajo es el que explica por qué están vacíos.
+                ->description(fn ($record) => self::tamizajeDe($record)
+                    ? 'Los contestó la persona en el cuestionario; se arrastran tal cual, no se capturan aparte.'
+                    : null)
+                ->schema([
+                    Grid::make(3)
+                        ->visible(fn ($record) => self::tamizajeDe($record) !== null)
+                        ->schema([
+                            self::resultado(
+                                'resultado_ansiedad',
+                                'Síntomas de Ansiedad',
+                                fn (Tamizaje $t) => $t->nivel_ansiedad,
+                                fn (Tamizaje $t) => 'GAD-7: '.(int) $t->riesgo_ansiedad.' de 21',
+                            ),
+
+                            self::resultado(
+                                'resultado_depresion',
+                                'Síntomas de Depresión',
+                                fn (Tamizaje $t) => $t->nivel_depresion,
+                                fn (Tamizaje $t) => 'PHQ-9: '.(int) $t->riesgo_depresion.' de 27',
+                            ),
+
+                            // El ASQ va con el título completo de la pantalla
+                            // —"Positivo: Riesgo Agudo" cuando la pregunta 5
+                            // fue "Sí"— y su acción debajo, igual que en el
+                            // detalle del tamizaje.
+                            self::resultado(
+                                'resultado_conducta_suicida',
+                                'Indicadores de Conducta suicida',
+                                fn (Tamizaje $t) => ResultadoAsq::titulo($t),
+                                fn (Tamizaje $t) => ResultadoAsq::accion($t),
+                                nivelParaColor: fn (Tamizaje $t) => $t->nivel_suicidio,
+                            ),
+                        ]),
+
+                    Placeholder::make('sin_tamizaje')
+                        ->hiddenLabel()
+                        ->visible(fn ($record) => self::tamizajeDe($record) === null)
+                        ->content(new HtmlString('<div style="color: #6b7280; font-size: 0.9rem;">Este caso se capturó a mano: no hay cuestionario en línea del que arrastrar resultados. El detalle clínico va en el informe de valoración.</div>')),
+
+                    Placeholder::make('nota_resultados')
+                        ->hiddenLabel()
+                        ->visible(fn ($record) => self::tamizajeDe($record) !== null)
+                        ->content(new HtmlString('<div style="color: #6b7280; font-size: 0.78rem; line-height: 1.4;"><strong>Nota:</strong> '.e(PrioridadAtencion::NOTA).'</div>')),
+                ]),
+
             Section::make('Asignación de cita')
                 ->description($puedeAgendar
                     ? 'Este bloque lo captura el Gestor o el administrador y la empresa lo ve en su tablero.'
@@ -268,6 +318,60 @@ class SolicitudReferenciaForm
                         ->disabled($ro || ! $puedeAgendar),
                 ]),
         ];
+    }
+
+    /**
+     * Tamizaje del que salen los resultados. El esquema lo consumen tres
+     * paneles, así que el registro puede ser un CasoSeguimiento (tiene el
+     * accesor `tamizaje`, que lo busca por nombre) o una SolicitudReferencia,
+     * que llega a él por su caso.
+     */
+    private static function tamizajeDe($record): ?Tamizaje
+    {
+        return $record?->tamizaje ?? $record?->casoSeguimiento?->tamizaje;
+    }
+
+    /**
+     * Resultado de un instrumento, con el color del nivel y su renglón de
+     * apoyo —el puntaje o la acción— en letra chica, como en el detalle del
+     * tamizaje. Es de solo lectura en los tres paneles: el resultado lo
+     * calcula el instrumento, no lo escribe quien llena el formato.
+     */
+    private static function resultado(
+        string $nombre,
+        string $titulo,
+        callable $valor,
+        callable $apoyo,
+        ?callable $nivelParaColor = null,
+    ): Placeholder {
+        return Placeholder::make($nombre)
+            ->hiddenLabel()
+            ->content(function ($record) use ($titulo, $valor, $apoyo, $nivelParaColor) {
+                $tamizaje = self::tamizajeDe($record);
+
+                if (! $tamizaje) {
+                    return null;
+                }
+
+                $nivel = (string) $valor($tamizaje);
+
+                // El color sale del valor guardado, no del título de pantalla:
+                // ColorNivel conoce "Positivo", no "Positivo: Riesgo Agudo", y
+                // si no se distingue el badge del ASQ se pinta gris. Igual que
+                // en el detalle del tamizaje.
+                $color = ColorNivel::hex($nivelParaColor ? (string) $nivelParaColor($tamizaje) : $nivel);
+                $renglonApoyo = $apoyo($tamizaje);
+
+                $apoyoHtml = $renglonApoyo
+                    ? '<span style="display: block; font-size: 0.72rem; font-weight: 500; margin-top: 2px;">'.e($renglonApoyo).'</span>'
+                    : '';
+
+                return new HtmlString(
+                    '<span style="background-color: '.$color.'; color: white; padding: 8px 16px; border-radius: 1rem; font-size: 0.875rem; font-weight: 600; display: inline-block; width: 100%; text-align: center;">'
+                    .e($titulo).': '.e($nivel).$apoyoHtml
+                    .'</span>'
+                );
+            });
     }
 
     /**
