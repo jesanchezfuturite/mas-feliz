@@ -268,6 +268,30 @@ class CatalogosSaludTest extends TestCase
             ->implode("\n");
     }
 
+    /** Un campo del formato, para revisar sus reglas sin montar la modal. */
+    private function campoDelFormato(string $nombre, bool $soloLectura = false)
+    {
+        $esquema = Schema::make(Livewire::test(ListCasoSeguimientos::class)->instance())
+            ->components(Formato::componentes(soloLectura: $soloLectura));
+
+        return collect($esquema->getFlatComponents())
+            ->first(fn ($componente) => method_exists($componente, 'getName') && $componente->getName() === $nombre);
+    }
+
+    /**
+     * Angélica, 11/09/2026: "si la carga del INE en el formato de referencia
+     * puede ser obligatorio". Solo al capturar: en modo consulta el formato ya
+     * está hecho y exigirla bloquearía al Gestor y al admin.
+     */
+    public function test_la_ine_es_obligatoria_al_capturar_el_formato(): void
+    {
+        $this->actingAs($this->empresa, 'empresa');
+        Filament::setCurrentPanel(Filament::getPanel('empresa'));
+
+        $this->assertTrue($this->campoDelFormato('ine_path')->isRequired());
+        $this->assertFalse($this->campoDelFormato('ine_path', soloLectura: true)->isRequired());
+    }
+
     /**
      * Angélica pidió por audio el 10/09/2026 que "me arrastre los resultados"
      * al formato: la sintomatología de ansiedad, la de depresión y la conducta
