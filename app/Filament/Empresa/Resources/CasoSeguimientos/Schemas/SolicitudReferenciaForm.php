@@ -211,8 +211,11 @@ class SolicitudReferenciaForm
                         ->columnSpanFull(),
 
                     Grid::make(2)->schema([
+                        // Obligatoria desde el 11/09/2026, a petición de
+                        // Angélica: Salud no puede agendar sin identificación.
                         FileUpload::make('ine_path')
                             ->label('INE')
+                            ->required(! $ro)
                             ->helperText('Adjunta identificación oficial. Máximo 10 MB.')
                             ->disk('public')
                             ->directory('referencias/ine')

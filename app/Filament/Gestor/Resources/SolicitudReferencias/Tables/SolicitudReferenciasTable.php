@@ -2,6 +2,7 @@
 
 namespace App\Filament\Gestor\Resources\SolicitudReferencias\Tables;
 
+use App\Filament\Empresa\Resources\CasoSeguimientos\Schemas\DetalleCasoForm;
 use App\Filament\Empresa\Resources\CasoSeguimientos\Schemas\SolicitudReferenciaForm;
 use App\Support\CatalogoUnidadesAtencion;
 use App\Support\ColorNivel;
@@ -164,6 +165,21 @@ class SolicitudReferenciasTable
                             ->success()
                             ->send();
                     }),
+
+                // El formato es el documento; esto es la persona: sus datos
+                // de Atención, su tamizaje y cómo va su seguimiento. El Gestor
+                // los necesita antes de asignar unidad y fecha.
+                Action::make('verDetalle')
+                    ->label('Ver detalle')
+                    ->icon('heroicon-m-user-circle')
+                    ->iconButton()
+                    ->tooltip('Ver todos los datos de la persona')
+                    ->color('gray')
+                    ->modalHeading('Detalle de la persona referida')
+                    ->modalWidth('4xl')
+                    ->modalSubmitAction(false)
+                    ->modalCancelActionLabel('Cerrar')
+                    ->form(DetalleCasoForm::componentes(conEmpresa: true)),
 
                 Action::make('verFormato')
                     ->label('Ver formato')
