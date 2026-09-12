@@ -2,7 +2,13 @@
 
 namespace App\Filament\Gestor\Resources\CasosCanalizados\Tables;
 
+use App\Filament\Empresa\Resources\CasoSeguimientos\Schemas\DetalleCasoForm;
+use App\Support\ColorNivel;
+use App\Support\PrioridadAtencion;
+use Filament\Actions\Action;
 use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Filters\Filter;
+use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
 
 /**
@@ -29,9 +35,9 @@ class CasosCanalizadosTable
                     ->wrap(),
 
                 TextColumn::make('nivel_riesgo_detectado')
-                    ->label(\App\Support\PrioridadAtencion::ETIQUETA)
+                    ->label(PrioridadAtencion::ETIQUETA)
                     ->badge()
-                    ->color(fn (string $state): string => \App\Support\ColorNivel::badge($state))
+                    ->color(fn (string $state): string => ColorNivel::badge($state))
                     ->sortable(),
 
                 TextColumn::make('servicios')
@@ -66,9 +72,10 @@ class CasosCanalizadosTable
                         if (! $solicitud) {
                             return $record->referencia_secretaria_salud ? 'Solicitada, sin formato' : 'No requiere';
                         }
+
                         return $solicitud->esta_agendada
-                            ? 'Cita: ' . $solicitud->fecha_cita->format('d/m/Y H:i')
-                            : 'Formato enviado (' . $solicitud->folio . ')';
+                            ? 'Cita: '.$solicitud->fecha_cita->format('d/m/Y H:i')
+                            : 'Formato enviado ('.$solicitud->folio.')';
                     })
                     ->color(fn (string $state): string => match (true) {
                         str_starts_with($state, 'Cita:') => 'success',
@@ -83,18 +90,35 @@ class CasosCanalizadosTable
                     ->sortable(),
             ])
             ->defaultSort('updated_at', 'desc')
+            ->recordActions([
+                // Angélica, 11/09/2026: "que el perfil de gestor pueda ver
+                // todos los datos de los usuarios que le mandan (los que salen
+                // en el apartado de Atención)". Es el mismo detalle que ve la
+                // empresa, más la organización, porque aquí se cruzan varias.
+                Action::make('verDetalle')
+                    ->label('Ver detalle')
+                    ->icon('heroicon-m-eye')
+                    ->iconButton()
+                    ->tooltip('Ver todos los datos de la persona')
+                    ->color('gray')
+                    ->modalHeading('Detalle de la persona canalizada')
+                    ->modalWidth('4xl')
+                    ->modalSubmitAction(false)
+                    ->modalCancelActionLabel('Cerrar')
+                    ->form(DetalleCasoForm::componentes(conEmpresa: true)),
+            ])
             ->filters([
-                \Filament\Tables\Filters\SelectFilter::make('nivel_riesgo_detectado')
-                    ->label(\App\Support\PrioridadAtencion::ETIQUETA)
-                    ->options(\App\Support\PrioridadAtencion::opciones()),
+                SelectFilter::make('nivel_riesgo_detectado')
+                    ->label(PrioridadAtencion::ETIQUETA)
+                    ->options(PrioridadAtencion::opciones()),
 
-                \Filament\Tables\Filters\SelectFilter::make('empresa_id')
+                SelectFilter::make('empresa_id')
                     ->label('Empresa')
                     ->relationship('empresa', 'nombre_empresa')
                     ->searchable()
                     ->preload(),
 
-                \Filament\Tables\Filters\Filter::make('sin_referencia')
+                Filter::make('sin_referencia')
                     ->label('Marcados para referencia, sin formato')
                     ->query(fn ($query) => $query
                         ->where('referencia_secretaria_salud', true)

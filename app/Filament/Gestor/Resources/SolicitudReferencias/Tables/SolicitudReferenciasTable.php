@@ -2,6 +2,7 @@
 
 namespace App\Filament\Gestor\Resources\SolicitudReferencias\Tables;
 
+use App\Filament\Empresa\Resources\CasoSeguimientos\Schemas\DetalleCasoForm;
 use App\Filament\Empresa\Resources\CasoSeguimientos\Schemas\SolicitudReferenciaForm;
 use App\Support\CatalogoUnidadesAtencion;
 use App\Support\ColorNivel;
@@ -64,6 +65,17 @@ class SolicitudReferenciasTable
                     ->label('Servicio')
                     ->wrap()
                     ->placeholder('N/A'),
+
+                // Columna propia y no descripción de "Servicio": cuando el
+                // servicio viene vacío Filament pinta solo el placeholder y
+                // descarta descripción y tooltip, y el motivo se perdería.
+                TextColumn::make('motivo_referencia')
+                    ->label('Motivo de referencia')
+                    ->wrap()
+                    ->limit(90)
+                    ->tooltip(fn ($record) => $record->motivo_referencia)
+                    ->searchable()
+                    ->placeholder('Sin registrar'),
 
                 TextColumn::make('fecha_solicitud')
                     ->label('Solicitud')
@@ -153,6 +165,21 @@ class SolicitudReferenciasTable
                             ->success()
                             ->send();
                     }),
+
+                // El formato es el documento; esto es la persona: sus datos
+                // de Atención, su tamizaje y cómo va su seguimiento. El Gestor
+                // los necesita antes de asignar unidad y fecha.
+                Action::make('verDetalle')
+                    ->label('Ver detalle')
+                    ->icon('heroicon-m-user-circle')
+                    ->iconButton()
+                    ->tooltip('Ver todos los datos de la persona')
+                    ->color('gray')
+                    ->modalHeading('Detalle de la persona referida')
+                    ->modalWidth('4xl')
+                    ->modalSubmitAction(false)
+                    ->modalCancelActionLabel('Cerrar')
+                    ->form(DetalleCasoForm::componentes(conEmpresa: true)),
 
                 Action::make('verFormato')
                     ->label('Ver formato')

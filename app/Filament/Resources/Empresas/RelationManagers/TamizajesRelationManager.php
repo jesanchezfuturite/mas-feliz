@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\Empresas\RelationManagers;
 
+use App\Filament\Actions\ExportarTamizajesAction;
 use App\Support\ColorNivel;
 use App\Support\PrioridadAtencion;
 use App\Support\ResultadoAsq;
@@ -128,6 +129,13 @@ class TamizajesRelationManager extends RelationManager
                 //
             ])
             ->headerActions([
+                // El admin puede hacer lo mismo que la empresa: bajarse su
+                // listado de tamizajes en Excel (Enrique, 10/09/2026).
+                ExportarTamizajesAction::make()
+                    ->color('primary')
+                    ->consulta(fn () => $this->getFilteredSortedTableQuery())
+                    ->empresa(fn () => $this->getOwnerRecord()),
+
                 Action::make('icon')
                     ->icon('heroicon-m-clock')
                     ->link()
