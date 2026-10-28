@@ -48,11 +48,7 @@ class EmpresaResource extends Resource
                             ->required(),
                         Forms\Components\Select::make('nivel_madurez_asignado')
                             ->label('Nivel de Madurez')
-                            ->options([
-                                'Inicial' => 'Nivel 1: Inicial',
-                                'Intermedio' => 'Nivel 2: En proceso',
-                                'Excelencia' => 'Nivel 3: Sobresaliente',
-                            ]),
+                            ->options(Empresa::opcionesNivelMadurez()),
                         Forms\Components\Textarea::make('retroalimentacion_gobierno')
                             ->label('Retroalimentación')
                             ->rows(4)

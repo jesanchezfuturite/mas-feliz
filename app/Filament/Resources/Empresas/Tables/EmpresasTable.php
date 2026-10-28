@@ -3,6 +3,7 @@
 namespace App\Filament\Resources\Empresas\Tables;
 
 use App\Filament\Resources\AutoevaluacionResource;
+use App\Filament\Resources\Empresas\Schemas\DictamenForm;
 use App\Mail\VisitaAgendadaMail;
 use App\Models\Empresa;
 use Filament\Actions\Action;
@@ -84,6 +85,9 @@ class EmpresasTable
                     ->visible(fn ($record) => ! empty($record?->ruta_pdf) && $record?->estatus === 'Dictaminado')
                     ->url(fn ($record) => ! empty($record?->ruta_pdf) ? '/storage/'.$record->ruta_pdf : null)
                     ->openUrlInNewTab(),
+                DictamenForm::accion()
+                    ->iconButton()
+                    ->tooltip('Emitir o corregir el dictamen'),
                 Action::make('certificarFase')
                     ->label('Certificar Fase')
                     ->icon('heroicon-o-check-badge')

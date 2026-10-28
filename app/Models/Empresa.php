@@ -50,6 +50,46 @@ class Empresa extends Model implements Authenticatable, CanResetPassword, Filame
         return $opciones;
     }
 
+    /**
+     * Niveles de madurez que Gobierno asigna al dictaminar. Son los cuatro
+     * que pidió Angélica (28/10/2026) y mandan sobre cualquier otra lista:
+     * el nivel predictivo que calcula la autoevaluación es otra cosa.
+     */
+    public const NIVELES_MADUREZ = ['Inicial', 'Intermedio', 'Avanzado', 'Excelencia'];
+
+    /**
+     * Estatus del distintivo que se pueden elegir al dictaminar.
+     */
+    public const ESTATUS_DISTINTIVO = ['En revisión', 'Aprobado', 'Rechazado'];
+
+    /**
+     * Los niveles de madurez, para los desplegables.
+     *
+     * @return array<string, string>
+     */
+    public static function opcionesNivelMadurez(): array
+    {
+        return array_combine(self::NIVELES_MADUREZ, self::NIVELES_MADUREZ);
+    }
+
+    /**
+     * Los estatus, para los desplegables. Si la empresa trae uno de otro
+     * flujo —'Validado' lo pone la validación de la autoevaluación— se
+     * agrega a la lista para no perderlo al abrir el formulario.
+     *
+     * @return array<string, string>
+     */
+    public static function opcionesEstatusDistintivo(?string $actual = null): array
+    {
+        $opciones = array_combine(self::ESTATUS_DISTINTIVO, self::ESTATUS_DISTINTIVO);
+
+        if (! empty($actual) && ! isset($opciones[$actual])) {
+            $opciones[$actual] = $actual;
+        }
+
+        return $opciones;
+    }
+
     protected $fillable = [
         'folio',
         'token_tamizaje',
