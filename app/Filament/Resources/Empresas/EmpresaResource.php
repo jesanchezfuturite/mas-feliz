@@ -101,7 +101,7 @@ class EmpresaResource extends Resource
                                     ->badge()
                                     ->color(fn ($state) => match ($state) {
                                         'Aprobado' => 'success',
-                                        'Rechazado' => 'danger',
+                                        'Rechazado', 'No aprobado' => 'danger',
                                         'En revisión' => 'warning',
                                         default => 'gray',
                                     }),
@@ -121,7 +121,7 @@ class EmpresaResource extends Resource
                                     ->dateTime()
                                     ->placeholder('No dictaminado'),
                                 TextEntry::make('retroalimentacion_gobierno')
-                                    ->label('Retroalimentación del Gobierno')
+                                    ->label('Comentario')
                                     ->placeholder('Sin comentarios'),
                                 TextEntry::make('ruta_pdf')
                                     ->label('Distintivo Otorgado')

@@ -58,9 +58,11 @@ class Empresa extends Model implements Authenticatable, CanResetPassword, Filame
     public const NIVELES_MADUREZ = ['Inicial', 'Intermedio', 'Avanzado', 'Excelencia'];
 
     /**
-     * Estatus del distintivo que se pueden elegir al dictaminar.
+     * Estatus del distintivo que se pueden elegir al dictaminar, en el orden
+     * que los pidió Angélica (28/10/2026). 'No aprobado' se llamaba
+     * 'Rechazado' hasta esa fecha; lo guardado se renombró por migración.
      */
-    public const ESTATUS_DISTINTIVO = ['En revisión', 'Aprobado', 'Rechazado'];
+    public const ESTATUS_DISTINTIVO = ['Aprobado', 'No aprobado', 'En revisión'];
 
     /**
      * Los niveles de madurez, para los desplegables.
