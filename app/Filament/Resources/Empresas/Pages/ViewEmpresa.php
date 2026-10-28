@@ -3,11 +3,11 @@
 namespace App\Filament\Resources\Empresas\Pages;
 
 use App\Filament\Resources\Empresas\EmpresaResource;
+use App\Filament\Resources\Empresas\Schemas\DictamenForm;
 use Filament\Actions\Action;
-use Filament\Forms\Components\Select;
-use Filament\Forms\Components\Textarea;
+use Filament\Notifications\Notification;
 use Filament\Resources\Pages\ViewRecord;
-use Filament\Schemas\Components\Utilities\Get;
+use Filament\Support\Enums\Alignment;
 
 class ViewEmpresa extends ViewRecord
 {
@@ -18,44 +18,19 @@ class ViewEmpresa extends ViewRecord
         return [
             Action::make('emitir_dictamen')
                 ->label('Emitir Dictamen')
+                ->icon('heroicon-o-shield-check')
                 ->color('primary')
-                ->modalFooterActionsAlignment(\Filament\Support\Enums\Alignment::Right)
-                ->modalSubmitActionLabel('Enviar')
+                ->modalHeading('Dictamen de Gobierno')
+                ->modalDescription(fn () => $this->record->nombre_empresa)
+                ->modalFooterActionsAlignment(Alignment::Right)
+                ->modalSubmitActionLabel('Guardar dictamen')
                 ->modalCancelActionLabel('Cerrar')
-                ->form([
-                    Select::make('estatus_distintivo')
-                        ->label('Estatus del Distintivo')
-                        ->options([
-                            'Aprobado' => 'Aprobado',
-                            'Rechazado' => 'Rechazado',
-                        ])
-                        ->required()
-                        ->live(),
-
-                    Select::make('nivel_madurez_asignado')
-                        ->label('Nivel de Madurez Asignado')
-                        ->options([
-                            'Inicial' => 'Inicial',
-                            'Intermedio' => 'Intermedio',
-                            'Avanzado' => 'Avanzado',
-                            'Excelencia' => 'Excelencia',
-                        ])
-                        ->visible(fn (Get $get) => $get('estatus_distintivo') === 'Aprobado')
-                        ->required(fn (Get $get) => $get('estatus_distintivo') === 'Aprobado'),
-
-                    Textarea::make('retroalimentacion_gobierno')
-                        ->label('Retroalimentación del Gobierno')
-                        ->placeholder('Justificación o comentarios. Si se rechaza, detalla qué mejorar para una futura revisión.')
-                        ->required()
-                        ->rows(4),
-                ])
+                // Se abre con lo que ya tiene la empresa: el dictamen se
+                // corrige tantas veces como haga falta, no se emite una vez.
+                ->fillForm(fn () => DictamenForm::valores($this->record))
+                ->form(DictamenForm::getSchema())
                 ->action(function (array $data) {
-                    $this->record->update([
-                        'estatus_distintivo' => $data['estatus_distintivo'],
-                        'nivel_madurez_asignado' => $data['estatus_distintivo'] === 'Aprobado' ? $data['nivel_madurez_asignado'] : null,
-                        'retroalimentacion_gobierno' => $data['retroalimentacion_gobierno'],
-                        'fecha_dictamen' => now(),
-                    ]);
+                    $this->record->update(DictamenForm::datos($data));
 
                     $this->refreshFormData([
                         'estatus_distintivo',
@@ -63,6 +38,12 @@ class ViewEmpresa extends ViewRecord
                         'retroalimentacion_gobierno',
                         'fecha_dictamen',
                     ]);
+
+                    Notification::make()
+                        ->title('Dictamen guardado')
+                        ->body('La empresa ya aparece con el dictamen en su tablero.')
+                        ->success()
+                        ->send();
                 }),
         ];
     }

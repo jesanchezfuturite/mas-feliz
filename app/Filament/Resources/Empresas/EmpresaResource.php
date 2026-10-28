@@ -7,6 +7,7 @@ use App\Filament\Resources\Empresas\Pages\CreateEmpresa;
 use App\Filament\Resources\Empresas\Pages\EditEmpresa;
 use App\Filament\Resources\Empresas\Pages\ListEmpresas;
 use App\Filament\Resources\Empresas\Pages\ViewEmpresa;
+use App\Filament\Resources\Empresas\Schemas\DictamenForm;
 use App\Filament\Resources\Empresas\Schemas\EmpresaForm;
 use App\Filament\Resources\Empresas\Tables\EmpresasTable;
 use App\Models\Empresa;
@@ -81,12 +82,18 @@ class EmpresaResource extends Resource
                             ->columns(2),
 
                         \Filament\Schemas\Components\Section::make('Dictamen de Gobierno')
+                            ->key('dictamen_gobierno')
                             ->headerActions([
                                 \Filament\Actions\Action::make('icon')
                                     ->icon('heroicon-m-shield-check')
                                     ->link()
                                     ->extraAttributes(['style' => 'pointer-events: none; margin-left: auto; color: #556ee6;'])
-                                    ->label('')
+                                    ->label(''),
+                                // Gobierno llena el dictamen desde la misma
+                                // tarjeta donde lo consulta.
+                                DictamenForm::accion('dictamen')
+                                    ->label('Llenar dictamen')
+                                    ->link(),
                             ])
                             ->schema([
                                 TextEntry::make('estatus_distintivo')
