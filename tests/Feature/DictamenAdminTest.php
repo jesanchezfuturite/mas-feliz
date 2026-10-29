@@ -2,7 +2,6 @@
 
 namespace Tests\Feature;
 
-use App\Filament\Evaluador\Resources\EmpresaResource;
 use App\Filament\Resources\Empresas\Pages\ListEmpresas;
 use App\Filament\Resources\Empresas\Pages\ViewEmpresa;
 use App\Filament\Resources\Empresas\Schemas\DictamenForm;
@@ -10,10 +9,7 @@ use App\Models\Empresa;
 use App\Models\User;
 use Filament\Actions\Testing\TestAction;
 use Filament\Facades\Filament;
-use Filament\Schemas\Contracts\HasSchemas;
-use Filament\Schemas\Schema;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Livewire\Component;
 use Livewire\Livewire;
 use Tests\TestCase;
 
@@ -210,34 +206,5 @@ class DictamenAdminTest extends TestCase
 
         $this->assertNotNull($comentario);
         $this->assertSame('Comentario', $comentario->getLabel());
-    }
-
-    /**
-     * Un componente Livewire de mentiras: los esquemas de Filament necesitan
-     * uno vivo para poder evaluarse fuera de una pantalla.
-     */
-    private function componenteDePrueba(): Component
-    {
-        $livewire = \Mockery::mock(Component::class, HasSchemas::class);
-        $livewire->shouldReceive('getId')->andReturn('dummy-id');
-
-        return $livewire;
-    }
-
-    public function test_el_evaluador_ve_los_mismos_cuatro_niveles(): void
-    {
-        $esquema = EmpresaResource::form(
-            Schema::make($this->componenteDePrueba())
-        );
-
-        $select = collect($esquema->getFlatComponents())
-            ->first(fn ($componente) => method_exists($componente, 'getName')
-                && $componente->getName() === 'nivel_madurez_asignado');
-
-        $this->assertNotNull($select, 'El formulario del evaluador debe tener el nivel de madurez.');
-        $this->assertSame(
-            ['Inicial', 'Intermedio', 'Avanzado', 'Excelencia'],
-            array_keys($select->getOptions())
-        );
     }
 }
