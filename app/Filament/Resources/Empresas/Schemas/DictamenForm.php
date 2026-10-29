@@ -8,6 +8,7 @@ use Filament\Forms\Components\DateTimePicker;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
 use Filament\Notifications\Notification;
+use Filament\Resources\Pages\ViewRecord;
 use Filament\Schemas\Components\Utilities\Get;
 use Filament\Support\Enums\Alignment;
 
@@ -111,6 +112,40 @@ class DictamenForm
             ->form(self::getSchema())
             ->action(function (Empresa $record, array $data): void {
                 $record->update(self::datos($data));
+
+                Notification::make()
+                    ->title('Dictamen guardado')
+                    ->body('La empresa ya aparece con el dictamen en su tablero.')
+                    ->success()
+                    ->send();
+            });
+    }
+
+    /**
+     * La misma acción, para el encabezado de una ficha. La página se pasa a
+     * sí misma porque ahí la acción no recibe la empresa por inyección y
+     * porque al guardar hay que refrescar lo que ya está en pantalla.
+     */
+    public static function accionDeFicha(ViewRecord $pagina, string $nombre = 'emitir_dictamen'): Action
+    {
+        return Action::make($nombre)
+            ->label('Emitir Dictamen')
+            ->icon('heroicon-o-shield-check')
+            ->color('primary')
+            ->modalHeading('Dictamen de Gobierno')
+            ->modalDescription(fn () => $pagina->getRecord()->nombre_empresa)
+            ->modalFooterActionsAlignment(Alignment::Right)
+            ->modalSubmitActionLabel('Guardar dictamen')
+            ->modalCancelActionLabel('Cerrar')
+            // Se abre con lo que ya tiene la empresa: el dictamen se
+            // corrige tantas veces como haga falta, no se emite una vez.
+            ->fillForm(fn () => self::valores($pagina->getRecord()))
+            ->form(self::getSchema())
+            ->action(function (array $data) use ($pagina): void {
+                $datos = self::datos($data);
+
+                $pagina->getRecord()->update($datos);
+                $pagina->refreshFormData(array_keys($datos));
 
                 Notification::make()
                     ->title('Dictamen guardado')

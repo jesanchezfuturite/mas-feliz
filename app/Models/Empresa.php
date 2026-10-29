@@ -65,6 +65,13 @@ class Empresa extends Model implements Authenticatable, CanResetPassword, Filame
     public const ESTATUS_DISTINTIVO = ['Aprobado', 'No aprobado', 'En revisión'];
 
     /**
+     * Los estatus con los que una empresa cuenta como dictaminada: el que
+     * elige Gobierno al aprobarla y el que pone la validación de la
+     * autoevaluación. Son los dos, no uno.
+     */
+    public const ESTATUS_DICTAMINADA = ['Validado', 'Aprobado'];
+
+    /**
      * Los niveles de madurez, para los desplegables.
      *
      * @return array<string, string>
@@ -257,7 +264,7 @@ class Empresa extends Model implements Authenticatable, CanResetPassword, Filame
      */
     public function getEstatusAttribute(): ?string
     {
-        if (in_array($this->estatus_distintivo, ['Validado', 'Aprobado'])) {
+        if (in_array($this->estatus_distintivo, self::ESTATUS_DICTAMINADA)) {
             return 'Dictaminado';
         }
 

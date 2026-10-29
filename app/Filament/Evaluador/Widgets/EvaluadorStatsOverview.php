@@ -22,9 +22,11 @@ class EvaluadorStatsOverview extends BaseWidget
             $query->where('user_id', $evaluadorId);
         })->where('estatus', 'En revisión')->count();
 
+        // Cuenta los dos estatus de empresa dictaminada: desde que Gobierno
+        // dictamina a mano, la mayoría quedan en 'Aprobado' y no en 'Validado'.
         $empresasDictaminadas = Empresa::whereHas('evaluadores', function (Builder $query) use ($evaluadorId) {
             $query->where('user_id', $evaluadorId);
-        })->where('estatus_distintivo', 'Validado')->count();
+        })->whereIn('estatus_distintivo', Empresa::ESTATUS_DICTAMINADA)->count();
 
         return [
             Stat::make('Empresas Asignadas', $totalEmpresas)
