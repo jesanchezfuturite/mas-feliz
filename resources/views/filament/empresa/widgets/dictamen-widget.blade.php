@@ -15,7 +15,7 @@
         default => ['texto' => '#4b5563', 'fondo' => '#f3f4f6', 'borde' => '#e5e7eb'],
     };
 
-    $tarjeta = 'flex: 1 1 200px; min-width: 200px; background-color: #f9fafb; border: 1px solid #f3f4f6; border-radius: 0.75rem; padding: 1rem 1.25rem; display: flex; flex-direction: column; gap: 0.5rem;';
+    $tarjeta = 'flex: 1 1 200px; min-width: 200px; max-width: 320px; background-color: #f9fafb; border: 1px solid #f3f4f6; border-radius: 0.75rem; padding: 1rem 1.25rem; display: flex; flex-direction: column; gap: 0.5rem;';
     $etiqueta = 'font-size: 10px; font-weight: 700; color: #9ca3af; text-transform: uppercase; letter-spacing: 0.1em; line-height: 1;';
     $pastilla = 'align-self: flex-start; border-radius: 9999px; padding: 0.25rem 0.875rem; font-size: 0.875rem; font-weight: 800; line-height: 1.4;';
 @endphp
