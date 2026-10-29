@@ -40,7 +40,7 @@ class DictamenForm
                 ->options(Empresa::opcionesNivelMadurez())
                 ->placeholder('Sin nivel asignado')
                 ->required(fn (Get $get) => $get('estatus_distintivo') === 'Aprobado')
-                ->hidden(fn (Get $get) => $get('estatus_distintivo') === 'Rechazado'),
+                ->hidden(fn (Get $get) => $get('estatus_distintivo') === 'No aprobado'),
 
             DateTimePicker::make('fecha_dictamen')
                 ->label('Fecha de Dictamen')
@@ -48,11 +48,11 @@ class DictamenForm
                 ->displayFormat('d/m/Y h:i A')
                 ->helperText('Se propone la fecha de hoy; se puede cambiar.'),
 
+            // Campo abierto y opcional: Angélica lo pidió así, con esa
+            // etiqueta y sin nada que obligue a llenarlo (28/10/2026).
             Textarea::make('retroalimentacion_gobierno')
-                ->label('Retroalimentación del Gobierno')
-                ->placeholder('Justificación o comentarios. Si se rechaza, detalla qué mejorar para una futura revisión.')
+                ->label('Comentario')
                 ->rows(4)
-                ->required(fn (Get $get) => $get('estatus_distintivo') === 'Rechazado')
                 ->columnSpanFull(),
         ];
     }
@@ -74,8 +74,8 @@ class DictamenForm
     }
 
     /**
-     * Lo que se guarda en la empresa. Una empresa rechazada no se queda con
-     * nivel de madurez.
+     * Lo que se guarda en la empresa. Una empresa no aprobada no se queda
+     * con nivel de madurez.
      *
      * @param  array<string, mixed>  $data
      * @return array<string, mixed>
@@ -86,7 +86,7 @@ class DictamenForm
 
         return [
             'estatus_distintivo' => $estatus,
-            'nivel_madurez_asignado' => $estatus === 'Rechazado' ? null : ($data['nivel_madurez_asignado'] ?? null),
+            'nivel_madurez_asignado' => $estatus === 'No aprobado' ? null : ($data['nivel_madurez_asignado'] ?? null),
             'fecha_dictamen' => $data['fecha_dictamen'] ?? null,
             'retroalimentacion_gobierno' => $data['retroalimentacion_gobierno'] ?? null,
         ];

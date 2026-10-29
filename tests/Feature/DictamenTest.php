@@ -46,15 +46,15 @@ class DictamenTest extends TestCase
         $this->assertEquals('Excelente implementación de políticas.', $empresa->retroalimentacion_gobierno);
         $this->assertNotNull($empresa->fecha_dictamen);
 
-        // Update to Rejected
+        // Update to Rejected (ahora se llama 'No aprobado')
         $empresa->update([
-            'estatus_distintivo' => 'Rechazado',
+            'estatus_distintivo' => 'No aprobado',
             'nivel_madurez_asignado' => null,
             'retroalimentacion_gobierno' => 'Se requiere mejorar la tasa de participación del personal en los tamizajes.',
             'fecha_dictamen' => now(),
         ]);
 
-        $this->assertEquals('Rechazado', $empresa->estatus_distintivo);
+        $this->assertEquals('No aprobado', $empresa->estatus_distintivo);
         $this->assertNull($empresa->nivel_madurez_asignado);
         $this->assertEquals('Se requiere mejorar la tasa de participación del personal en los tamizajes.', $empresa->retroalimentacion_gobierno);
     }

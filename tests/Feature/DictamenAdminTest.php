@@ -5,6 +5,7 @@ namespace Tests\Feature;
 use App\Filament\Evaluador\Resources\EmpresaResource;
 use App\Filament\Resources\Empresas\Pages\ListEmpresas;
 use App\Filament\Resources\Empresas\Pages\ViewEmpresa;
+use App\Filament\Resources\Empresas\Schemas\DictamenForm;
 use App\Models\Empresa;
 use App\Models\User;
 use Filament\Actions\Testing\TestAction;
@@ -144,7 +145,7 @@ class DictamenAdminTest extends TestCase
         $this->assertSame('Avanzado', $this->empresa->nivel_madurez_asignado);
     }
 
-    public function test_una_empresa_rechazada_no_conserva_nivel_de_madurez(): void
+    public function test_una_empresa_no_aprobada_no_conserva_nivel_de_madurez(): void
     {
         $this->empresa->update([
             'estatus_distintivo' => 'Aprobado',
@@ -153,7 +154,7 @@ class DictamenAdminTest extends TestCase
 
         Livewire::test(ViewEmpresa::class, ['record' => $this->empresa->getRouteKey()])
             ->callAction('emitir_dictamen', [
-                'estatus_distintivo' => 'Rechazado',
+                'estatus_distintivo' => 'No aprobado',
                 'fecha_dictamen' => '2026-11-04 10:00:00',
                 'retroalimentacion_gobierno' => 'Falta participación en el tamizaje.',
             ])
@@ -161,27 +162,72 @@ class DictamenAdminTest extends TestCase
 
         $this->empresa->refresh();
 
-        $this->assertSame('Rechazado', $this->empresa->estatus_distintivo);
+        $this->assertSame('No aprobado', $this->empresa->estatus_distintivo);
         $this->assertNull($this->empresa->nivel_madurez_asignado);
     }
 
-    public function test_el_rechazo_exige_retroalimentacion(): void
+    public function test_el_comentario_es_un_campo_abierto_que_no_obliga(): void
     {
         Livewire::test(ViewEmpresa::class, ['record' => $this->empresa->getRouteKey()])
             ->callAction('emitir_dictamen', [
-                'estatus_distintivo' => 'Rechazado',
+                'estatus_distintivo' => 'No aprobado',
                 'retroalimentacion_gobierno' => null,
             ])
-            ->assertHasActionErrors(['retroalimentacion_gobierno']);
+            ->assertHasNoActionErrors();
+
+        $this->empresa->refresh();
+
+        $this->assertSame('No aprobado', $this->empresa->estatus_distintivo);
+        $this->assertNull($this->empresa->retroalimentacion_gobierno);
     }
 
-    public function test_el_evaluador_ve_los_mismos_cuatro_niveles(): void
+    public function test_los_estatus_son_los_tres_que_pidio_angelica(): void
+    {
+        $this->assertSame(
+            ['Aprobado', 'No aprobado', 'En revisión'],
+            array_keys(Empresa::opcionesEstatusDistintivo())
+        );
+    }
+
+    public function test_la_migracion_renombra_los_rechazados_ya_guardados(): void
+    {
+        $this->empresa->update(['estatus_distintivo' => 'Rechazado']);
+
+        $migracion = require database_path('migrations/2026_10_28_120000_renombra_rechazado_a_no_aprobado.php');
+        $migracion->up();
+
+        $this->assertSame('No aprobado', $this->empresa->fresh()->estatus_distintivo);
+
+        $migracion->down();
+
+        $this->assertSame('Rechazado', $this->empresa->fresh()->estatus_distintivo);
+    }
+
+    public function test_el_comentario_se_llama_comentario_y_es_campo_abierto(): void
+    {
+        $comentario = collect(DictamenForm::getSchema())
+            ->first(fn ($componente) => $componente->getName() === 'retroalimentacion_gobierno');
+
+        $this->assertNotNull($comentario);
+        $this->assertSame('Comentario', $comentario->getLabel());
+    }
+
+    /**
+     * Un componente Livewire de mentiras: los esquemas de Filament necesitan
+     * uno vivo para poder evaluarse fuera de una pantalla.
+     */
+    private function componenteDePrueba(): Component
     {
         $livewire = \Mockery::mock(Component::class, HasSchemas::class);
         $livewire->shouldReceive('getId')->andReturn('dummy-id');
 
+        return $livewire;
+    }
+
+    public function test_el_evaluador_ve_los_mismos_cuatro_niveles(): void
+    {
         $esquema = EmpresaResource::form(
-            Schema::make($livewire)
+            Schema::make($this->componenteDePrueba())
         );
 
         $select = collect($esquema->getFlatComponents())

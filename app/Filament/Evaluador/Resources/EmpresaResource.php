@@ -43,14 +43,14 @@ class EmpresaResource extends Resource
                                 'Pendiente' => 'Pendiente',
                                 'En revisión' => 'En revisión',
                                 'Validado' => 'Validado',
-                                'Rechazado' => 'Rechazado',
+                                'No aprobado' => 'No aprobado',
                             ])
                             ->required(),
                         Forms\Components\Select::make('nivel_madurez_asignado')
                             ->label('Nivel de Madurez')
                             ->options(Empresa::opcionesNivelMadurez()),
                         Forms\Components\Textarea::make('retroalimentacion_gobierno')
-                            ->label('Retroalimentación')
+                            ->label('Comentario')
                             ->rows(4)
                             ->columnSpanFull(),
                     ])->columns(2),
@@ -92,7 +92,7 @@ class EmpresaResource extends Resource
                     ->color(fn (string $state): string => match ($state) {
                         'Validado' => 'success',
                         'En revisión' => 'warning',
-                        'Rechazado' => 'danger',
+                        'Rechazado', 'No aprobado' => 'danger',
                         default => 'gray',
                     }),
             ])
@@ -103,7 +103,7 @@ class EmpresaResource extends Resource
                         'Pendiente' => 'Pendiente',
                         'En revisión' => 'En revisión',
                         'Validado' => 'Validado',
-                        'Rechazado' => 'Rechazado',
+                        'No aprobado' => 'No aprobado',
                     ]),
             ])
             ->actions([

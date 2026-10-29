@@ -151,7 +151,7 @@ class AvancePorEmpresa extends BaseWidget
                     ->color(fn (?string $state): string => match ($state) {
                         'Validado', 'Aprobado' => 'success',
                         'En revisión' => 'warning',
-                        'Rechazado' => 'danger',
+                        'Rechazado', 'No aprobado' => 'danger',
                         default => 'gray',
                     }),
             ])
