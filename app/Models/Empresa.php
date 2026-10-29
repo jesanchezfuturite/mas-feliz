@@ -72,6 +72,17 @@ class Empresa extends Model implements Authenticatable, CanResetPassword, Filame
     public const ESTATUS_DICTAMINADA = ['Validado', 'Aprobado'];
 
     /**
+     * Cómo se le nombra el estatus a la empresa en su propio tablero.
+     * 'Validado' es el mismo «Aprobado» con el nombre viejo que pone la
+     * validación de la autoevaluación: la empresa no tiene por qué
+     * aprenderse ese término.
+     */
+    public static function etiquetaEstatusDistintivo(?string $estatus): ?string
+    {
+        return $estatus === 'Validado' ? 'Aprobado' : $estatus;
+    }
+
+    /**
      * Los niveles de madurez, para los desplegables.
      *
      * @return array<string, string>
@@ -269,6 +280,19 @@ class Empresa extends Model implements Authenticatable, CanResetPassword, Filame
         }
 
         return $this->estatus_distintivo;
+    }
+
+    /**
+     * Si Gobierno ya dictaminó a esta empresa. Vale cualquiera de las
+     * señales del dictamen porque el formulario no obliga a llenarlas
+     * todas: el comentario, por ejemplo, es opcional.
+     */
+    public function tieneDictamen(): bool
+    {
+        return filled($this->fecha_dictamen)
+            || filled($this->nivel_madurez_asignado)
+            || filled($this->retroalimentacion_gobierno)
+            || in_array($this->estatus_distintivo, [...self::ESTATUS_DICTAMINADA, 'No aprobado']);
     }
 
     public function canAccessPanel(Panel $panel): bool

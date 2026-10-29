@@ -33,6 +33,7 @@ class Dashboard extends BaseDashboard
 
         return [
             \App\Filament\Empresa\Widgets\EmpresaInfoWidget::class,
+            \App\Filament\Empresa\Widgets\DictamenWidget::class,
             \App\Filament\Empresa\Widgets\CertificationTimelineWidget::class,
         ];
     }
