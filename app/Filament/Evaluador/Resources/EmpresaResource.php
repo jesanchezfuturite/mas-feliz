@@ -3,13 +3,21 @@
 namespace App\Filament\Evaluador\Resources;
 
 use App\Filament\Evaluador\Resources\EmpresaResource\Pages;
+use App\Filament\Resources\Empresas\Schemas\DictamenForm;
+use App\Mail\VisitaAgendadaMail;
 use App\Models\Empresa;
+use Filament\Actions\Action;
+use Filament\Actions\EditAction;
+use Filament\Actions\ViewAction;
 use Filament\Forms;
-use Filament\Schemas\Schema;
+use Filament\Notifications\Notification;
 use Filament\Resources\Resource;
+use Filament\Schemas\Components\Section;
+use Filament\Schemas\Schema;
 use Filament\Tables;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Facades\Mail;
 
 class EmpresaResource extends Resource
 {
@@ -20,6 +28,7 @@ class EmpresaResource extends Resource
     protected static string|\UnitEnum|null $navigationGroup = 'Gestión de Auditoría';
 
     protected static ?string $modelLabel = 'Empresa';
+
     protected static ?string $pluralModelLabel = 'Empresas';
 
     public static function getEloquentQuery(): Builder
@@ -34,28 +43,14 @@ class EmpresaResource extends Resource
     {
         return $schema
             ->components([
-                \Filament\Schemas\Components\Section::make('Dictamen y Auditoría')
+                // Los mismos cuatro campos que llena Gobierno, tal cual: el
+                // evaluador dictamina con ese vocabulario, no con uno propio.
+                Section::make('Dictamen y Auditoría')
                     ->description('Gestiona el estatus del distintivo y nivel de madurez para esta empresa.')
-                    ->schema([
-                        Forms\Components\Select::make('estatus_distintivo')
-                            ->label('Estatus del Distintivo')
-                            ->options([
-                                'Pendiente' => 'Pendiente',
-                                'En revisión' => 'En revisión',
-                                'Validado' => 'Validado',
-                                'No aprobado' => 'No aprobado',
-                            ])
-                            ->required(),
-                        Forms\Components\Select::make('nivel_madurez_asignado')
-                            ->label('Nivel de Madurez')
-                            ->options(Empresa::opcionesNivelMadurez()),
-                        Forms\Components\Textarea::make('retroalimentacion_gobierno')
-                            ->label('Comentario')
-                            ->rows(4)
-                            ->columnSpanFull(),
-                    ])->columns(2),
+                    ->schema(DictamenForm::getSchema())
+                    ->columns(2),
 
-                \Filament\Schemas\Components\Section::make('Información de la Empresa (Lectura)')
+                Section::make('Información de la Empresa (Lectura)')
                     ->collapsible()
                     ->collapsed()
                     ->schema([
@@ -99,26 +94,27 @@ class EmpresaResource extends Resource
             ->filters([
                 Tables\Filters\SelectFilter::make('estatus_distintivo')
                     ->label('Estatus')
-                    ->options([
-                        'Pendiente' => 'Pendiente',
-                        'En revisión' => 'En revisión',
-                        'Validado' => 'Validado',
-                        'No aprobado' => 'No aprobado',
-                    ]),
+                    // Los tres vigentes más 'Validado', que es el que pone la
+                    // validación de la autoevaluación y sigue en la base.
+                    ->options(Empresa::opcionesEstatusDistintivo('Validado')),
             ])
             ->actions([
-                \Filament\Actions\EditAction::make(),
-                \Filament\Actions\ViewAction::make(),
+                EditAction::make(),
+                ViewAction::make(),
+                // El evaluador dictamina desde el listado, igual que el admin.
+                DictamenForm::accion()
+                    ->iconButton()
+                    ->tooltip('Emitir o corregir el dictamen'),
                 // El acompañante es quien sigue de cerca el avance de la empresa,
                 // así que puede mover la Ruta Crítica sin depender del administrador.
-                \Filament\Actions\Action::make('certificarFase')
+                Action::make('certificarFase')
                     ->label('Actualizar Fase')
                     ->icon('heroicon-o-check-badge')
                     ->color('success')
                     ->iconButton()
                     ->tooltip('Actualizar fase de la Ruta Crítica')
                     ->modalHeading('Ruta Crítica de Avance')
-                    ->modalDescription(fn (Empresa $record) => 'La empresa verá esta fase en su escritorio: ' . $record->nombre_empresa)
+                    ->modalDescription(fn (Empresa $record) => 'La empresa verá esta fase en su escritorio: '.$record->nombre_empresa)
                     ->modalSubmitActionLabel('Guardar fase')
                     ->fillForm(fn (Empresa $record) => ['paso_certificacion' => $record->paso_certificacion])
                     ->form([
@@ -130,13 +126,13 @@ class EmpresaResource extends Resource
                     ->action(function (Empresa $record, array $data): void {
                         $record->update(['paso_certificacion' => $data['paso_certificacion']]);
 
-                        \Filament\Notifications\Notification::make()
+                        Notification::make()
                             ->title('Fase actualizada')
-                            ->body('La empresa ya ve la fase «' . (Empresa::PASOS_CERTIFICACION[$data['paso_certificacion']] ?? '') . '» en su escritorio.')
+                            ->body('La empresa ya ve la fase «'.(Empresa::PASOS_CERTIFICACION[$data['paso_certificacion']] ?? '').'» en su escritorio.')
                             ->success()
                             ->send();
                     }),
-                \Filament\Actions\Action::make('agendarVisita')
+                Action::make('agendarVisita')
                     ->label('Agendar Visita')
                     ->icon('heroicon-o-calendar-days')
                     ->color('info')
@@ -154,18 +150,18 @@ class EmpresaResource extends Resource
                         ]);
 
                         try {
-                            \Illuminate\Support\Facades\Mail::to($record->correo)
-                                ->send(new \App\Mail\VisitaAgendadaMail($record));
+                            Mail::to($record->correo)
+                                ->send(new VisitaAgendadaMail($record));
 
-                            \Filament\Notifications\Notification::make()
+                            Notification::make()
                                 ->title('Visita agendada y correo enviado')
                                 ->success()
                                 ->send();
                         } catch (\Exception $e) {
-                            \Filament\Notifications\Notification::make()
+                            Notification::make()
                                 ->title('Visita agendada pero el correo falló')
                                 ->warning()
-                                ->body('Error: ' . $e->getMessage())
+                                ->body('Error: '.$e->getMessage())
                                 ->send();
                         }
                     })
