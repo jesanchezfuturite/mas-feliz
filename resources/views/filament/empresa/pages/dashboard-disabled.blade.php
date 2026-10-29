@@ -1,4 +1,11 @@
 <x-filament-panels::page>
+    {{-- El resultado de la dictaminación no es una herramienta: se ve aunque
+         el interruptor global tenga las herramientas apagadas, porque es lo
+         que el correo de resultados le pide a la empresa venir a consultar. --}}
+    @if(\App\Filament\Empresa\Widgets\DictamenWidget::canView())
+        @livewire(\App\Filament\Empresa\Widgets\DictamenWidget::class)
+    @endif
+
     <div style="display: flex; align-items: center; justify-content: center; min-height: 50vh; padding: 2rem 1rem;">
         <div style="width: 100%; max-width: 42rem; background-color: #ffffff; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04); border-radius: 1rem; border: 1px solid #f1f5f9; padding: 3rem 2rem; text-align: center; display: flex; flex-direction: column; align-items: center; gap: 1.5rem;">
             
