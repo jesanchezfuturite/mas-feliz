@@ -4,10 +4,12 @@ namespace App\Providers\Filament;
 
 use App\Filament\Empresa\Pages\Capacitacion;
 use App\Filament\Empresa\Pages\Crisis;
+use App\Filament\Empresa\Pages\Dashboard;
 use App\Filament\Empresa\Pages\EditProfile;
 use App\Filament\Empresa\Pages\PrevencionPromocion;
 use App\Filament\Empresa\Resources\CasoSeguimientos\Pages\ListCasoSeguimientos;
 use App\Filament\Empresa\Widgets\CertificationTimelineWidget;
+use App\Filament\Empresa\Widgets\DictamenWidget;
 use App\Filament\Empresa\Widgets\EmpresaInfoWidget;
 use App\Filament\Pages\Auth\Login;
 use Filament\Http\Middleware\Authenticate;
@@ -50,7 +52,7 @@ class EmpresaPanelProvider extends PanelProvider
             ->profile(EditProfile::class)
             ->darkMode(false)
             ->pages([
-                \App\Filament\Empresa\Pages\Dashboard::class,
+                Dashboard::class,
                 PrevencionPromocion::class,
                 Crisis::class,
                 Capacitacion::class,
@@ -58,6 +60,7 @@ class EmpresaPanelProvider extends PanelProvider
             ->discoverWidgets(in: app_path('Filament/Empresa/Widgets'), for: 'App\Filament\Empresa\Widgets')
             ->widgets([
                 EmpresaInfoWidget::class,
+                DictamenWidget::class,
                 CertificationTimelineWidget::class,
             ])
             ->middleware([
