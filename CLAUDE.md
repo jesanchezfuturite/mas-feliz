@@ -115,6 +115,15 @@ Para poder enviar a revisión, la empresa debe haber contestado los **96 element
 
 La autoevaluación es un formulario grande con tabs anidados (Criterios Indispensables / Necesarios → Fortalecimiento, Prevención, Cuidado y Atención / Deseables) construido programáticamente en [AutoevaluacionForm.php](app/Filament/Empresa/Resources/Autoevaluacions/Schemas/AutoevaluacionForm.php) (~800 líneas); las respuestas viven en la columna JSON `respuestas`.
 
+### Datos del reconocimiento (candado del resultado)
+
+Pedido de Angélica del 31/10/2026: para la entrega de Laguna recabaron a mano el nombre tal cual va en el reconocimiento, el logotipo en HD y los contactos de Director y enlace. Ahora la empresa **aprobada** (`Empresa::estaAprobada()`, los dos estatus de `ESTATUS_DICTAMINADA`) los confirma en [DatosReconocimiento](app/Filament/Empresa/Pages/DatosReconocimiento.php) (`/tablero/reconocimiento`), y mientras `empresas.reconocimiento_confirmado_at` esté vacío el [widget del dictamen](resources/views/filament/empresa/widgets/dictamen-widget.blade.php) pinta un candado en vez del nivel, el comentario y el distintivo — no los manda al navegador ni escondidos. A la no aprobada no se le pide nada.
+
+- El formulario vive en [ReconocimientoForm](app/Filament/Resources/Empresas/Schemas/ReconocimientoForm.php) y lo comparten la empresa y el admin. `nombre_reconocimiento` es aparte de `nombre_empresa` (que no se toca: es con el que Gobierno ubica a la empresa); para leerlo usar siempre el accesor `nombre_para_reconocimiento`. El logotipo en imagen exige 1000 px en su lado mayor; el PDF vectorial pasa.
+- **La región no se captura**: sale del municipio con [RegionesCoahuila](app/Support/RegionesCoahuila.php) (`$empresa->region`). Para filtrar por región se hace `whereIn('municipio', …)`.
+- Gobierno lo ve en `/admin/reconocimientos` ([ReconocimientoResource](app/Filament/Resources/Reconocimientos/ReconocimientoResource.php), otra vista del modelo `Empresa` limitada a aprobadas): filtros por región/municipio/nivel, «Exportar a Excel» y «Descargar logotipos» (ZIP con los archivos renombrados por organización), ambos con lo que esté filtrado y escritos por [ExportacionReconocimientos](app/Support/ExportacionReconocimientos.php). Las acciones masivas «Quitar candado sin pedir datos» y «Volver a pedir confirmación» solo mueven `reconocimiento_confirmado_at`.
+- No depende del interruptor de herramientas: igual que el dictamen, no es una herramienta.
+
 ### Correo
 
 Transporte **Brevo** registrado a mano en `AppServiceProvider::boot()` (`Mail::extend('brevo', …)` con `config('services.brevo.dsn')`). Los envíos se disparan desde acciones de Filament, no desde eventos de modelo: accesos al tablero, bienvenida de evaluador, autoevaluación devuelta, distintivo aprobado, visita agendada ([app/Mail/](app/Mail/)). `/preview-email` en [routes/web.php](routes/web.php) previsualiza `AccesosTableroEmpresa` en el navegador.

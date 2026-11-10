@@ -94,6 +94,17 @@ class DictamenForm
     }
 
     /**
+     * Lo que se le dice a quien dictamina. La empresa aprobada todavía no ve
+     * su nivel: primero confirma los datos de su reconocimiento.
+     */
+    public static function avisoAlGuardar(Empresa $empresa): string
+    {
+        return $empresa->reconocimientoPendiente()
+            ? 'La empresa verá su resultado en cuanto confirme en su tablero los datos de su reconocimiento.'
+            : 'La empresa ya aparece con el dictamen en su tablero.';
+    }
+
+    /**
      * La acción lista para colgarse del listado, de la ficha o de la tarjeta
      * del dictamen.
      */
@@ -115,7 +126,7 @@ class DictamenForm
 
                 Notification::make()
                     ->title('Dictamen guardado')
-                    ->body('La empresa ya aparece con el dictamen en su tablero.')
+                    ->body(self::avisoAlGuardar($record))
                     ->success()
                     ->send();
             });
@@ -149,7 +160,7 @@ class DictamenForm
 
                 Notification::make()
                     ->title('Dictamen guardado')
-                    ->body('La empresa ya aparece con el dictamen en su tablero.')
+                    ->body(self::avisoAlGuardar($pagina->getRecord()))
                     ->success()
                     ->send();
             });
