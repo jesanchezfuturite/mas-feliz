@@ -1,3 +1,36 @@
+@if($candado)
+    {{-- El candado: la empresa aprobada confirma los datos de su
+         reconocimiento antes de ver su nivel. Aquí no se pinta nada del
+         dictamen, ni escondido: lo que no llega al navegador no se puede
+         leer con el inspector. --}}
+    <x-filament-widgets::widget>
+        <x-filament::section>
+            <div style="display: flex; flex-wrap: wrap; align-items: center; gap: 1.25rem;">
+                <div style="padding: 0.875rem; background-color: #eef2ff; border-radius: 9999px; display: flex; flex-shrink: 0;">
+                    <x-heroicon-s-lock-closed style="width: 28px; height: 28px; color: #4338ca;" />
+                </div>
+
+                <div style="flex: 1 1 320px; display: flex; flex-direction: column; gap: 0.375rem;">
+                    <h3 style="font-size: 0.875rem; font-weight: 800; color: #1f2937; text-transform: uppercase; letter-spacing: 0.1em; line-height: 1.3; margin: 0;">
+                        Resultado de la Dictaminación
+                    </h3>
+                    <p style="font-size: 1.0625rem; font-weight: 700; color: #312e81; line-height: 1.4; margin: 0;">
+                        ¡Felicidades! Tu organización obtuvo el Distintivo +Feliz.
+                    </p>
+                    <p style="font-size: 0.9375rem; color: #4b5563; line-height: 1.6; margin: 0;">
+                        Para consultar tu nivel de madurez, confirma primero los datos de tu reconocimiento: el nombre tal cual debe imprimirse, tu logotipo en alta resolución y los contactos para la invitación al evento de entrega.
+                    </p>
+                </div>
+
+                <a href="{{ $urlReconocimiento }}"
+                   style="flex-shrink: 0; display: inline-flex; align-items: center; gap: 0.5rem; background-color: #556ee6; color: #ffffff; border-radius: 0.5rem; padding: 0.625rem 1.125rem; font-size: 0.875rem; font-weight: 700; text-decoration: none;">
+                    <x-heroicon-s-lock-open style="width: 16px; height: 16px;" />
+                    Confirmar mis datos
+                </a>
+            </div>
+        </x-filament::section>
+    </x-filament-widgets::widget>
+@else
 @php
     // Todo va con estilos en línea, como la Ruta Crítica: en este panel las
     // utilidades de Tailwind de las vistas no llegan al navegador.
@@ -73,6 +106,20 @@
             @endif
         </div>
 
+        {{-- Lo que la empresa confirmó para su reconocimiento, con la
+             puerta para corregirlo. --}}
+        @if($nombreReconocimiento)
+            <div style="margin-top: 1.5rem; padding-top: 1.5rem; border-top: 1px solid #f3f4f6; display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 0.75rem;">
+                <div style="display: flex; flex-direction: column; gap: 0.5rem;">
+                    <span style="{{ $etiqueta }}">Nombre en el reconocimiento</span>
+                    <span style="font-size: 0.9375rem; font-weight: 700; color: #1f2937;">{{ $nombreReconocimiento }}</span>
+                </div>
+                <a href="{{ $urlReconocimiento }}" style="font-size: 0.8125rem; font-weight: 700; color: #556ee6; text-decoration: none;">
+                    Revisar datos del reconocimiento
+                </a>
+            </div>
+        @endif
+
         {{-- El comentario del Comité: Angélica pidió que se llamara así, a secas. --}}
         @if($comentario)
             <div style="margin-top: 1.5rem; padding-top: 1.5rem; border-top: 1px solid #f3f4f6; display: flex; flex-direction: column; gap: 0.5rem;">
@@ -82,3 +129,4 @@
         @endif
     </x-filament::section>
 </x-filament-widgets::widget>
+@endif

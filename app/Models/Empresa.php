@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Notifications\ResetPasswordNotificationEs;
+use App\Support\RegionesCoahuila;
 use Filament\Models\Contracts\FilamentUser;
 use Filament\Models\Contracts\HasName;
 use Filament\Panel;
@@ -114,14 +115,19 @@ class Empresa extends Model implements Authenticatable, CanResetPassword, Filame
         'folio',
         'token_tamizaje',
         'nombre_empresa',
+        'nombre_reconocimiento',
+        'logo_reconocimiento',
         'rfc',
         'ambito',
         'domicilio',
         'municipio',
         'dias_horario_servicio',
         'nombre_director',
+        'cargo_director',
+        'celular_director',
         'nombre_responsable',
         'cargo_enlace',
+        'celular_enlace',
         'correo',
         'password',
         'telefono',
@@ -131,6 +137,7 @@ class Empresa extends Model implements Authenticatable, CanResetPassword, Filame
         'nivel_madurez_asignado',
         'retroalimentacion_gobierno',
         'fecha_dictamen',
+        'reconocimiento_confirmado_at',
         'paso_certificacion',
         'fecha_visita_presencial',
         'resultados_tamizaje_visibles',
@@ -144,6 +151,7 @@ class Empresa extends Model implements Authenticatable, CanResetPassword, Filame
     protected $casts = [
         'fecha_visita_presencial' => 'datetime',
         'fecha_dictamen' => 'datetime',
+        'reconocimiento_confirmado_at' => 'datetime',
         'resultados_tamizaje_visibles' => 'boolean',
     ];
 
@@ -293,6 +301,48 @@ class Empresa extends Model implements Authenticatable, CanResetPassword, Filame
             || filled($this->nivel_madurez_asignado)
             || filled($this->retroalimentacion_gobierno)
             || in_array($this->estatus_distintivo, [...self::ESTATUS_DICTAMINADA, 'No aprobado']);
+    }
+
+    /**
+     * Si la empresa obtuvo el distintivo: es a quien se le entrega un
+     * reconocimiento y, por lo mismo, a quien se le piden sus datos.
+     */
+    public function estaAprobada(): bool
+    {
+        return in_array($this->estatus_distintivo, self::ESTATUS_DICTAMINADA);
+    }
+
+    /**
+     * El candado del resultado (Angélica, 31/10/2026): la empresa aprobada
+     * no ve su nivel de madurez hasta confirmar el nombre que irá en el
+     * reconocimiento, su logotipo y los contactos para la invitación.
+     */
+    public function reconocimientoPendiente(): bool
+    {
+        return $this->estaAprobada() && blank($this->reconocimiento_confirmado_at);
+    }
+
+    /**
+     * El nombre que va impreso en el reconocimiento. Mientras la empresa no
+     * lo confirme es el mismo con el que se registró.
+     */
+    public function getNombreParaReconocimientoAttribute(): string
+    {
+        return filled($this->nombre_reconocimiento)
+            ? (string) $this->nombre_reconocimiento
+            : (string) $this->nombre_empresa;
+    }
+
+    /** La región sale del municipio; no se captura. */
+    public function getRegionAttribute(): ?string
+    {
+        return RegionesCoahuila::de($this->municipio);
+    }
+
+    /** Las empresas que obtuvieron el distintivo. */
+    public function scopeAprobadas($query)
+    {
+        return $query->whereIn('estatus_distintivo', self::ESTATUS_DICTAMINADA);
     }
 
     public function canAccessPanel(Panel $panel): bool

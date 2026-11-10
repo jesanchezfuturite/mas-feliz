@@ -48,6 +48,11 @@ class DictamenEmpresaTest extends TestCase
         Filament::setCurrentPanel(Filament::getPanel('empresa'));
     }
 
+    /**
+     * Deja a la empresa dictaminada y con los datos de su reconocimiento ya
+     * confirmados: aquí se prueba lo que ve después del candado. El candado
+     * en sí está en DatosReconocimientoTest.
+     */
     private function dictaminar(array $datos = []): void
     {
         $this->empresa->update(array_merge([
@@ -55,6 +60,7 @@ class DictamenEmpresaTest extends TestCase
             'nivel_madurez_asignado' => 'Intermedio',
             'fecha_dictamen' => '2026-10-28 10:00:00',
             'retroalimentacion_gobierno' => 'Excelente trabajo en prevención.',
+            'reconocimiento_confirmado_at' => '2026-10-29 09:00:00',
         ], $datos));
     }
 
